@@ -85,8 +85,6 @@ public class OcesJSONParameterGenerator {
 	}
 
 	public String getParametersAsJSON() {
-//		final String certificate = "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";
-//		addParameter("SP_CERT", certificate);
 		addParameter("SP_CERT", signer.getCertificate());
 
 		byte[] normalizedParameters = getNormalizedParameters();
@@ -151,9 +149,9 @@ public class OcesJSONParameterGenerator {
 		}
 	}
 
-	public static String generateClientTag(String mid, String clientMode, String language) throws StatusCodeException {
+	public static String generateClientTag(String mid, String clientMode, String language, String sref) throws StatusCodeException {
 		return generateParametersTag(mid, clientMode, language) + System.getProperty("line.separator") + generateIframeTag()
-				+ System.getProperty("line.separator") + generateScriptTag() + System.getProperty("line.separator") + generatePostBackFormTag();
+				+ System.getProperty("line.separator") + generateScriptTag() + System.getProperty("line.separator") + generatePostBackFormTag(sref);
 	}
 
 	private static String generateParametersTag(String mid, String clientMode, String language) throws StatusCodeException {
@@ -194,9 +192,9 @@ public class OcesJSONParameterGenerator {
 		return scriptTag;
 	}
 
-	private static String generatePostBackFormTag() {
+	private static String generatePostBackFormTag(String sref) {
 		String postBackFormTag = Config.INSTANCE.getProperty("nemid.clienttag.postbackform");
-		postBackFormTag = String.format(postBackFormTag, Config.INSTANCE.getProperty("nemid.url.receipt"));
+		postBackFormTag = String.format(postBackFormTag, Config.INSTANCE.getProperty("nemid.url.receipt"), sref);
 		return postBackFormTag;
 	}
 

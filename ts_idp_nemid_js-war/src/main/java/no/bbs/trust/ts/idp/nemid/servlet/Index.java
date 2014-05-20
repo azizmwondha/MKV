@@ -4,9 +4,6 @@
  */
 package no.bbs.trust.ts.idp.nemid.servlet;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -22,9 +19,7 @@ import no.bbs.trust.common.basics.utils.EventLogger;
 import no.bbs.trust.common.basics.utils.StringUtils;
 import no.bbs.trust.common.config.Config;
 import no.bbs.trust.common.i18n.LangSupport;
-import no.bbs.trust.ts.idp.nemid.attachments.Attachment;
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
-import no.bbs.trust.ts.idp.nemid.contants.Constants;
 import no.bbs.trust.ts.idp.nemid.event.NemIDActionEvent;
 import no.bbs.trust.ts.idp.nemid.event.NemIDPerformanceEvent;
 import no.bbs.trust.ts.idp.nemid.tag.AppletElementGenerator;
@@ -32,7 +27,6 @@ import no.bbs.trust.ts.idp.nemid.tag.ChallengeGenerator;
 import no.bbs.trust.ts.idp.nemid.tag.OcesJSONParameterGenerator;
 import no.bbs.trust.ts.idp.nemid.tag.Signer;
 import no.bbs.trust.ts.idp.nemid.utils.DAOUtil;
-import no.bbs.tt.bc.cryptlib.util.HashUtil;
 import no.bbs.tt.trustsign.te.xml.messages.ErrorResponse;
 import no.bbs.tt.trustsign.te.xml.messages.GetStatusTableRequest;
 import no.bbs.tt.trustsign.te.xml.messages.GetStatusTableResponse;
@@ -41,21 +35,19 @@ import no.bbs.tt.trustsign.te.xml.messages.TEMessage;
 import no.bbs.tt.trustsign.tecapi.communicator.Requestor;
 import no.bbs.tt.trustsign.trustsignDAL.constant.SessionKey;
 import no.bbs.tt.trustsign.trustsignDAL.dao.table.SessionDataDAO;
-import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObjectData;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.WebContext;
 
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.bouncycastle.util.encoders.Base64;
 
 import eu.nets.no.vas.esign.sdosigner.types.KeyCredentials;
 
 /**
- *
  * @author azm
  */
 public class Index extends BaseServlet {
+
+	private static final long serialVersionUID = 1L;
 
 	public static final String COMPONENT_NAME = "NemIDJS";
 
@@ -87,7 +79,7 @@ public class Index extends BaseServlet {
 			throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, e, COMPONENT_NAME, sref);
 		}
 
-		String tag = OcesJSONParameterGenerator.generateClientTag(mid, Config.INSTANCE.getProperty("nemid.client.mode.standard"), languageCode);
+		String tag = OcesJSONParameterGenerator.generateClientTag(mid, Config.INSTANCE.getProperty("nemid.client.mode.standard"), languageCode, sref);
 		logger.debug("NemID JS tag: " + tag);
 		request.setAttribute("clienttag", tag);
 
@@ -150,63 +142,10 @@ public class Index extends BaseServlet {
 		}
 	}
 
-	private String generateAppletTag(String midf, String sref, SigningProcess sp) throws StatusCodeException {
-		AppletElementGenerator appletGenerator = createGenerator(midf);
-
-		SignObjectData signObject = DAOUtil.getSignObjectData(sp);
-		String doctype = signObject.getElementType();
-		String docTitle = DAOUtil.getSignObject(signObject.getSignerObjectId()).getTitle();
-		String docDescr = DAOUtil.getSignObject(signObject.getSignerObjectId()).getDescription();
-
-		if ("txt,text,text/plain".indexOf(doctype.toLowerCase()) > -1) {
-			doctype = "text/plain";
-			String signText = utf8b642iso88591String(signObject.getObjectB64());
-			logger.debug("Document signText: " + signText);
-			appletGenerator.setSignText(signText, doctype);
-		} else {
-			Attachment attachment = new Attachment();
-			attachment.setTitle(docTitle);
-			attachment.setMimeType(doctype);
-
-			byte[] documentBytes = Base64.decode(signObject.getObjectB64());
-			try {
-				String dochash = new String(Base64.encode(HashUtil.hash(documentBytes, no.bbs.trust.ts.idp.nemid.contants.Constants.DIGEST_SHA2)));
-				attachment.setB64HashValue(dochash);
-				attachment.setB64HashAlgo(no.bbs.trust.ts.idp.nemid.contants.Constants.DIGEST_SHA2_SHORTNAME);
-			} catch (NoSuchAlgorithmException ex) {
-				Logger.getLogger(Index.class.getName()).error(ex);
-			} catch (NoSuchProviderException ex) {
-				Logger.getLogger(Index.class.getName()).error(ex);
-			}
-
-			String docUrl = getConfigProperty(ConfigKeys.CONFIG_NEMID_DOCURL) + "?" + ConfigKeys.PARAM_SREF + "=" + sref;
-			attachment.setPath(docUrl);
-			attachment.setSize(documentBytes.length);
-
-			logger.trace("Attachment: " + attachment.toXML());
-
-			appletGenerator.setSignText(docDescr, "text/plain");
-			appletGenerator.setPDF(attachment);
-		}
-
-		String certType = DAOUtil.getCertificateTypes(sp.getSignerId());
-		String subjectDnFilter = null;
-		logger.debug("CertType: " + certType);
-		if (Constants.CERTTYPE_EMPLOYEE.equals(certType)) {
-			subjectDnFilter = Constants.SUBJECT_DN_FILTER_RID;
-		} else if (Constants.CERTTYPE_PERSONAL.equals(certType)) {
-			subjectDnFilter = Constants.SUBJECT_DN_FILTER_PID;
-		}
-		logger.debug("SubjectDNFilter: " + subjectDnFilter);
-		return appletGenerator.generateSignAppletElement(sref, subjectDnFilter, Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_TAG_VERIFYURL));
-	}
-
 	private void setupWebContext(String tid, SigningProcess sp, HttpServletRequest request) throws StatusCodeException {
 		WebContext wc = DAOUtil.getWebContext(sp.getWebcontextid());
 
 		// Web context and merchant URLs
-		//		updateWCattributes(ConfigKeys.SESSIONKEY_STATUS, "statusurl", wc.getErrorUrlBase(), tid, request);
-		//		updateWCattributes(ConfigKeys.SESSIONKEY_CANCEL, "cancelurl", wc.getAbortUrl(), tid, request);
 		updateWCattributes(ConfigKeys.SESSIONKEY_STYLE, "styleurl", wc.getStyleUrl(), tid, request);
 
 		// SE_BID application URLs
@@ -252,36 +191,9 @@ public class Index extends BaseServlet {
 		}
 	}
 
-	private String utf8b642iso88591String(String b64in) throws StatusCodeException {
-		try {
-			byte[] utfbytes = Base64.decode(b64in);
-			b64in = null;
-			byte[] isobytes = new String(utfbytes, "UTF-8").getBytes("ISO-8859-1");
-			return new String(isobytes, "ISO-8859-1");
-		} catch (UnsupportedEncodingException uex) {
-			EventLogger.dumpStack(uex, logger);
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR, uex.getMessage());
-		}
-	}
-
-	private boolean runDetectorApplet(String sref) {
-		SessionDataDAO sdd = new SessionDataDAO();
-		try {
-			String jre = sdd.getBySrefAndKey(sref, "JAVAVERSION").getVal();
-			if (jre.equals("0")) {
-				return true;
-			} else {
-				logger.info("User has [javaversion=" + jre + "]");
-			}
-		} catch (SQLException e) {
-			EventLogger.dumpStack(e);
-			logger.error("Error accessing db: " + e);
-		}
-		return false;
-	}
-
 	@Override
 	public void doInit() throws ServletException {
+		// Empty
 	}
 
 }
