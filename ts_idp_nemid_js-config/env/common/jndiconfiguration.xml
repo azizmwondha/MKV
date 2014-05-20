@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<allbindings>
+        <!--
+        If the <url> <pkg> or <fac> are not specified for a binding then these
+        will be used by default
+        -->
+<!--
+        <binding name="DEFAULT">
+                <url>corbaname:iiop:localhost:3700</url>
+                <fac>com.sun.jndi.cosnaming.CNCtxFactory</fac>
+                <pkg>com.sun.enterprise.naming</pkg>
+        </binding>
+-->
+        <!-- JDBC Bindings -->
+        <binding name="TRUSTSIGNDB">
+                <path>jdbc/TrustSignDB</path>
+                <cacheable>true</cacheable>
+                <url>corbaname:iiop:localhost:3700</url>
+        </binding>
+
+</allbindings>

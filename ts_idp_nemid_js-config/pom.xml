@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>no.bbs.trust</groupId>
+	<artifactId>ts_idp_nemid_js-config</artifactId>
+	<name>ts_idp_nemid_js - config </name>
+	<version>1.0.0-SNAPSHOT</version>
+	<description>ts_idp_nemid_js - configuration</description>
+	<packaging>pom</packaging>
+
+	<parent>
+		<artifactId>ts_idp_nemid_js</artifactId>
+		<groupId>no.bbs.trust</groupId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>assembly-dev.xml</descriptor>
+						<descriptor>assembly-test.xml</descriptor>
+						<descriptor>assembly-prod.xml</descriptor>
+						<descriptor>assembly-preprod.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
