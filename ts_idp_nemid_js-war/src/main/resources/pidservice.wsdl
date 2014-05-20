@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns:tns="http://localhost/" xmlns:wsr="http://www.openuri.org/2002/10/soap/reliability/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:soap12enc="http://www.w3.org/2003/05/soap-encoding" xmlns:conv="http://www.openuri.org/2002/04/wsdl/conversation/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://localhost/">
+ <types>
+  <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:stns="http://localhost/" elementFormDefault="qualified" attributeFormDefault="unqualified" targetNamespace="http://localhost/">
+   <xsd:import namespace="java:dk.certifikat.pid.webservices">
+   </xsd:import>
+   <xsd:element name="pid">
+    <xsd:complexType>
+     <xsd:sequence>
+      <xsd:element xmlns:tp="java:dk.certifikat.pid.webservices" type="tp:ArrayOfPIDRequest" name="pIDRequests">
+      </xsd:element>
+     </xsd:sequence>
+    </xsd:complexType>
+   </xsd:element>
+   <xsd:element name="pidResponse">
+    <xsd:complexType>
+     <xsd:sequence>
+      <xsd:element xmlns:tp="java:dk.certifikat.pid.webservices" type="tp:ArrayOfPIDReply" name="result">
+      </xsd:element>
+     </xsd:sequence>
+    </xsd:complexType>
+   </xsd:element>
+   <xsd:element name="test">
+    <xsd:complexType>
+    </xsd:complexType>
+   </xsd:element>
+   <xsd:element name="testConnection">
+    <xsd:complexType>
+     <xsd:sequence>
+      <xsd:element type="xsd:int" name="intVal">
+      </xsd:element>
+     </xsd:sequence>
+    </xsd:complexType>
+   </xsd:element>
+   <xsd:element name="testConnectionResponse">
+    <xsd:complexType>
+     <xsd:sequence>
+      <xsd:element type="xsd:int" name="result">
+      </xsd:element>
+     </xsd:sequence>
+    </xsd:complexType>
+   </xsd:element>
+   <xsd:element name="testResponse">
+    <xsd:complexType>
+    </xsd:complexType>
+   </xsd:element>
+  </xsd:schema>
+  <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:stns="java:dk.certifikat.pid.webservices" elementFormDefault="qualified" attributeFormDefault="qualified" targetNamespace="java:dk.certifikat.pid.webservices">
+   <xsd:complexType name="ArrayOfPIDReply">
+    <xsd:sequence>
+     <xsd:element type="stns:PIDReply" name="PIDReply" minOccurs="0" maxOccurs="unbounded" nillable="true">
+     </xsd:element>
+    </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="ArrayOfPIDRequest">
+    <xsd:sequence>
+     <xsd:element type="stns:PIDRequest" name="PIDRequest" minOccurs="0" maxOccurs="unbounded" nillable="true">
+     </xsd:element>
+    </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="PIDReply">
+    <xsd:sequence>
+     <xsd:element type="xsd:string" name="CPR" minOccurs="1" maxOccurs="1" nillable="true">
+     </xsd:element>
+     <xsd:element type="xsd:string" name="PID" minOccurs="1" maxOccurs="1" nillable="true">
+     </xsd:element>
+     <xsd:element type="xsd:string" name="id" minOccurs="1" maxOccurs="1" nillable="true">
+     </xsd:element>
+     <xsd:element type="xsd:string" name="redirURL" minOccurs="1" maxOccurs="1" nillable="true">
+     </xsd:element>
+     <xsd:element type="xsd:string" name="statusCode" minOccurs="1" maxOccurs="1" nillable="true">
+     </xsd:element>
+     <xsd:element type="xsd:string" name="statusTextDK" minOccurs="1" maxOccurs="1" nillable="true">
+     </xsd:element>
+     <xsd:element type="xsd:string" name="statusTextUK" minOccurs="1" maxOccurs="1" nillable="true">
+     </xsd:element>
+    </xsd:sequence>
+   </xsd:complexType>
+   <xsd:complexType name="PIDRequest">
+    <xsd:sequence>
+     <xsd:element type="xsd:string" name="CPR" minOccurs="1" maxOccurs="1" nillable="true">
+     </xsd:element>
+     <xsd:element type="xsd:string" name="PID" minOccurs="1" maxOccurs="1" nillable="true">
+     </xsd:element>
+     <xsd:element type="xsd:string" name="b64Cert" minOccurs="1" maxOccurs="1" nillable="true">
+     </xsd:element>
+     <xsd:element type="xsd:string" name="id" minOccurs="1" maxOccurs="1" nillable="true">
+     </xsd:element>
+     <xsd:element type="xsd:string" name="serviceId" minOccurs="1" maxOccurs="1" nillable="true">
+     </xsd:element>
+    </xsd:sequence>
+   </xsd:complexType>
+  </xsd:schema>
+ </types>
+ <message name="pid">
+  <part xmlns:partns="http://localhost/" name="parameters" element="partns:pid">
+  </part>
+ </message>
+ <message name="pidResponse">
+  <part xmlns:partns="http://localhost/" name="parameters" element="partns:pidResponse">
+  </part>
+ </message>
+ <message name="testConnection">
+  <part xmlns:partns="http://localhost/" name="parameters" element="partns:testConnection">
+  </part>
+ </message>
+ <message name="testConnectionResponse">
+  <part xmlns:partns="http://localhost/" name="parameters" element="partns:testConnectionResponse">
+  </part>
+ </message>
+ <message name="test">
+  <part xmlns:partns="http://localhost/" name="parameters" element="partns:test">
+  </part>
+ </message>
+ <message name="testResponse">
+  <part xmlns:partns="http://localhost/" name="parameters" element="partns:testResponse">
+  </part>
+ </message>
+ <portType name="pidwsdocPort">
+  <operation name="pid">
+   <input message="tns:pid">
+   </input>
+   <output message="tns:pidResponse">
+   </output>
+  </operation>
+  <operation name="testConnection">
+   <input message="tns:testConnection">
+   </input>
+   <output message="tns:testConnectionResponse">
+   </output>
+  </operation>
+  <operation name="test">
+   <input message="tns:test">
+   </input>
+   <output message="tns:testResponse">
+   </output>
+  </operation>
+ </portType>
+ <binding type="tns:pidwsdocPort" name="pidwsdocPort">
+  <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http">
+  </soap:binding>
+  <operation name="pid">
+   <soap:operation style="document" soapAction="">
+   </soap:operation>
+   <input>
+    <soap:body namespace="http://localhost/" use="literal">
+    </soap:body>
+   </input>
+   <output>
+    <soap:body namespace="http://localhost/" use="literal">
+    </soap:body>
+   </output>
+  </operation>
+  <operation name="testConnection">
+   <soap:operation style="document" soapAction="">
+   </soap:operation>
+   <input>
+    <soap:body namespace="http://localhost/" use="literal">
+    </soap:body>
+   </input>
+   <output>
+    <soap:body namespace="http://localhost/" use="literal">
+    </soap:body>
+   </output>
+  </operation>
+  <operation name="test">
+   <soap:operation style="document" soapAction="">
+   </soap:operation>
+   <input>
+    <soap:body namespace="http://localhost/" use="literal">
+    </soap:body>
+   </input>
+   <output>
+    <soap:body namespace="http://localhost/" use="literal">
+    </soap:body>
+   </output>
+  </operation>
+ </binding>
+ <service name="pidwsdoc">
+  <port name="pidwsdocPort" binding="tns:pidwsdocPort">
+   <soap:address location="https://test.pid.certifikat.dk:443/pidwsv2/pidwsdoc">
+   </soap:address>
+  </port>
+ </service>
+</definitions>

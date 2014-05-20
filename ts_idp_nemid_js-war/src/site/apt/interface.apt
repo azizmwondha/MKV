@@ -1,0 +1,59 @@
+Introduction
+
+* Purpose
+
+  The purpose of the ts_idp_nemid is...
+
+* Abbrevations
+
+*-------------------+--------------------------------------+
+|<<Abbrevation>>    |<<Description>>                       |
+*-------------------+--------------------------------------+
+|SJSWS              |Sun Java System Web Server            |
+*-------------------+--------------------------------------+
+|...                |...                                   |
+*-------------------+--------------------------------------+
+
+* References
+
+*-------------------+--------------------------------------+
+|<<Abbrevation>>    |<<Location>>                          |
+*-------------------+--------------------------------------+
+|SSPEC              |Prod specification.doc                |
+*-------------------+--------------------------------------+
+|...                |...                                   |
+*-------------------+--------------------------------------+
+
+* Target audience
+
+  This document is intended for no.bbs.trust maintenance personnel
+
+* Document responsible
+
+  The component responsible is responsible for this document.
+
+General
+
+* Functional overview
+
+* Message protocol
+
+** Message transmission
+  
+Sequence diagrams
+
+* Use case 1
+
+[./images/usecase1.png] Use case 1
+
+* Use case 2
+
+Message structures
+
+* Overview
+
+* Messages
+
+** Request 1
+
+** Request 2

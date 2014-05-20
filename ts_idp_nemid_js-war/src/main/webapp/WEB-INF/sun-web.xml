@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : sun-web.xml
+    Created on : 30 January 2011, 22:38
+    Author     : azm
+    Description:
+        Purpose of the document follows.
+-->
+
+<sun-web-app>
+  <resource-ref>
+    <res-ref-name>jdbc/TrustSignDB</res-ref-name>
+    <jndi-name>jdbc/TrustSignDB</jndi-name>
+  </resource-ref>
+</sun-web-app>

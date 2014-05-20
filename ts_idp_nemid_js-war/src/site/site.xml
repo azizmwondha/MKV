@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="ts_idp_nemid-war">
+  <publishDate position="right"/>
+  <version position="right"/>
+  
+  <skin>
+    <groupId>no.bbs.tt.skins</groupId>
+    <artifactId>maven-tt-site-skin</artifactId>
+    <version>1.0.1</version>
+  </skin>
+  
+  <bannerRight>
+    <src>/images/BBS_logo.png</src>
+  </bannerRight>
+  
+  <body>
+    <menu name="ts_idp_nemid-war">
+      <item name="Main" href="index.html"/>
+      <item name="Introduction" href="intro.html"/>
+      <item name="Release Notes" href="release.html" />
+      <item name="Maintenance Documentation" href="maintenance.html"/>
+      <item name="Interface Specification" href="interface.html"/>
+      <item name="Component Description" href="component.html"/>
+    </menu>
+    <menu ref="reports"/>
+  </body>
+  
+</project>

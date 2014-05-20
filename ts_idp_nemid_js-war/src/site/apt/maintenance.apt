@@ -1,0 +1,150 @@
+Introduction
+
+* Purpose
+
+  The purpose of the ts_idp_nemid is...
+
+* Abbrevations
+
+*-------------------+--------------------------------------+
+|<<Abbrevation>>    |<<Description>>                       |
+*-------------------+--------------------------------------+
+|SJSWS              |Sun Java System Web Server            |
+*-------------------+--------------------------------------+
+|...                |...                                   |
+*-------------------+--------------------------------------+
+
+* References
+
+*-------------------+--------------------------------------+
+|<<Abbrevation>>    |<<Location>>                          |
+*-------------------+--------------------------------------+
+|SSPEC              |Prod specification.doc                |
+*-------------------+--------------------------------------+
+|...                |...                                   |
+*-------------------+--------------------------------------+
+
+* Target audience
+
+  This document is intended for no.bbs.trust maintenance personnel
+
+* Document responsible
+
+  The component responsible is responsible for this document.
+
+Installation/Deployment
+
+* General
+
+  ts_idp_nemid-war is probably the most important component in the whole it universe...
+
+* Environment
+
+  The production environment specification for this module and how it correlates to the other COI modules are defined in the site specification [SSPEC]
+
+* Start/Stop
+
+** Stop the ts_idp_nemid application
+
+  * Open a terminal to the target local zone
+  
+  * # /opt/sun_web/servers/https-ts_idp_nemid/bin/stopserv 
+
+** Start the ts_idp_nemid application
+
+  * Open a terminal to the target local zone
+  
+  * # /opt/sun_web/servers/https-ts_idp_nemid/bin/startserv
+  
+* Parameters
+
+  All parameters used for the ts_idp_nemid application to start and function correctly are contained in the following files. 
+  Properties that should be set default to a specific value are not in cursive. 
+  Properties that are not static and might be changed are in cursive.
+
+  * {rootArtifactId}.properties
+  
+    * key=value
+  
+  * secrets.properties
+
+    * key=value
+
+  * log4j.properties
+
+    * key=value
+  
+Logging
+
+* General
+
+  For logging the application uses log4j.
+
+* Logfiles
+
+The logfiles for the ts_idp_nemid application are
+
+  * ts_idp_nemid.log
+  
+  * ts_idp_nemid-trapometer.log
+  
+  * ts_idp_nemid-dosometer.log 
+  
+  * ts_idp_nemid-branchometer.log
+  
+
+* Changing log level
+
+  To change the loglevel for ts_idp_nemid.log do the following:
+
+  * Open the log4j.properties file
+  
+  * Choose wanted loglevel
+  
+  * Restart application
+
+* Error codes
+
+** Error 1 codes
+
+*-------------------+-------------------------------------------------------------+
+|<<ErrCode 1>>      |<<Description>>                                              |
+*-------------------+-------------------------------------------------------------+
+|D100               |Do nothing at the time, just report the error                |
+*-------------------+-------------------------------------------------------------+
+|D110               |Restart component                                            |
+*-------------------+-------------------------------------------------------------+
+|D120               |Check if the database process is running                     |
+*-------------------+-------------------------------------------------------------+
+|D130               |Call maintenance personell                                   |
+*-------------------+-------------------------------------------------------------+
+
+** Error 2 codes
+
+*-------------------+-------------------------------------------------------------+
+|<<ErrCode 2>>      |<<Description>>                                              |
+*-------------------+-------------------------------------------------------------+
+|1401               |Something went wrong                                         |
+*-------------------+-------------------------------------------------------------+
+|...                |...                                                          |
+*-------------------+-------------------------------------------------------------+
+
+* Action events
+
+*-------------------+-------------------------------------------------------------+
+|<<Actionevent>>    |<<Description>>                                              |
+*-------------------+-------------------------------------------------------------+
+|1401               |Executed database call                                       |
+*-------------------+-------------------------------------------------------------+
+|...                |...                                                          |
+*-------------------+-------------------------------------------------------------+
+
+* Performance events
+
+*-------------------+-------------------------------------------------------------+
+|<<Actionevent>>    |<<Description>>                                              |
+*-------------------+-------------------------------------------------------------+
+|1401               |Database call execution                                      |
+*-------------------+-------------------------------------------------------------+
+|...                |...                                                          |
+*-------------------+-------------------------------------------------------------+
