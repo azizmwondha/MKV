@@ -2,22 +2,20 @@
 <ErrorMapper xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<version>1.0</version>
 	<ErrorMap>
-		<!--
+<!--
 /*
  * Code range 0x33000 - 0x330FF Reserved for IDP_DK_NEMID
- * ==========
+ * ------------------------------------------------------
  * 0x33000 - 0x3309F Action events
  * 0x330A0 - 0x330CF Measurement events
  * 0x330D0 - 0x330FF Performance events
  *
- * NB: Event group ranges can overlap (ie. there is
- * no problem if an action event has the same code as
- * a measurement event or a performance event).
+ * NB: Event group ranges can overlap (ie. there is no problem if an action event
+ * has the same code as a measurement event or a performance event).
  */
-		-->
+-->
 		<Errors>
 			<!-- Action events for this module: -->
-
 
 			<Error>
 				<code>033001</code>
@@ -153,7 +151,14 @@
 				<message>STATUS_VERIFY_CERT_TYPE_FAILED</message>
 				<severity>info</severity>
 			</Error>
-			
+			<Error>
+				<code>033027</code>
+				<label>cancel</label>
+				<action>D100</action>
+				<message>STATUS_USER_CANCEL</message>
+				<severity>info</severity>
+			</Error>
+
 			<Error>
 				<code>033029</code>
 				<label>signrefnotfound</label>
