@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package no.bbs.trust.ts.idp.nemid.event;
 
 import no.bbs.trust.common.basics.events.ActionEvent;
@@ -11,20 +6,20 @@ import no.bbs.trust.common.basics.events.ActionEvent;
  *
  * @author azm
  */
-public enum NemIDActionEvent implements ActionEvent
-{
+public enum NemIDActionEvent implements ActionEvent {
+
 	/*
-	 * Code range 0x33000 - 0x330FF Reserved for SE_BID
-	 * --------
+	 * Code range 0x33000 - 0x330FF Reserved for DK_NEMID
+	 * --------------------------------------------------
 	 * 0x33000 - 0x3309F Action events
 	 * 0x330A0 - 0x330CF Measurement events
 	 * 0x330D0 - 0x330FF Performance events
 	 *
-	 * NB: Event group ranges can overlap (ie. there is
-	 * no problem if an action event has the same code as
-	 * a measurement event or a performance event).
+	 * NB: Event group ranges can overlap (i.e. there is no problem if an action event
+	 * has the same code as a measurement event or a performance event).
 	 */
 
+	//@formatter:off
 	REQUEST_RECEIVED("33001"),
 	RESPONSE_SENT("33002"),
 	ACTION_IDP_DKNEMID_LIFECYCLE_STARTED("33003"),
@@ -44,6 +39,7 @@ public enum NemIDActionEvent implements ActionEvent
 	STATUS_VERIFY_PIDMISMATCH("33024"),
 	STATUS_VERIFY_RIDMISMATCH("33025"),
 	STATUS_VERIFY_CERT_TYPE_FAILED("33026"),
+	STATUS_USER_CANCEL("33027"),
 	
 	STATUS_VERIFY_INVALIDSTATUS("33029"),
 	
@@ -62,18 +58,17 @@ public enum NemIDActionEvent implements ActionEvent
 	ACTION_LOAD_IDP_CONFIG("3309D"),
 	ACTION_LOAD_MERCHANT_CONTEXTS("3309E"),
 	ACTION_IDP_DK_NEMID_LIFECYCLE("3309F");
+	//@formatter:on
 
 	private String eventcode;
 
-	private NemIDActionEvent(String theEventCode)
-	{
+	private NemIDActionEvent(String theEventCode) {
 		eventcode = theEventCode;
 	}
-	
+
 	@Override
-	public String getCode()
-	{
+	public String getCode() {
 		return eventcode;
 	}
-}
 
+}

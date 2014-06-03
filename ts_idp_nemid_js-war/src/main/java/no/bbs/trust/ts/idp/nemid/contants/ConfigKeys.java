@@ -1,8 +1,11 @@
 package no.bbs.trust.ts.idp.nemid.contants;
 
-public class ConfigKeys
-{
+public class ConfigKeys {
+
 	public static final String PARAM_SREF = "sref";
+	public static final String PARAM_CLIENTMODE = "clientmode";
+	public static final String PARAM_CLIENT_WIDTH = "width";
+	public static final String PARAM_CLIENT_HEIGHT = "height";
 
 	public static final String SESSIONKEY_STEP = "STEP";
 	public static final String SESSIONKEY_MID = "MERCHANTID";
@@ -13,16 +16,15 @@ public class ConfigKeys
 	public static final String SESSIONKEY_STATUS = "STATUS";
 	public static final String SESSIONKEY_STYLE = "STYLE";
 	public static final String SESSIONKEY_TZO = "TZO";
-	
+
 	public static final String CONFIG_NEMID_DOCURL = "nemid.url.document";
 	public static final String CONFIG_TRUSTENGINE_URL = "trustengine.url";
-		
-		public static final String CONFIG_NEMIDVERIFYURL = "nemid.url.verify";
+
+	public static final String CONFIG_NEMID_VERIFYURL = "nemid.url.verify";
 	public static final String CONFIG_NEMID_STATUSURL = "nemid.url.status";
 	public static final String CONFIG_NEMID_CANCELURL = "nemid.url.cancel";
 	public static final String CONFIG_NEMID_RECEIPTURL = "nemid.url.receipt";
-	
-	
+
 	public static final String CONFIG_PROXY_USER = "proxy.user";
 	public static final String CONFIG_PROXY_PASS = "proxy.pass";
 	public static final String CONFIG_PROXY_HOST = "proxy.host";
@@ -30,7 +32,7 @@ public class ConfigKeys
 
 	public static final String CONFIG_SUPPORTED_LOCALES = "i18n.supportedlocales";
 	public static final String CONFIG_HTML_CHARSET = "http.html.charset";
-	
+
 	public static final String CPR_TRUSTSTORE_PATH = "cprreg.truststore.file";
 	public static final String CPR_TRUSTSTORE_TYPE = "cprreg.truststore.type";
 	public static final String CPR_TRUSTSTORE_PASSWORD = "cprreg.truststore.password";
@@ -38,7 +40,7 @@ public class ConfigKeys
 	public static final String RID_TRUSTSTORE_PATH = "ridreg.truststore.file";
 	public static final String RID_TRUSTSTORE_TYPE = "ridreg.truststore.type";
 	public static final String RID_TRUSTSTORE_PASSWORD = "ridreg.truststore.password";
-	
+
 	public static final String CPRREG_LOOKUP_URL = "cprreg.lookup.url";
 	public static final String CPRREG_REQUESTISSUER = "cprreg.request.issuer";
 
@@ -62,7 +64,7 @@ public class ConfigKeys
 	public static final String NEMID_CODEGROUP_AUTHFAILED = "nemid.codegroup.authfailed";
 
 	public static final String RIDREG_LOOKUP_URL = "ridreg.lookup.url";
-	
+
 	// Activation tag keys.
 	public static final String CONFIG_NEMID_TAG_SOURCE = "nemid.clienttag.source";
 	public static final String CONFIG_NEMID_TAG_APPLETPATH = "nemid.clienttag.appletpath";
@@ -70,11 +72,27 @@ public class ConfigKeys
 	public static final String CONFIG_NEMID_TAG_SIGNATURE = "signeddigest";
 	public static final String CONFIG_NEMID_TAG_SUBJECTDNFILTER = "subjectdnfilter";
 	public static final String CONFIG_NEMID_TAG_CHALLENGE = "nemid.clienttag.challenge";
-	
+
 	public static final String CONFIG_NEMID_TAG_PARAMS_UNSIGNED = "nemid.clienttag.unsignedparams";
 	public static final String CONFIG_NEMID_TAG_PARAMS_SIGNED = "nemid.clienttag.signedparams";
-	
+
 	public static final String CONFIG_NEMID_TAG_VERIFYURL = "nemid.clienttag.verifyurl";
 	public static final String CONFIG_NEMID_TAG_STATUSURL = "nemid.clienttag.statusurl";
+
+	public static final String CONFIG_NEMID_CLIENTMODE_STANDARD = "nemid.clientmode.standard";
+	public static final String CONFIG_NEMID_CLIENTMODE_LIMITED = "nemid.clientmode.limited";
+	public static final String CONFIG_NEMID_CLIENTFLOW_SIGNING = "nemid.clientflow.signing";
+	public static final String CONFIG_NEMID_CLIENT_STANDARD_WIDTH = "nemid.client.standard.width";
+	public static final String CONFIG_NEMID_CLIENT_STANDARD_HEIGHT = "nemid.client.standard.height";
+	public static final String CONFIG_NEMID_CLIENT_LIMITED_WIDTH = "nemid.client.limited.width";
+	public static final String CONFIG_NEMID_CLIENT_LIMITED_HEIGHT = "nemid.client.limited.height";
+	public static final String CONFIG_NEMID_CLIENT_LAUNCHER = "nemid.client.launcher";
+	public static final String CONFIG_NEMID_CLIENT_ORIGIN = "nemid.client.origin";
+	public static final String CONFIG_NEMID_CLIENT_URL = "nemid.client.url";
+
+	public static final String CONFIG_NEMID_CLIENTTAG_PARAMETERS = "nemid.clienttag.parameters";
+	public static final String CONFIG_NEMID_CLIENTTAG_IFRAME = "nemid.clienttag.iframe";
+	public static final String CONFIG_NEMID_CLIENTTAG_POSTBACKFORM = "nemid.clienttag.postbackform";
+	public static final String CONFIG_NEMID_CLIENTTAG_SCRIPT = "nemid.clienttag.script";
 
 }
