@@ -62,7 +62,6 @@ public abstract class BaseServlet extends BaseSignServlet
 			EventLogger.appendEvent(NemIDActionEvent.RESPONSE_SENT);
 			EventLogger.appendEvent(NemIDPerformanceEvent.DK_NEMID_HANDLE_REQUEST, start);
 			EventLogger.flush();
-			System.err.println("clienttag: " + request.getAttribute("clienttag"));
 		}
 	}
 
@@ -124,7 +123,6 @@ public abstract class BaseServlet extends BaseSignServlet
 		}
 		catch (Throwable t)
 		{
-			System.err.println("Servlet Startup failed. " + t.getMessage());
 			EventLogger.dumpStack(t);
 			throw new UnavailableException("Servlet Startup failed. " + t.getMessage());
 		}
