@@ -36,7 +36,6 @@ public class SignHandlerHack {
 
 			OcesCertificate certificate = opensignSignature.getSigningCertificate();
 			CertificateStatus status = certificate.validityStatus();
-			System.out.println("ServiceProviderSetup.getCurrentChecker(): " + ServiceProviderSetup.getCurrentChecker().getClass().getName());
 			if ((status == CertificateStatus.VALID) && (ServiceProviderSetup.getCurrentChecker().isRevoked(certificate))) {
 				status = CertificateStatus.REVOKED;
 			}

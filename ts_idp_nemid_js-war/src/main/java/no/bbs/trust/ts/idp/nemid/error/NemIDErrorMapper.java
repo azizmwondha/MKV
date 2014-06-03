@@ -25,6 +25,7 @@ public class NemIDErrorMapper {
 		String uidInvalid = Config.INSTANCE.getProperty(ConfigKeys.NEMID_CODEGROUP_UIDINVALID);
 		String uidExpired = Config.INSTANCE.getProperty(ConfigKeys.NEMID_CODEGROUP_UIDEXPIRED);
 		String authFailed = Config.INSTANCE.getProperty(ConfigKeys.NEMID_CODEGROUP_AUTHFAILED);
+		String docInvalid = Config.INSTANCE.getProperty(ConfigKeys.NEMID_CODEGROUP_DOCINVALID);
 
 		if (userCancel.contains(nemidCode)) {
 			return ErrorCodes.USERCANCEL;
@@ -46,6 +47,9 @@ public class NemIDErrorMapper {
 		}
 		if (authFailed.contains(nemidCode)) {
 			return ErrorCodes.AUTHFAILED;
+		}
+		if (docInvalid.contains(nemidCode)) {
+			return ErrorCodes.DOCINVALID;
 		}
 
 		return null;

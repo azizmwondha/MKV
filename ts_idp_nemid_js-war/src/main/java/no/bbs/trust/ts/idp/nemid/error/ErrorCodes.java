@@ -20,7 +20,8 @@ public enum ErrorCodes {
 	UIDREVOKED,
 	UIDINVALID,
 	UIDEXPIRED,
-	AUTHFAILED;
+	AUTHFAILED,
+	DOCINVALID;
 	//@formatter:on
 
 }
