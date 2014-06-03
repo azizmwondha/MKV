@@ -127,18 +127,12 @@ public class Index extends BaseServlet {
 
 	static String getClientMode(String clientMode) {
 		String clientMode2 = clientMode;
-		logger.debug("Client mode 1: " + clientMode2 + ", equals standard: "
-				+ Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD).equals(clientMode2) + ", equals limited: "
-				+ Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED).equals(clientMode2));
 
 		// Default to standard mode if no valid value is given
 		if (!Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD).equals(clientMode2)
 				&& !Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED).equals(clientMode2)) {
 			clientMode2 = Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD);
 		}
-		logger.debug("Client mode 2: " + clientMode2 + ", equals standard: "
-				+ Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD).equals(clientMode2) + ", equals limited: "
-				+ Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED).equals(clientMode2));
 		return clientMode2;
 	}
 
