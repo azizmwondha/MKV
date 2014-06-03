@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package no.bbs.trust.ts.idp.nemid.servlet;
 
 import java.security.cert.X509Certificate;
@@ -64,94 +60,73 @@ import org.bouncycastle.util.encoders.Base64;
  *
  * @author azm
  */
-public class Verify extends BaseServlet
-{
+public class Verify extends BaseServlet {
+
+	private static final long serialVersionUID = 1L;
+
 	private static final String PKICONFIG_PIDSERVICEID = "PIDServiceId";
 	private static final String PKICONFIG_RIDSERVICEID = "RIDServiceId";
 
 	@Override
-	protected ReturnCode serviceRequest(HttpServletRequest request, HttpServletResponse response) throws StatusCodeException
-	{
+	protected ReturnCode serviceRequest(HttpServletRequest request, HttpServletResponse response) throws StatusCodeException {
 		long start = System.currentTimeMillis();
 		logger.info("Verify signature");
+
+		String signedResponse = request.getParameter("response");
+		logger.debug("Signed response: " + signedResponse);
+
 		String sref = request.getParameter(ConfigKeys.PARAM_SREF);
-
 		int spid = (int) StringUtils.toLong(DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_SPID), 0);
-		SigningProcess sp = DAOUtil.getSigningProcess(spid);
-		
-		// Check sign process status before proceeding
-		if ((sp.getStatusId() != StatusTypes.READY_ID) && (sp.getStatusId() != StatusTypes.INPROGRESS_ID))
-		{
-			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_INVALIDSTATUS, "Signing process status is not active [Expected=" + StatusTypes.READY_ID + "," + StatusTypes.INPROGRESS_ID + "][Found=" + sp.getStatusId() + "/" + StatusTypes.getNameById(sp.getStatusId()) + "]");
-		}
-		
-		DAOUtil.validateSessionStep(sref, new int[]
-		{
-			5
-		});
+		SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
 
-		String mid = DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_MID);
-		
-		if (!sref.equalsIgnoreCase(sp.getSignProcessRef()))
-		{
-			logger.info("SignProcess reference updated since session started (OneTimeUrl) [PreviousSREF=" + sref + "][NewSREF=" + sp.getSignProcessRef() + "]");
-		}
+		// Check signing process, sref and step before proceeding
+		checkSigningProcessSrefAndStep(signingProcess, sref);
 
 		String result = request.getParameter("result");
-
-		if (!("" + result).equalsIgnoreCase("b2s="))
-		{
-			if (("" + result).equalsIgnoreCase("Y2FuY2Vs"))
-			{
-				return new ReturnCode(Dispatch.REDIRECT, getConfigProperty(ConfigKeys.CONFIG_NEMID_CANCELURL) + "?status=cancel&sref=" + sref);
-			}
-//			if (("" + result).equalsIgnoreCase("T0NFUzAwNA=="))  // OCES004
-//			{
-//				throw new StatusCodeException(NemIDActionEvent.STATUS_YOUTH_CARD_NOT_ALLOWED, "Signer is using youthcard, this is not allowed");
+		logger.debug("Result: " + result);
+//		if (!("" + result).equalsIgnoreCase("b2s=")) { // ok
+//			if (("" + result).equalsIgnoreCase("Y2FuY2Vs")) { // cancel
+//				return new ReturnCode(Dispatch.REDIRECT, getConfigProperty(ConfigKeys.CONFIG_NEMID_CANCELURL) + "?status=cancel&sref=" + sref);
 //			}
-			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Signature verification failed. Reason: " + new String(Base64.decode(result)));
-		}
+//			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Signature verification failed. Reason: "
+//					+ new String(Base64.decode("" + result)));
+//		}
 
 		String signature = request.getParameter("signature");
+		signature = signedResponse;
 		String challenge = request.getParameter("challenge");
 
 		byte[] xmldsig = Base64.decode(signature);
 
-		SignObjectData signObject = DAOUtil.getSignObjectData(sp);
+		SignObjectData signObject = DAOUtil.getSignObjectData(signingProcess);
 
 		VerifyClientSignatureData vcsdata = new VerifyClientSignatureData();
 		vcsdata.setSignature(signature);
 		vcsdata.setB64Document(signObject.getObjectB64());
 		vcsdata.setChallenge(challenge);
 
-		vcsdata.setCertType(DAOUtil.getCertificateTypes(sp.getSignerId()));
+		vcsdata.setCertType(DAOUtil.getCertificateTypes(signingProcess.getSignerId()));
 
+		String mid = DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_MID);
 		String dtype = null;
-		if (signObject.getElementType().equalsIgnoreCase("pdf"))
-		{
+		if (signObject.getElementType().equalsIgnoreCase("pdf")) {
 			dtype = "application/pdf";
-		}
-		else
-		{
+		} else {
 			dtype = "text/plain";
 		}
 		vcsdata.setDocumentType(dtype);
 		vcsdata.setMid(mid);
-		vcsdata.setResult(result);
+//		vcsdata.setResult(result);
 
-		SignerId signerID = DAOUtil.getSignerID(sp.getSignerId());
-		if (null != signerID)
-		{
-			if ("SSN".equalsIgnoreCase("" + signerID.getIdKey()))
-			{
+		SignerId signerID = DAOUtil.getSignerID(signingProcess.getSignerId());
+		if (null != signerID) {
+			if ("SSN".equalsIgnoreCase("" + signerID.getIdKey())) {
 				vcsdata.setSignerCPR(signerID.getIdValue());
 			}
-			if ("PID".equalsIgnoreCase("" + signerID.getIdKey()))
-			{
+			if ("PID".equalsIgnoreCase("" + signerID.getIdKey())) {
 				vcsdata.setSignerPID(signerID.getIdValue());
 			}
-			if ("RID".equalsIgnoreCase("" + signerID.getIdKey()))
-			{
+			if ("RID".equalsIgnoreCase("" + signerID.getIdKey())) {
 				vcsdata.setSignerRID(signerID.getIdValue());
 			}
 		}
@@ -162,8 +137,7 @@ public class Verify extends BaseServlet
 		String signerCN = null;
 		String signerCertPolicyOID = null;
 
-		try
-		{
+		try {
 			logger.info("Verify XMLDSIG against signers document");
 
 			XMLDSIGValidator xdvalidator = new XMLDSIGValidator();
@@ -176,14 +150,11 @@ public class Verify extends BaseServlet
 			signerCN = xp.getSubjectCommonName();
 
 			String[] oids = xp.getPolicyIdentifiers();
-			if ((null != oids) && (oids.length > 0))
-			{
+			if ((null != oids) && (oids.length > 0)) {
 				StringBuilder sb = new StringBuilder();
 
-				for (String oid : oids)
-				{
-					if (sb.length() > 0)
-					{
+				for (String oid : oids) {
+					if (sb.length() > 0) {
 						sb.append(",");
 					}
 					sb.append(oid);
@@ -191,49 +162,40 @@ public class Verify extends BaseServlet
 				signerCertPolicyOID = sb.toString();
 			}
 			logger.info("Signer info [SignerOID=" + signerCertPolicyOID + "][SignerCN=" + signerCN + "]");
-			logger.debug("Signer info [SignerCPR=" + verifySign.getSignerCPR() + "][SignerPID=" + verifySign.getSignerPID() + "][SignerRID=" + verifySign.getSignerRID() + "]");
-		}
-		catch (InstantiationException ie)
-		{
+			logger.debug("Signer info [SignerCPR=" + verifySign.getSignerCPR() + "][SignerPID=" + verifySign.getSignerPID() + "][SignerRID="
+					+ verifySign.getSignerRID() + "]");
+		} catch (InstantiationException ie) {
 			EventLogger.dumpStack(ie);
 			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Cannot parse signature. Reason: " + ie.getMessage());
-		}
-		catch (X509ParserException xpe)
-		{
+		} catch (X509ParserException xpe) {
 			EventLogger.dumpStack(xpe);
 			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Cannot parse signer certificate. Reason: " + xpe.getMessage());
-		}
-		catch (XMLDSValidationException xve)
-		{
+		} catch (XMLDSValidationException xve) {
 			EventLogger.dumpStack(xve);
 			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Cannot verify XML signature. Reason: " + xve.getMessage());
-		}
-		catch (Throwable t)
-		{
+		} catch (Throwable t) {
 			EventLogger.dumpStack(t);
 			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Cannot verify XML signature. Reason: " + t.getMessage());
 		}
 
 		// Verify signer ID/SSN
 		logger.info("Verify signer ID (check CPR, PID, RID)");
-		DAOUtil.validateSignerID(sp, verifySign.getSignerCPR(), "SSN");
+		DAOUtil.validateSignerID(signingProcess, verifySign.getSignerCPR(), "SSN");
 
-		if (null != verifySign.getSignerPID())
-		{
+		if (null != verifySign.getSignerPID()) {
 			String pid = "PID:" + verifySign.getSignerPID();
 			pid = pid.substring(pid.lastIndexOf(":") + 1);
 			logger.debug("Check PID[" + pid + "]");
-			DAOUtil.validateSignerID(sp, pid, "PID");
+			DAOUtil.validateSignerID(signingProcess, pid, "PID");
 		}
-		if (null != verifySign.getSignerRID())
-		{
+		if (null != verifySign.getSignerRID()) {
 			String rid = verifySign.getSignerRID().trim();
 			logger.debug("Check RID[" + rid + "]");
-			DAOUtil.validateSignerID(sp, rid, "RID");
+			DAOUtil.validateSignerID(signingProcess, rid, "RID");
 		}
 
 		logger.info("Verify signer certificate type (check certificate policy)");
-		DAOUtil.validateSignerOIDs(sp, signerCertPolicyOID);
+		DAOUtil.validateSignerOIDs(signingProcess, signerCertPolicyOID);
 
 		// Status OK
 		logger.info("Signature verification completed OK. Store signature and revocation status");
@@ -241,7 +203,7 @@ public class Verify extends BaseServlet
 		Date signerTime = new Date();
 		DAOUtil.storeSignature(spid, signerTime, verifySign.getSignerCPR(), signerCN, signerCertPolicyOID, signature, verifySign.getB64ocsp());
 		DAOUtil.updateSigningProcessStatus(spid);
-		notifyTE(mid, sref, sp);
+		notifyTE(mid, sref, signingProcess);
 		DAOUtil.updateSessionDataByKey(sref, ConfigKeys.SESSIONKEY_STEP, "7");
 
 		// Temporary fix to force a wait for OrderComplete
@@ -257,7 +219,25 @@ public class Verify extends BaseServlet
 		return new ReturnCode(Dispatch.REDIRECT, getConfigProperty(ConfigKeys.CONFIG_NEMID_RECEIPTURL) + "?status=completed&sref=" + sref);
 	}
 
-	private void waitForOrderCompletion(int spid) {
+	private static void checkSigningProcessSrefAndStep(SigningProcess signingProcess, String sref) throws StatusCodeException {
+		// Check signing process status before proceeding
+		if ((signingProcess.getStatusId() != StatusTypes.READY_ID) && (signingProcess.getStatusId() != StatusTypes.INPROGRESS_ID)) {
+			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_INVALIDSTATUS, "Signing process status is not active [Expected="
+					+ StatusTypes.READY_ID + "," + StatusTypes.INPROGRESS_ID + "][Found=" + signingProcess.getStatusId() + "/"
+					+ StatusTypes.getNameById(signingProcess.getStatusId()) + "]");
+		}
+
+		// Check for valid step
+		DAOUtil.validateSessionStep(sref, new int[] { 5 });
+
+		// Check sref
+		if (!sref.equalsIgnoreCase(signingProcess.getSignProcessRef())) {
+			logger.info("SignProcess reference updated since session started (OneTimeUrl) [PreviousSREF=" + sref + "][NewSREF="
+					+ signingProcess.getSignProcessRef() + "]");
+		}
+	}
+
+	private static void waitForOrderCompletion(int spid) {
 		try {
 			boolean doneWaiting = false;
 			// Get my signingprocess
@@ -325,10 +305,8 @@ public class Verify extends BaseServlet
 		}
 	}
 
-	private VerifyClientSignatureResponseDataExt verifySign(VerifyClientSignatureData verifyClientSignatureData) throws StatusCodeException
-	{
-		try
-		{
+	private static VerifyClientSignatureResponseDataExt verifySign(VerifyClientSignatureData verifyClientSignatureData) throws StatusCodeException {
+		try {
 			SignatureVerifier signatureVerifier = new SignatureVerifier(verifyClientSignatureData);
 
 			VerifyClientSignatureResponseDataExt responseData = signatureVerifier.handleVerifyClientSignatureData();
@@ -352,98 +330,73 @@ public class Verify extends BaseServlet
 			logger.debug("OrderCPR: [" + orderCPR + "] IsNullOrEmpty=" + StringUtils.isNullorEmpty(orderCPR));
 			logger.debug("OrderCertPolicy: " + verifyClientSignatureData.getCertType());
 
-			if (verifyClientSignatureData.getCertType() != null && verifyClientSignatureData.getCertType().equalsIgnoreCase("Personal"))
-			{
-				if (signerPID == null || signerPID.equals(""))
-				{
+			if (verifyClientSignatureData.getCertType() != null && verifyClientSignatureData.getCertType().equalsIgnoreCase("Personal")) {
+				if (signerPID == null || signerPID.equals("")) {
 					throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_CERT_TYPE_FAILED, "Expected POCES but signature cert was MOCES");
 				}
-			}
-			else if (verifyClientSignatureData.getCertType() != null && verifyClientSignatureData.getCertType().equalsIgnoreCase("Employee"))
-			{
-				if (signerRID == null || signerRID.equals(""))
-				{
+			} else if (verifyClientSignatureData.getCertType() != null && verifyClientSignatureData.getCertType().equalsIgnoreCase("Employee")) {
+				if (signerRID == null || signerRID.equals("")) {
 					throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_CERT_TYPE_FAILED, "Expected MOCES but signature cert was POCES");
 				}
 			}
 
-			if (!StringUtils.isNullorEmpty(orderCPR))
-			{
-				if (signerPID != null && !signerPID.equals(""))
-				{
+			if (!StringUtils.isNullorEmpty(orderCPR)) {
+				if (signerPID != null && !signerPID.equals("")) {
 					logger.debug("Matching [OrderCPR=" + orderCPR + "] against [SignerPID=" + signerPID + "]");
 					MerchantContext mc = MerchantContextCache.getMerchantContext(mid);
 
-					if (null == mc)
-					{
-						throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_CACHE_ERROR, "Unable to retrieve merchant context from cache for Merchant[" + mid + "]");
+					if (null == mc) {
+						throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_CACHE_ERROR, "Unable to retrieve merchant context from cache for Merchant["
+								+ mid + "]");
 					}
 
-					java.util.Map<String, String> idpc = mc.getIdpConfig();
+					Map<String, String> idpc = mc.getIdpConfig();
 					String serviceId = idpc.get(PKICONFIG_PIDSERVICEID);
 
-					if (!matchCPR2PID(mid, serviceId, signerPID, orderCPR))
-					{
+					if (!matchCPR2PID(mid, serviceId, signerPID, orderCPR)) {
 						StatusCodeException sce = new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_CPRMISMATCH, "CPR-PID mismatch");
 						StackLogger.logStatusCode(sce);
 						throw sce;
 					}
-					else
-					{
-						logger.info("CPR and PID match OK");
-					}
+					logger.info("CPR and PID match OK");
 					responseData.setSignerCPR(orderCPR);
-				}
-				else if (signerRID != null && !signerRID.equals(""))
-				{
+				} else if (signerRID != null && !signerRID.equals("")) {
 					logger.debug("Matching [OrderCPR=" + orderCPR + "] against [SignerRID=" + signerRID + "]");
 					MerchantContext mc = MerchantContextCache.getMerchantContext(mid);
 
-					if (null == mc)
-					{
-						throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_CACHE_ERROR, "Unable to retrieve merchant context from cache for Merchant[" + mid + "]");
+					if (null == mc) {
+						throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_CACHE_ERROR, "Unable to retrieve merchant context from cache for Merchant["
+								+ mid + "]");
 					}
-					if (!matchCPR2RID(mid, signerRID, orderCPR, responseData.certificate))
-					{
+					if (!matchCPR2RID(mid, signerRID, orderCPR, responseData.certificate)) {
 						StatusCodeException sce = new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_CPRMISMATCH, "CPR-RID mismatch");
 						StackLogger.logStatusCode(sce);
 						throw sce;
 					}
-					else
-					{
-						logger.info("CPR and RID is matching");
-					}
+					logger.info("CPR and RID is matching");
 					responseData.setSignerCPR(orderCPR);
 				}
-			}
-			else
-			{
+			} else {
 				logger.info("Order does not contain any requirements on PID/RID/CPR");
 			}
 
 			logger.trace("responseData: " + responseData);
 
-			StackLogger.appendEvent(NemIDActionEvent.ACTION_DK_NEMID_SIGN_OK);
+			EventLogger.appendEvent(NemIDActionEvent.ACTION_DK_NEMID_SIGN_OK);
 			return responseData;
-		}
-		catch (StatusCodeException sce)
-		{
+		} catch (StatusCodeException sce) {
 			throw sce;
-		}
-		catch (Throwable t)
-		{
+		} catch (Throwable t) {
 			EventLogger.dumpStack(t);
 			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, t.getMessage());
 		}
 	}
 
-	private boolean matchCPR2RID(String mid, String rid, String cpr, byte[] certificate) throws StatusCodeException
-	{
+	private static boolean matchCPR2RID(String mid, String rid, String cpr, byte[] certificate) throws StatusCodeException {
 		long start = System.currentTimeMillis();
 		logger.debug("Match RID:" + rid + "/oCPR:" + cpr);
 
-		if (StringUtils.isNullorEmpty(cpr) || StringUtils.isNullorEmpty(rid))
-		{
+		if (StringUtils.isNullorEmpty(cpr) || StringUtils.isNullorEmpty(rid)) {
 			return false;
 		}
 		RIDMerchantContext ctx = new RIDMerchantContext();
@@ -465,8 +418,7 @@ public class Verify extends BaseServlet
 
 		MerchantContext mc = MerchantContextCache.getMerchantContext(mid);
 
-		if (null == mc)
-		{
+		if (null == mc) {
 			throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_CACHE_ERROR, "Unable to retrieve merchant context from cache for Merchant[" + mid + "]");
 		}
 
@@ -476,11 +428,9 @@ public class Verify extends BaseServlet
 		String keystoretype = idpc.get(PKIConfigKeys.RIDKEYSTORETYPE);
 		String serviceid = idpc.get(PKICONFIG_RIDSERVICEID);
 
-		if (keystoretype == null || keystoretype.equals("") || keystorepass == null || keystorepass.equals("") || keystoretype == null || keystoretype.equals(""))
-		{
+		if (keystoretype == null || keystoretype.equals("") || keystorepass == null || keystorepass.equals("")) {
 			throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_SETUP_FAIL, "Unable to find rid keystore for Merchant[" + mid + "]");
 		}
-
 
 		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("CPRRequest keystore: " + keystorepath);
 		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("CPRRequest sto type: " + keystoretype);
@@ -496,53 +446,40 @@ public class Verify extends BaseServlet
 		ctx.setKeystoreType(keystoretype);
 
 		MatchCPRRIDResponse resp;
-		try
-		{
+		try {
 			RIDFacade facade = RIDFacadeFactory.getRIDFacade(ctx);
 			resp = facade.matchCPRRID(rid, cpr, certificate, serviceid);
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			logger.error("Unable to do a rid match for [Merchant=" + mid + "] Errormessage: " + e.getMessage());
 			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Unable to do a rid match for [MerchantID=" + mid + "]");
-		}
-		finally
-		{
+		} finally {
 			EventLogger.appendEvent(NemIDPerformanceEvent.DK_NEMID_RID_MATCH, start);
 		}
 
-		StackLogger.appendEvent(NemIDActionEvent.ACTION_DK_NEMID_RIDMATCH);
+		EventLogger.appendEvent(NemIDActionEvent.ACTION_DK_NEMID_RIDMATCH);
 		logger.info("[MatchStatus=" + resp.getStatuscode() + "][MatchMessage=" + resp.getStatustext() + "]");
 
-		if (resp.getStatuscode() == 0)
-		{
+		if (resp.getStatuscode() == 0) {
 			return resp.isMatch();
-		}
-		else if (resp.getStatuscode() == 4)
-		{
+		} else if (resp.getStatuscode() == 4) {
 			logger.warn("Validation failed in ridregister: [ridstatuscode=" + resp.getStatuscode() + "] [ridstatusmessage=" + resp.getStatustext()
 					+ "] The probable cause is wrong serviceid. [ridserviceid=" + serviceid + "][mid=" + mid + "]");
 			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Error in rid match");
-		}
-		else if (resp.getStatuscode() == 8)
-		{
+		} else if (resp.getStatuscode() == 8) {
 			logger.info("Validation failed in ridregister: [ridstatuscode=" + resp.getStatuscode() + "][ridstatusmessage=" + resp.getStatustext()
 					+ "] This might happen if cert is not connected to a cpr/ssn");
 			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Error in rid match");
-		}
-		else
-		{
-			logger.info("Validation failed in ridregister: [ridstatuscode=" + resp.getStatuscode() + "][ridstatusmessage=" + resp.getStatustext() + "] Reason is unknown.");
+		} else {
+			logger.info("Validation failed in ridregister: [ridstatuscode=" + resp.getStatuscode() + "][ridstatusmessage=" + resp.getStatustext()
+					+ "] Reason is unknown.");
 			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Error in rid match");
 		}
 	}
 
-	private static boolean matchCPR2PID(String mid, String nemIDserviceID, String pid, String cpr) throws Exception
-	{
+	private static boolean matchCPR2PID(String mid, String nemIDserviceID, String pid, String cpr) throws Exception {
 		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("Match sPID:" + pid + "/oCPR:" + cpr);
 
-		if (StringUtils.isNullorEmpty(cpr) || StringUtils.isNullorEmpty(pid))
-		{
+		if (StringUtils.isNullorEmpty(cpr) || StringUtils.isNullorEmpty(pid)) {
 			return false;
 		}
 
@@ -562,8 +499,7 @@ public class Verify extends BaseServlet
 
 		MerchantContext mc = MerchantContextCache.getMerchantContext(mid);
 
-		if (null == mc)
-		{
+		if (null == mc) {
 			throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_CACHE_ERROR, "Unable to retrieve merchant context from cache for Merchant[" + mid + "]");
 		}
 
@@ -577,35 +513,32 @@ public class Verify extends BaseServlet
 
 		int serviceId = (int) StringUtils.toLong(nemIDserviceID, 0);
 		int VOID_MERCHANT_ID = 127;
-		CPRRegistryFacade facade = new CPRRegistryFacade(VOID_MERCHANT_ID, serviceId, keystorepath, keystorepass, keystoretype, truststorepath, truststorepass, truststoretype,
-				lookupURL, 5000, proxyHost, proxyPort, null, null);
+		CPRRegistryFacade facade = new CPRRegistryFacade(VOID_MERCHANT_ID, serviceId, keystorepath, keystorepass, keystoretype, truststorepath, truststorepass,
+				truststoretype, lookupURL, 5000, proxyHost, proxyPort, null, null);
 
 		int requestId = (int) (Math.random() * Integer.MAX_VALUE);
 
 		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("CPRRequest ID: " + requestId);
 
 		MatchCPR2PIDRequest match;
-		try
-		{
+		try {
 			match = new MatchCPR2PIDRequest(serviceId, pid, cpr, requestId);
-		}
-		catch (Exception e)
-		{
-			Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).error("Unable to do a pid match for [Merchant=" + mid + "] Errormessage: " + e.getMessage());
+		} catch (Exception e) {
+			Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).error(
+					"Unable to do a pid match for [Merchant=" + mid + "] Errormessage: " + e.getMessage());
 			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Unable to do a pid match for Merchant[" + mid + "]");
 		}
 		ResponseType resp = facade.sendCPRRegistryRequest(match);
-		StackLogger.appendEvent(NemIDActionEvent.ACTION_DK_NEMID_CPRMATCH);
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).info("[MatchStatus=" + resp.getStatus().getStatusCode() + "][MatchMessage=" + resp.getStatus().getStatusText().get(0).getValue() + "]");
+		EventLogger.appendEvent(NemIDActionEvent.ACTION_DK_NEMID_CPRMATCH);
+		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).info(
+				"[MatchStatus=" + resp.getStatus().getStatusCode() + "][MatchMessage=" + resp.getStatus().getStatusText().get(0).getValue() + "]");
 		return (resp.getStatus().getStatusCode() == 0);
 	}
 
-	private void notifyTE(String mid, String sref, SigningProcess sp) throws StatusCodeException
-	{
+	private void notifyTE(String mid, String sref, SigningProcess sp) throws StatusCodeException {
 		TEMessage temessage = null;
-			String orderID = DAOUtil.getOrderID(sp);
-		try
-		{
+		String orderID = DAOUtil.getOrderID(sp);
+		try {
 			FinalizeSignProcessRequest fspr = new FinalizeSignProcessRequest();
 			fspr.setOrderID(orderID);
 			fspr.setSignProcessID("" + sp.getSignprocessId());
@@ -616,26 +549,26 @@ public class Verify extends BaseServlet
 
 			Requestor requestor = new Requestor(getConfigProperty(ConfigKeys.CONFIG_TRUSTENGINE_URL), 10000L);
 			temessage = requestor.sendRequest(fspr);
-		}
-		catch (Throwable t)
-		{
-			logger.warn("FinalizeSignProcess restore info [MerchantID=" + mid + "][OrderID=" + orderID + "][SigningProcessID=" + sp.getSignprocessId() + "][TransRef=" + sref + "]");
+		} catch (Throwable t) {
+			logger.warn("FinalizeSignProcess restore info [MerchantID=" + mid + "][OrderID=" + orderID + "][SigningProcessID=" + sp.getSignprocessId()
+					+ "][TransRef=" + sref + "]");
 			EventLogger.appendEvent(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR);
 			EventLogger.dumpStack(t, logger);
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR, "Unable to finalize SigningProcess [SREF=" + sref + "] Reason" + t.getMessage());
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR, "Unable to finalize SigningProcess [SREF=" + sref + "] Reason"
+					+ t.getMessage());
 		}
 
-		if (temessage instanceof ErrorResponse)
-		{
+		if (temessage instanceof ErrorResponse) {
 			EventLogger.appendEvent(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR);
 			ErrorResponse ers = (ErrorResponse) temessage;
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR, "Unable to finalize SigningProcess [SREF=" + sref + "][ErrorCode=" + ers.getErrorCode() + "][ErrorText=" + ers.getErrorText() + "]");
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR, "Unable to finalize SigningProcess [SREF=" + sref + "][ErrorCode="
+					+ ers.getErrorCode() + "][ErrorText=" + ers.getErrorText() + "]");
 		}
 	}
 
 	@Override
-	public void doInit() throws ServletException
-	{
-//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	public void doInit() throws ServletException {
+		//		throw new UnsupportedOperationException("Not supported yet.");
 	}
+
 }

@@ -4,6 +4,9 @@
  */
 package no.bbs.trust.ts.idp.nemid.servlet;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,14 +22,15 @@ import no.bbs.trust.common.basics.utils.EventLogger;
 import no.bbs.trust.common.basics.utils.StringUtils;
 import no.bbs.trust.common.config.Config;
 import no.bbs.trust.common.i18n.LangSupport;
+import no.bbs.trust.ts.idp.nemid.attachments.Attachment;
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
+import no.bbs.trust.ts.idp.nemid.contants.Constants;
 import no.bbs.trust.ts.idp.nemid.event.NemIDActionEvent;
 import no.bbs.trust.ts.idp.nemid.event.NemIDPerformanceEvent;
-import no.bbs.trust.ts.idp.nemid.tag.AppletElementGenerator;
-import no.bbs.trust.ts.idp.nemid.tag.ChallengeGenerator;
-import no.bbs.trust.ts.idp.nemid.tag.OcesJSONParameterGenerator;
+import no.bbs.trust.ts.idp.nemid.tag.OcesJsonParameterGenerator;
 import no.bbs.trust.ts.idp.nemid.tag.Signer;
 import no.bbs.trust.ts.idp.nemid.utils.DAOUtil;
+import no.bbs.tt.bc.cryptlib.util.HashUtil;
 import no.bbs.tt.trustsign.te.xml.messages.ErrorResponse;
 import no.bbs.tt.trustsign.te.xml.messages.GetStatusTableRequest;
 import no.bbs.tt.trustsign.te.xml.messages.GetStatusTableResponse;
@@ -35,10 +39,13 @@ import no.bbs.tt.trustsign.te.xml.messages.TEMessage;
 import no.bbs.tt.trustsign.tecapi.communicator.Requestor;
 import no.bbs.tt.trustsign.trustsignDAL.constant.SessionKey;
 import no.bbs.tt.trustsign.trustsignDAL.dao.table.SessionDataDAO;
+import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObject;
+import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObjectData;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.WebContext;
 
-import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.bouncycastle.util.encoders.Base64;
 
 import eu.nets.no.vas.esign.sdosigner.types.KeyCredentials;
 
@@ -47,23 +54,33 @@ import eu.nets.no.vas.esign.sdosigner.types.KeyCredentials;
  */
 public class Index extends BaseServlet {
 
+	private static final String UTF_8 = "UTF-8";
+
+	private static final String ISO_8859_1 = "ISO-8859-1";
+
 	private static final long serialVersionUID = 1L;
 
 	public static final String COMPONENT_NAME = "NemIDJS";
 
+	private OcesJsonParameterGenerator clientGenerator;
+
 	@Override
 	protected ReturnCode serviceRequest(HttpServletRequest request, HttpServletResponse response) throws StatusCodeException {
 		long start = System.currentTimeMillis();
-		logger.info("NemID JS: Get NemID client activation tag");
+		logger.info("Get NemID client activation tag");
 		String sref = "" + request.getParameter(ConfigKeys.PARAM_SREF);
+		String clientMode = getClientMode(request.getParameter(ConfigKeys.PARAM_CLIENTMODE));
+		String clientWidth = getClientWidth(request.getParameter(ConfigKeys.PARAM_CLIENT_WIDTH), clientMode);
+		String clientHeight = getClientHeight(request.getParameter(ConfigKeys.PARAM_CLIENT_HEIGHT), clientMode);
 
 		DAOUtil.validateSessionStep(sref, new int[] { 2, 4, 5, 6 });
 
 		int spid = (int) StringUtils.toLong(DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_SPID), 0);
-		SigningProcess sp = DAOUtil.getSigningProcess(spid);
+		SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
 
-		if (!sref.equalsIgnoreCase(sp.getSignProcessRef())) {
-			logger.info("SignProcess reference updated since session started (OneTimeUrl) [PreviousSREF=" + sref + "][NewSREF=" + sp.getSignProcessRef() + "]");
+		if (!sref.equalsIgnoreCase(signingProcess.getSignProcessRef())) {
+			logger.info("SignProcess reference updated since session started (OneTimeUrl) [PreviousSREF=" + sref + "][NewSREF="
+					+ signingProcess.getSignProcessRef() + "]");
 		}
 
 		DAOUtil.updateSessionDataByKey(sref, ConfigKeys.SESSIONKEY_STEP, "5");
@@ -79,15 +96,17 @@ public class Index extends BaseServlet {
 			throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, e, COMPONENT_NAME, sref);
 		}
 
-		String tag = OcesJSONParameterGenerator.generateClientTag(mid, Config.INSTANCE.getProperty("nemid.client.mode.standard"), languageCode, sref);
+		clientGenerator = createClientGenerator(mid);
+		setSigningDocument(signingProcess, sref);
+		String tag = clientGenerator.generateClientTag(clientMode, clientWidth, clientHeight, languageCode, sref);
 		logger.debug("NemID JS tag: " + tag);
 		request.setAttribute("clienttag", tag);
 
-		setupWebContext(sref, sp, request);
+		setupWebContext(sref, signingProcess, request);
 		request.setAttribute("sref", sref);
 
 		// Parse signer deadline
-		long endtime = sp.getDeadline().getTime();
+		long endtime = signingProcess.getDeadline().getTime();
 
 		SimpleDateFormat formatter = new SimpleDateFormat(LangSupport.getUserText("format.mediumdate", locale));
 		String tzos = DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_TZO);
@@ -98,7 +117,7 @@ public class Index extends BaseServlet {
 		request.setAttribute("tzo", tzos);
 
 		try {
-			request.setAttribute("statustable", getStatusTable(mid, sref, sp));
+			request.setAttribute("statustable", getStatusTable(mid, sref, signingProcess));
 		} catch (StatusCodeException sce) {
 			logger.info("No status table available for SREF");
 		}
@@ -106,39 +125,91 @@ public class Index extends BaseServlet {
 		return new ReturnCode(Dispatch.INCLUDE, "/index.jsp");
 	}
 
-	private AppletElementGenerator createGenerator(String midf) throws StatusCodeException {
+	static String getClientMode(String clientMode) {
+		String clientMode2 = clientMode;
+		logger.debug("Client mode 1: " + clientMode2 + ", equals standard: "
+				+ Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD).equals(clientMode2) + ", equals limited: "
+				+ Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED).equals(clientMode2));
+
+		// Default to standard mode if no valid value is given
+		if (!Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD).equals(clientMode2)
+				&& !Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED).equals(clientMode2)) {
+			clientMode2 = Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD);
+		}
+		logger.debug("Client mode 2: " + clientMode2 + ", equals standard: "
+				+ Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD).equals(clientMode2) + ", equals limited: "
+				+ Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED).equals(clientMode2));
+		return clientMode2;
+	}
+
+	private static String getClientWidth(String width, String clientMode) {
+		if (width == null || "".equals(width)) {
+			if (Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED).equals(clientMode)) {
+				return Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_LIMITED_WIDTH);
+			}
+			return Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_STANDARD_WIDTH);
+		}
+		return width;
+	}
+
+	private static String getClientHeight(String height, String clientMode) {
+		if (height == null || "".equals(height)) {
+			if (Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED).equals(clientMode)) {
+				return Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_LIMITED_HEIGHT);
+			}
+			return Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_STANDARD_HEIGHT);
+		}
+		return height;
+	}
+
+	private static OcesJsonParameterGenerator createClientGenerator(String mid) throws StatusCodeException {
+		KeyCredentials credentials = null;
 		try {
-			KeyCredentials credentials = DAOUtil.getMerchantCredentials(midf);
-
-			String keystore = credentials.getKeystorepath();
-			String keystorePasswd = credentials.getKeystorepass();
-			String alias = credentials.getKeyalias();
-			String aliasPasswd = credentials.getKeyaliaspass();
-
-			Signer appletSigner = null;
-			try {
-				appletSigner = new Signer(keystore, keystorePasswd, alias, aliasPasswd);
-			} catch (Throwable t) {
-				logger.warn("Cannot create AppletSigner. Check merchant PKI config (maybe a password and/or alias mismatch)");
-				throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_OPERATION_FAILED, "Cannot create applet signer for Merchant[" + midf + "] "
-						+ t.getMessage());
-			}
-			String challenge = ChallengeGenerator.generateChallenge();
-
-			AppletElementGenerator generator = new AppletElementGenerator(appletSigner);
-			generator.setServerUrlPrefix(Config.INSTANCE.getProperty(ConfigKeys.APPLET_URL_PREFIX));
-			generator.setChallenge(challenge);
-			if (logger.getLevel() != Level.INFO) {
-				generator.setLogLevel("debug"); // INFO/DEBUG/ERROR
-			} else {
-				generator.setLogLevel("info"); // INFO/DEBUG/ERROR
-			}
-			generator.addSignedParameter("always_embedded", "true");
-
-			return generator;
+			credentials = DAOUtil.getMerchantCredentials(mid);
 		} catch (SQLException ex) {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, "Unable to obtain key credentials for Merchant[" + midf + "] "
+			throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, "Unable to obtain key credentials for Merchant [" + mid + "] "
 					+ ex.getMessage());
+		}
+
+		Signer signer = new Signer(credentials.getKeystorepath(), credentials.getKeystorepass(), credentials.getKeyalias(), credentials.getKeyaliaspass());
+		return new OcesJsonParameterGenerator(signer);
+	}
+
+	private void setSigningDocument(SigningProcess signingProcess, String sref) throws StatusCodeException {
+		SignObjectData signObjectData = DAOUtil.getSignObjectData(signingProcess);
+		SignObject signObject = DAOUtil.getSignObject(signObjectData.getSignerObjectId());
+		String docType = signObjectData.getElementType();
+		String docTitle = DAOUtil.getSignObject(signObject.getSignerObjectId()).getTitle();
+		String docDescription = DAOUtil.getSignObject(signObject.getSignerObjectId()).getDescription();
+		logger.debug("Doc type: " + docType + ", title: " + docTitle + ", description: " + docDescription);
+
+		if ("txt,text,text/plain".indexOf(docType.toLowerCase()) > -1) {
+			docType = "text";
+			String signText = utf8b642iso88591String(signObjectData.getObjectB64());
+			logger.debug("Document signText: " + signText);
+			clientGenerator.setSignText(signText, docType);
+		} else {
+			Attachment attachment = new Attachment();
+			attachment.setTitle(docTitle);
+			attachment.setMimeType(docType);
+
+			byte[] documentBytes = Base64.decode(signObjectData.getObjectB64());
+			try {
+				String docHash = new String(Base64.encode(HashUtil.hash(documentBytes, Constants.DIGEST_SHA2)));
+				attachment.setB64HashValue(docHash);
+				attachment.setB64HashAlgo(Constants.DIGEST_SHA2_SHORTNAME);
+			} catch (NoSuchAlgorithmException e) {
+				Logger.getLogger(Index.class.getName()).error(e);
+			} catch (NoSuchProviderException e) {
+				Logger.getLogger(Index.class.getName()).error(e);
+			}
+
+			String docUrl = getConfigProperty(ConfigKeys.CONFIG_NEMID_DOCURL) + "?" + ConfigKeys.PARAM_SREF + "=" + sref;
+			attachment.setPath(docUrl);
+			attachment.setSize(documentBytes.length);
+
+			logger.debug("Attachment: " + attachment.toXML());
+			clientGenerator.setSignPdf(docDescription, attachment);
 		}
 	}
 
@@ -153,7 +224,7 @@ public class Index extends BaseServlet {
 		request.setAttribute("docurl", getConfigProperty(ConfigKeys.CONFIG_NEMID_DOCURL));
 	}
 
-	private void updateWCattributes(String sessionKey, String attrName, String wcURL, String tid, HttpServletRequest request) throws StatusCodeException {
+	private static void updateWCattributes(String sessionKey, String attrName, String wcURL, String tid, HttpServletRequest request) throws StatusCodeException {
 		String sessionURL = DAOUtil.getSessionDataByKey(tid, sessionKey);
 		if (!StringUtils.isNullorEmpty(sessionURL)) {
 			request.setAttribute(attrName, sessionURL);
@@ -188,6 +259,18 @@ public class Index extends BaseServlet {
 			EventLogger.dumpStack(t, logger);
 			throw new StatusCodeException(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR, "Unable to finalize SigningProcess [SREF=" + sref + "] Reason"
 					+ t.getMessage());
+		}
+	}
+
+	private static String utf8b642iso88591String(String b64in) throws StatusCodeException {
+		try {
+			byte[] utfbytes = Base64.decode(b64in);
+			b64in = null;
+			byte[] isobytes = new String(utfbytes, UTF_8).getBytes(ISO_8859_1);
+			return new String(isobytes, ISO_8859_1);
+		} catch (UnsupportedEncodingException uex) {
+			EventLogger.dumpStack(uex, logger);
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR, uex.getMessage());
 		}
 	}
 
