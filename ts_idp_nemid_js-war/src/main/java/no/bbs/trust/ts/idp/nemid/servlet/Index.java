@@ -96,7 +96,7 @@ public class Index extends BaseServlet {
 			throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, e, COMPONENT_NAME, sref);
 		}
 
-		clientGenerator = createClientGenerator(mid);
+		createClientGenerator(mid);
 		setSigningDocument(signingProcess, sref);
 		String tag = clientGenerator.generateClientTag(clientMode, clientWidth, clientHeight, languageCode, sref);
 		logger.debug("NemID JS tag: " + tag);
@@ -156,7 +156,7 @@ public class Index extends BaseServlet {
 		return height;
 	}
 
-	private static OcesJsonParameterGenerator createClientGenerator(String mid) throws StatusCodeException {
+	void createClientGenerator(String mid) throws StatusCodeException {
 		KeyCredentials credentials = null;
 		try {
 			credentials = DAOUtil.getMerchantCredentials(mid);
@@ -166,10 +166,10 @@ public class Index extends BaseServlet {
 		}
 
 		Signer signer = new Signer(credentials.getKeystorepath(), credentials.getKeystorepass(), credentials.getKeyalias(), credentials.getKeyaliaspass());
-		return new OcesJsonParameterGenerator(signer);
+		clientGenerator = new OcesJsonParameterGenerator(signer);
 	}
 
-	private void setSigningDocument(SigningProcess signingProcess, String sref) throws StatusCodeException {
+	void setSigningDocument(SigningProcess signingProcess, String sref) throws StatusCodeException {
 		SignObjectData signObjectData = DAOUtil.getSignObjectData(signingProcess);
 		SignObject signObject = DAOUtil.getSignObject(signObjectData.getSignerObjectId());
 		String docType = signObjectData.getElementType();
@@ -205,6 +205,10 @@ public class Index extends BaseServlet {
 			logger.debug("Attachment: " + attachment.toXML());
 			clientGenerator.setSignPdf(docDescription, attachment);
 		}
+	}
+
+	OcesJsonParameterGenerator getClientGenerator() {
+		return clientGenerator;
 	}
 
 	private void setupWebContext(String tid, SigningProcess sp, HttpServletRequest request) throws StatusCodeException {
