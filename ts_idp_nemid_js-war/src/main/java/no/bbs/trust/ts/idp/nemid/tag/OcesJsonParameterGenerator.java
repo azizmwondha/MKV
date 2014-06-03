@@ -34,6 +34,7 @@ import java.util.TreeMap;
 
 import no.bbs.trust.common.config.Config;
 import no.bbs.trust.ts.idp.nemid.attachments.Attachment;
+import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
 
 import org.openoces.ooapi.utils.Base64Handler;
 import org.openoces.ooapi.web.JSONException;
@@ -44,6 +45,7 @@ import org.openoces.ooapi.web.JSONObject;
 */
 public class OcesJsonParameterGenerator {
 
+	private static final String LINE_SEPARATOR = "line.separator";
 	private static final String DIGEST = "PARAMS_DIGEST";
 	private static final String SIGNATURE = "DIGEST_SIGNATURE";
 
@@ -151,38 +153,38 @@ public class OcesJsonParameterGenerator {
 		}
 	}
 
-	public String generateClientTag(String clientMode, String language, String sref) {
-		return generateParametersTag(clientMode, language) + System.getProperty("line.separator") + generateIframeTag() + System.getProperty("line.separator")
-				+ generateScriptTag() + System.getProperty("line.separator") + generatePostBackFormTag(sref);
+	public String generateClientTag(String clientMode, String width, String height, String language, String sref) {
+		return generateParametersTag(clientMode, language) + System.getProperty(LINE_SEPARATOR) + generateIframeTag(width, height)
+				+ System.getProperty(LINE_SEPARATOR) + generateScriptTag() + System.getProperty(LINE_SEPARATOR) + generatePostBackFormTag(sref);
 	}
 
 	private String generateParametersTag(String clientMode, String language) {
 		// Set parameter values
-		addParameter("CLIENTFLOW", Config.INSTANCE.getProperty("nemid.client.clientflow.signing"));
+		addParameter("CLIENTFLOW", Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTFLOW_SIGNING));
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
 		dateFormat.setTimeZone(TimeZone.getTimeZone("CET"));
 		addParameter("TIMESTAMP", Base64Handler.encode(String.valueOf(dateFormat.format(new Date()))));
 		addParameter("CLIENTMODE", clientMode);
 		addParameter("LANGUAGE", language);
-		return String.format(Config.INSTANCE.getProperty("nemid.clienttag.parameters"), getParametersAsJSON());
+		return String.format(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_PARAMETERS), getParametersAsJSON());
 	}
 
-	private static String generateIframeTag() {
-		String iframeTag = Config.INSTANCE.getProperty("nemid.clienttag.iframe");
-		iframeTag = String.format(iframeTag, Config.INSTANCE.getProperty("nemid.client.width"), Config.INSTANCE.getProperty("nemid.client.height"),
-				Config.INSTANCE.getProperty("nemid.client.launcher") + System.currentTimeMillis());
+	private static String generateIframeTag(String width, String height) {
+		String iframeTag = Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_IFRAME);
+		iframeTag = String.format(iframeTag, width, height, Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_LAUNCHER) + System.currentTimeMillis());
 		return iframeTag;
 	}
 
 	private static String generateScriptTag() {
-		String scriptTag = Config.INSTANCE.getProperty("nemid.clienttag.script");
-		scriptTag = String.format(scriptTag, Config.INSTANCE.getProperty("nemid.client.origin"), Config.INSTANCE.getProperty("nemid.client.url"));
+		String scriptTag = Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_SCRIPT);
+		scriptTag = String.format(scriptTag, Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_ORIGIN),
+				Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_URL));
 		return scriptTag;
 	}
 
 	private static String generatePostBackFormTag(String sref) {
-		String postBackFormTag = Config.INSTANCE.getProperty("nemid.clienttag.postbackform");
-		postBackFormTag = String.format(postBackFormTag, Config.INSTANCE.getProperty("nemid.url.verify"), sref);
+		String postBackFormTag = Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_POSTBACKFORM);
+		postBackFormTag = String.format(postBackFormTag, Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_VERIFYURL), sref);
 		return postBackFormTag;
 	}
 
