@@ -23,19 +23,20 @@ import org.openoces.serviceprovider.ServiceProviderException;
 import org.openoces.serviceprovider.ServiceProviderSetup;
 
 public class SignHandlerHack {
-	public static SignatureValidationStatus validateSignatureAgainstAgreement(String loginData, String agreement, String signTextTransformation, String challenge, String logonto)
-			throws ServiceProviderException, AppletException {
+
+	public static SignatureValidationStatus validateSignatureAgainstAgreement(String loginDataB64, String agreement, String signTextTransformation,
+			String challenge, String logonto) throws ServiceProviderException, AppletException {
+		String loginData = Base64Handler.decode(loginDataB64);
 		if (ErrorCodeChecker.isError(loginData))
 			throw new AppletException(ErrorCodeChecker.extractError(loginData));
 		try {
-			
-			
-			OpensignSignature opensignSignature = createOpensignSignature(Base64Handler.decode(loginData));			
+			OpensignSignature opensignSignature = createOpensignSignature(loginData);
 			validateSignatureParameters(challenge, opensignSignature, logonto);
 			String encodedSignature = encodeSignature(opensignSignature);
-			
+
 			OcesCertificate certificate = opensignSignature.getSigningCertificate();
 			CertificateStatus status = certificate.validityStatus();
+			System.out.println("ServiceProviderSetup.getCurrentChecker(): " + ServiceProviderSetup.getCurrentChecker().getClass().getName());
 			if ((status == CertificateStatus.VALID) && (ServiceProviderSetup.getCurrentChecker().isRevoked(certificate))) {
 				status = CertificateStatus.REVOKED;
 			}
@@ -50,19 +51,20 @@ public class SignHandlerHack {
 		}
 	}
 
-	public static SignatureValidationStatus validateSignatureAgainstAgreement(String loginData, String agreement, String challenge, String logonto)
+	public static SignatureValidationStatus validateSignatureAgainstAgreement(String loginDataB64, String agreement, String challenge, String logonto)
 			throws ServiceProviderException, AppletException {
-		return validateSignatureAgainstAgreement(loginData, agreement, null, challenge, logonto);
+		return validateSignatureAgainstAgreement(loginDataB64, agreement, null, challenge, logonto);
 	}
 
-	public static SignatureValidationStatus validateSignatureAgainstAgreementPDF(String loginData, String agreement, String challenge, String logonto) throws IOException,
-			ServiceProviderException, AppletException {
+	public static SignatureValidationStatus validateSignatureAgainstAgreementPDF(String loginDataB64, String agreement, String challenge, String logonto)
+			throws ServiceProviderException, AppletException {
+		String loginData = Base64Handler.decode(loginDataB64);
 		if (ErrorCodeChecker.isError(loginData))
 			throw new AppletException(ErrorCodeChecker.extractError(loginData));
 		try {
-			OpensignSignature opensignSignature = createOpensignSignature(new String(Base64.decode(loginData)));
+			OpensignSignature opensignSignature = createOpensignSignature(new String(loginData));
 
-			validateChallenge(opensignSignature, challenge);
+//			validateChallenge(opensignSignature, challenge);
 			if (logonto != null) {
 				validateLogonTo(opensignSignature, logonto);
 			}
@@ -139,8 +141,9 @@ public class SignHandlerHack {
 		}
 	}
 
-	private static void validateSignatureParameters(String challenge, OpensignSignature opensignSignature, String logonto) throws InternalException, ServiceProviderException {
-		validateChallenge(opensignSignature, challenge);
+	private static void validateSignatureParameters(String challenge, OpensignSignature opensignSignature, String logonto) throws InternalException,
+			ServiceProviderException {
+//		validateChallenge(opensignSignature, challenge);
 		validateVisibleToSignerForSignText(opensignSignature);
 		if (logonto != null)
 			validateLogonTo(opensignSignature, logonto);
@@ -151,9 +154,10 @@ public class SignHandlerHack {
 	}
 
 	private static void validateVisibleToSignerForSignText(OpensignSignature opensignSignature) throws InternalException, ServiceProviderException {
-		SignatureProperty signTextProperty = (SignatureProperty) opensignSignature.getSignatureProperties().get("signtext");
+		SignatureProperty signTextProperty = opensignSignature.getSignatureProperties().get("signtext");
 		if ((isNotSignedXmlDocument(opensignSignature)) && (!(signTextProperty.isVisibleToSigner())))
-			throw new ServiceProviderException("Invalid sign signature - the parameter signtext in the signature must have the attribute visibleToSigner set to true");
+			throw new ServiceProviderException(
+					"Invalid sign signature - the parameter signtext in the signature must have the attribute visibleToSigner set to true");
 	}
 
 	private static boolean isNotSignedXmlDocument(OpensignSignature opensignSignature) throws InternalException {
@@ -161,8 +165,8 @@ public class SignHandlerHack {
 	}
 
 	private static void validateLogonTo(OpensignSignature signature, String logonto) throws ServiceProviderException, InternalException {
-		SignatureProperty logontoProperty = (SignatureProperty) signature.getSignatureProperties().get("logonto");
-		SignatureProperty requestIssuerProperty = (SignatureProperty) signature.getSignatureProperties().get("RequestIssuer");
+		SignatureProperty logontoProperty = signature.getSignatureProperties().get("logonto");
+		SignatureProperty requestIssuerProperty = signature.getSignatureProperties().get("RequestIssuer");
 
 		if ((logontoProperty != null) && (requestIssuerProperty != null)) {
 			throw new IllegalStateException("Invalid signature logonto and RequestIssuer parameters cannot both be set");
@@ -175,16 +179,17 @@ public class SignHandlerHack {
 		if (logontoProperty != null) {
 			String logontoPropertyValue = logontoProperty.getValue();
 			if (!(logontoPropertyValue.equals(logonto))) {
-				throw new ServiceProviderException("Invalid signature logonto parameter does not match expected value. Expected: " + logonto + " actual: " + logontoPropertyValue);
+				throw new ServiceProviderException("Invalid signature logonto parameter does not match expected value. Expected: " + logonto + " actual: "
+						+ logontoPropertyValue);
 			}
-
 		}
 
 		if (requestIssuerProperty != null) {
 			String requestIssuerValue = requestIssuerProperty.getValue();
 			if (!(requestIssuerValue.equals(logonto)))
-				throw new ServiceProviderException("Invalid signature RequestIssuer parameter does not match expected value. Expected: " + logonto + " actual: "
-						+ requestIssuerValue);
+				throw new ServiceProviderException("Invalid signature RequestIssuer parameter does not match expected value. Expected: " + logonto
+						+ " actual: " + requestIssuerValue);
 		}
 	}
+
 }
