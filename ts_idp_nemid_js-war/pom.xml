@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>no.bbs.trust</groupId>
 			<artifactId>common_basics</artifactId>
-			<version>1.3.3</version>
+			<version>1.3.4-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -33,8 +33,14 @@
 		<dependency>
 			<groupId>no.bbs.trust</groupId>
 			<artifactId>common_webapp</artifactId>
-			<version>1.4.3</version>
+			<version>1.4.4-SNAPSHOT</version>
 			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>no.bbs.trust</groupId>
+					<artifactId>common_basics</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- ############################################################################# -->
@@ -43,14 +49,14 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcmail-jdk16</artifactId>
-			<version>1.46</version>
+			<version>1.40</version>
 			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk16</artifactId>
-			<version>1.46</version>
+			<version>1.40</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -104,12 +110,16 @@
 		<dependency>
 			<groupId>no.bbs.trust.trustsign</groupId>
 			<artifactId>tecapi</artifactId>
-			<version>2.0.0</version>
+			<version>1.6.3</version>
 			<scope>compile</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>no.bbs.tt.trustsign</groupId>
 					<artifactId>trustsigndal</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>no.bbs.trust</groupId>
+					<artifactId>common_basics</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -140,13 +150,29 @@
 
 		<dependency>
 			<groupId>org.springframework</groupId>
-			<artifactId>spring</artifactId>
-			<version>2.5.6.SEC01</version>
+			<artifactId>spring-core</artifactId>
+			<version>3.2.8.RELEASE</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>3.2.8.RELEASE</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>3.2.6.RELEASE</version>
 			<scope>compile</scope>
 			<exclusions>
 				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-beans</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -182,6 +208,13 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-servlet-api</artifactId>
+			<version>7.0.53</version>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- OpenOcess dependencies -->
 
 		<!-- DK NemID JS dependencies -->
@@ -189,7 +222,7 @@
 		<dependency>
 			<groupId>org.openoces</groupId>
 			<artifactId>ooapi</artifactId>
-			<version>1.161.0</version>
+			<version>1.172.0</version>
 		</dependency>
 
 		<dependency>
