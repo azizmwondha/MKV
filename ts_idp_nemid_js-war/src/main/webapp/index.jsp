@@ -8,7 +8,7 @@
 	%>
 	<head>
 		<meta http-equiv="content-Type" content="text/html; charset=<%= Config.INSTANCE.getProperty(ConfigKeys.CONFIG_HTML_CHARSET)%>">
-		<meta name="viewport" content="user-scalable=yes, initial-scale=1.0, width=device-width">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 		<meta http-equiv="X-UA-Compatible" content="IE=Edge">
 		<title><%= LangSupport.getUserText("digitalsignature", locale) %></title>
 		<link href="<%= (String) request.getAttribute("styleurl") %>" rel="stylesheet" type="text/css">
