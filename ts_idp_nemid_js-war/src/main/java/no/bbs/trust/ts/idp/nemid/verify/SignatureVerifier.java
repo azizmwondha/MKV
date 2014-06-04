@@ -116,7 +116,7 @@ public class SignatureVerifier {
 			if (ErrorCodes.USERCANCEL.equals(NemIDErrorMapper.getErrorCodeFromNemIDCode(ae.getErrorCode()))) {
 				throw new StatusCodeException(NemIDActionEvent.STATUS_USER_CANCEL, "User cancelled signing: " + ae.getMessage());
 			}
-			throw new StatusCodeException(NemIDActionEvent.STATUS_USER_CANCEL, "NemID error code: " + ae.getErrorCode() + ", message: " + ae.getMessage());
+			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_CERT_TYPE_FAILED, "NemID error code: " + ae.getErrorCode() + ", message: " + ae.getMessage());
 		} catch (Throwable t) {
 			EventLogger.dumpStack(t);
 			logger.info("Certificate status validation: " + t.getMessage());

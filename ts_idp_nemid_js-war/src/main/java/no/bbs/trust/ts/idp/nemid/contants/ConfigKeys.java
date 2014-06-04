@@ -89,6 +89,7 @@ public class ConfigKeys {
 	public static final String CONFIG_NEMID_CLIENT_LIMITED_HEIGHT = "nemid.client.limited.height";
 	public static final String CONFIG_NEMID_CLIENT_LAUNCHER = "nemid.client.launcher";
 	public static final String CONFIG_NEMID_CLIENT_ORIGIN = "nemid.client.origin";
+	public static final String CONFIG_NEMID_CLIENT_SP_ORIGIN = "nemid.client.sp.origin";
 	public static final String CONFIG_NEMID_CLIENT_URL = "nemid.client.url";
 
 	public static final String CONFIG_NEMID_CLIENTTAG_PARAMETERS = "nemid.clienttag.parameters";

@@ -164,6 +164,7 @@ public class OcesJsonParameterGenerator {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
 		dateFormat.setTimeZone(TimeZone.getTimeZone("CET"));
 		addParameter("TIMESTAMP", Base64Handler.encode(String.valueOf(dateFormat.format(new Date()))));
+		addParameter("ORIGIN", Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_SP_ORIGIN));
 		addParameter("CLIENTMODE", clientMode);
 		addParameter("LANGUAGE", language);
 		return String.format(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_PARAMETERS), getParametersAsJSON());
