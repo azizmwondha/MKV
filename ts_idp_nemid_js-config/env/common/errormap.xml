@@ -98,6 +98,22 @@
 			</Error>
 
 			<Error>
+				<code>033016</code>
+				<label>statusamqerror</label>
+				<action>D100</action>
+				<message>STATUS_AMQ_ERROR</message>
+				<severity>error</severity>
+			</Error>
+
+			<Error>
+				<code>033017</code>
+				<label>statusencodingerror</label>
+				<action>D100</action>
+				<message>STATUS_ENCODING_ERROR</message>
+				<severity>error</severity>
+			</Error>
+
+			<Error>
 				<code>033020</code>
 				<label>errorsigningdocument</label>
 				<action>D100</action>
