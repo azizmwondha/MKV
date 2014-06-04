@@ -1,15 +1,21 @@
 package no.bbs.trust.ts.idp.nemid.servlet;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.cert.X509Certificate;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
-import javax.servlet.ServletException;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import no.bbs.trust.amqcapi.AMQAPIException;
+import no.bbs.trust.amqcapi.MessageQueueProducer;
+import no.bbs.trust.amqcapi.QueueMessageEvent;
+import no.bbs.trust.amqcapi.constants.AMQConstants;
 import no.bbs.trust.common.basics.exceptions.StatusCodeException;
 import no.bbs.trust.common.basics.types.Dispatch;
 import no.bbs.trust.common.basics.types.ReturnCode;
@@ -21,6 +27,7 @@ import no.bbs.trust.cprregclientapi.CPRRegistryFacade;
 import no.bbs.trust.cprregclientapi.MatchCPR2PIDRequest;
 import no.bbs.trust.cprregclientapi.ResponseType;
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
+import no.bbs.trust.ts.idp.nemid.contants.Constants;
 import no.bbs.trust.ts.idp.nemid.event.NemIDActionEvent;
 import no.bbs.trust.ts.idp.nemid.event.NemIDPerformanceEvent;
 import no.bbs.trust.ts.idp.nemid.utils.DAOUtil;
@@ -38,10 +45,8 @@ import no.bbs.tt.bc.cryptlib.ds.XMLDSIGValidator;
 import no.bbs.tt.bc.cryptlib.ds.XMLDSValidationException;
 import no.bbs.tt.bc.cryptlib.x509.X509Parser;
 import no.bbs.tt.bc.cryptlib.x509.X509ParserException;
-import no.bbs.tt.trustsign.te.xml.messages.ErrorResponse;
-import no.bbs.tt.trustsign.te.xml.messages.FinalizeSignProcessRequest;
-import no.bbs.tt.trustsign.te.xml.messages.TEMessage;
-import no.bbs.tt.trustsign.tecapi.communicator.Requestor;
+import no.bbs.tt.trustsign.te.common.constants.TEConstants;
+import no.bbs.tt.trustsign.trustsignDAL.constant.DbTableInfo;
 import no.bbs.tt.trustsign.trustsignDAL.constant.PKIConfigKeys;
 import no.bbs.tt.trustsign.trustsignDAL.constant.StatusTypes;
 import no.bbs.tt.trustsign.trustsignDAL.dao.helpers.MerchantPropertiesHelperDAO;
@@ -53,6 +58,7 @@ import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObjectData;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignerId;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.Step;
+
 import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Base64;
 
@@ -84,13 +90,13 @@ public class Verify extends BaseServlet {
 
 		String result = request.getParameter("result");
 		logger.debug("Result: " + result);
-//		if (!("" + result).equalsIgnoreCase("b2s=")) { // ok
-//			if (("" + result).equalsIgnoreCase("Y2FuY2Vs")) { // cancel
-//				return new ReturnCode(Dispatch.REDIRECT, getConfigProperty(ConfigKeys.CONFIG_NEMID_CANCELURL) + "?status=cancel&sref=" + sref);
-//			}
-//			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Signature verification failed. Reason: "
-//					+ new String(Base64.decode("" + result)));
-//		}
+		//		if (!("" + result).equalsIgnoreCase("b2s=")) { // ok
+		//			if (("" + result).equalsIgnoreCase("Y2FuY2Vs")) { // cancel
+		//				return new ReturnCode(Dispatch.REDIRECT, getConfigProperty(ConfigKeys.CONFIG_NEMID_CANCELURL) + "?status=cancel&sref=" + sref);
+		//			}
+		//			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Signature verification failed. Reason: "
+		//					+ new String(Base64.decode("" + result)));
+		//		}
 
 		String signature = request.getParameter("signature");
 		signature = signedResponse;
@@ -116,7 +122,7 @@ public class Verify extends BaseServlet {
 		}
 		vcsdata.setDocumentType(dtype);
 		vcsdata.setMid(mid);
-//		vcsdata.setResult(result);
+		//		vcsdata.setResult(result);
 
 		SignerId signerID = DAOUtil.getSignerID(signingProcess.getSignerId());
 		if (null != signerID) {
@@ -536,33 +542,33 @@ public class Verify extends BaseServlet {
 	}
 
 	private void notifyTE(String mid, String sref, SigningProcess sp) throws StatusCodeException {
-		TEMessage temessage = null;
 		String orderID = DAOUtil.getOrderID(sp);
+
+		QueueMessageEvent qme = null;
+		MessageQueueProducer mqProducer = null;
 		try {
-			FinalizeSignProcessRequest fspr = new FinalizeSignProcessRequest();
-			fspr.setOrderID(orderID);
-			fspr.setSignProcessID("" + sp.getSignprocessId());
-			fspr.setMerchantID(mid);
-			fspr.setTransId(sref);
+			mqProducer = new MessageQueueProducer(AMQConstants.QUEUE_FINALIZE_SP, getConfigProperty(Constants.ACTIVEMQ_URL));
+			qme = new QueueMessageEvent();
+			qme.put(Constants.TID, sref);
+			qme.put(DbTableInfo.BO_ORDERID, URLEncoder.encode(orderID, TEConstants.CHARSET_UTF8));
+			qme.put(DbTableInfo.BO_MERCHANTID, mid);
+			qme.put(DbTableInfo.SIGPRO_SIGNPROSID, "" + sp.getSignprocessId());
+			logger.info("Registering [Event=" + qme + "]");
 
-			logger.info("Finalize signing process [MerchantID=" + mid + "][OrderID=" + orderID + "][SigningProcessID=" + sp.getSignprocessId() + "]");
-
-			Requestor requestor = new Requestor(getConfigProperty(ConfigKeys.CONFIG_TRUSTENGINE_URL), 10000L);
-			temessage = requestor.sendRequest(fspr);
-		} catch (Throwable t) {
-			logger.warn("FinalizeSignProcess restore info [MerchantID=" + mid + "][OrderID=" + orderID + "][SigningProcessID=" + sp.getSignprocessId()
-					+ "][TransRef=" + sref + "]");
-			EventLogger.appendEvent(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR);
-			EventLogger.dumpStack(t, logger);
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR, "Unable to finalize SigningProcess [SREF=" + sref + "] Reason"
-					+ t.getMessage());
-		}
-
-		if (temessage instanceof ErrorResponse) {
-			EventLogger.appendEvent(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR);
-			ErrorResponse ers = (ErrorResponse) temessage;
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR, "Unable to finalize SigningProcess [SREF=" + sref + "][ErrorCode="
-					+ ers.getErrorCode() + "][ErrorText=" + ers.getErrorText() + "]");
+			mqProducer.sendMessage(qme);
+			mqProducer.close();
+		} catch (AMQAPIException exp) {
+			logger.fatal("Unable to register [QueueEvent=" + qme + "] - " + exp.getMessage());
+			EventLogger.dumpStack(exp);
+			throw new StatusCodeException(NemIDActionEvent.STATUS_AMQ_ERROR, "Unable to register [QueueEvent=" + qme + "] Reason" + exp.getMessage());
+		} catch (UnsupportedEncodingException exp) {
+			logger.fatal("Error during queue message registration [QueueEvent=" + qme + "] - " + exp.getMessage());
+			EventLogger.dumpStack(exp);
+			throw new StatusCodeException(NemIDActionEvent.STATUS_ENCODING_ERROR, "Unable to encode order ID [" + orderID + "] Reason" + exp.getMessage());
+		} finally {
+			if (mqProducer != null) {
+				mqProducer.close();
+			}
 		}
 	}
 

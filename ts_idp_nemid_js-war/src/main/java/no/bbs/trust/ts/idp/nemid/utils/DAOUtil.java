@@ -134,7 +134,7 @@ public class DAOUtil {
 			if (null == signInfo) {
 				signdao.insertXMLDsig(null, 0, spid, signerCN, signerOIDS, dsig, ocsp, PKIIDMap.DKNEMIDJS_ID, signTime, signerID);
 			} else {
-				throw new StatusCodeException(NemIDActionEvent.SIGNING_ALLREADY_DONE, "Signature already exists for this SignProcess [SignProcessID=" + spid + "][signerCN="
+				throw new StatusCodeException(NemIDActionEvent.SIGNING_ALREADY_DONE, "Signature already exists for this SignProcess [SignProcessID=" + spid + "][signerCN="
 						+ signerCN + "]");
 			}
 		} catch (SQLException se) {
