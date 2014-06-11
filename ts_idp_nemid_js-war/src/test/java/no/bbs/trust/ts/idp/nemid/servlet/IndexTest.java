@@ -43,7 +43,9 @@ public class IndexTest {
 	public static void setUpBeforeClass() throws Exception {
 		InitConfig config = new InitConfig();
 		ConfigStarter.initConfig(config.getConfigPropertySources("../ts_idp_nemid_js-config/env/common"), config.getConfigPropertySettings());
-		ConnectionFactories.getInstance().registerDBConnectionFactory(new OracleConnectionFactory());
+		if (ConnectionFactories.getInstance().getNumberOfConnectionFactories() == 0) {
+			ConnectionFactories.getInstance().registerDBConnectionFactory(new OracleConnectionFactory());
+		}
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
