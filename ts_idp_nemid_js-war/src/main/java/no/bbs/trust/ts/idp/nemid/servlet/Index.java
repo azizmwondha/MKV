@@ -10,6 +10,7 @@ import java.security.NoSuchProviderException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -55,10 +56,10 @@ import eu.nets.no.vas.esign.sdosigner.types.KeyCredentials;
 public class Index extends BaseServlet {
 
 	private static final String UTF_8 = "UTF-8";
-
 	private static final String ISO_8859_1 = "ISO-8859-1";
-
 	private static final long serialVersionUID = 1L;
+	private static final String[] SESSION_DATA_KEYS = new String[] { ConfigKeys.SESSIONKEY_SPID, ConfigKeys.SESSIONKEY_MID, ConfigKeys.SESSIONKEY_LOCALE,
+		ConfigKeys.SESSIONKEY_TZO };
 
 	public static final String COMPONENT_NAME = "NemIDJS";
 
@@ -74,8 +75,9 @@ public class Index extends BaseServlet {
 		String clientHeight = getClientHeight(request.getParameter(ConfigKeys.PARAM_CLIENT_HEIGHT), clientMode);
 
 		DAOUtil.validateSessionStep(sref, new int[] { 2, 4, 5, 6 });
+		Map<String, String> sessionDatas = DAOUtil.getSessionDataKeysAndValues(sref, SESSION_DATA_KEYS);
 
-		int spid = (int) StringUtils.toLong(DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_SPID), 0);
+		int spid = (int) StringUtils.toLong(sessionDatas.get(ConfigKeys.SESSIONKEY_SPID), 0);
 		SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
 
 		if (!sref.equalsIgnoreCase(signingProcess.getSignProcessRef())) {
@@ -85,8 +87,8 @@ public class Index extends BaseServlet {
 
 		DAOUtil.updateSessionDataByKey(sref, ConfigKeys.SESSIONKEY_STEP, "5");
 
-		String mid = DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_MID);
-		String locale = DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_LOCALE);
+		String mid = sessionDatas.get(ConfigKeys.SESSIONKEY_MID);
+		String locale = sessionDatas.get(ConfigKeys.SESSIONKEY_LOCALE);
 		locale = (locale.trim().length() > 0) ? locale : LangSupport.getDefaultLanguage();
 		request.setAttribute("locale", locale);
 		String languageCode = null;
@@ -109,7 +111,7 @@ public class Index extends BaseServlet {
 		long endtime = signingProcess.getDeadline().getTime();
 
 		SimpleDateFormat formatter = new SimpleDateFormat(LangSupport.getUserText("format.mediumdate", locale));
-		String tzos = DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_TZO);
+		String tzos = sessionDatas.get(ConfigKeys.SESSIONKEY_TZO);
 		tzos = (tzos.trim().length() > 0) ? tzos : "0";
 		long tzo = Long.parseLong(tzos);
 
