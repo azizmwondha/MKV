@@ -1,9 +1,12 @@
 package no.bbs.trust.ts.idp.nemid.utils;
 
-import eu.nets.no.vas.esign.sdosigner.types.KeyCredentials;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import no.bbs.trust.common.basics.exceptions.StatusCodeException;
 import no.bbs.trust.common.basics.utils.EventLogger;
 import no.bbs.trust.common.basics.utils.StringUtils;
@@ -33,52 +36,33 @@ import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignerId;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.Step;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.WebContext;
+import eu.nets.no.vas.esign.sdosigner.types.KeyCredentials;
 
 public class DAOUtil {
+
 	public static KeyCredentials getMerchantCredentials(String midf) throws SQLException {
+		final String[] KEYS = new String[] { "Keystore", "KeystorePassword", "MerchantAlias", "MerchantAliasPwd", "CertChainPath", "DefaultOCSPUrl",
+		"SignOCSPRequests" };
+
 		int mid = Integer.parseInt(midf);
 		KeyCredentials credentials = new KeyCredentials();
 
-		// Get merchant_pki_config from DB
-		// populate credentials with all non-null values
-		MerchantPkiConfigDAO mpcdao = new MerchantPkiConfigDAO();
-		MerchantPkiConfig mpc = mpcdao.getByMerchantidPkiidKey(null, mid, PKIIDMap.DKNEMIDJS_ID, "Keystore");
-		String value = (null != mpc) ? mpc.getValue() : null;
-		if (null != value) {
-			credentials.setKeystorepath(value);
+		// Get MerchantPkiConfig from database
+		MerchantPkiConfigDAO mpcDao = new MerchantPkiConfigDAO();
+		Collection<MerchantPkiConfig> merchantPkiConfigs = mpcDao.getByMerchantidPkiidKeys(null, mid, PKIIDMap.DKNEMIDJS_ID, KEYS);
+		Map<String, String> mpcKeysAndValues = new HashMap<String, String>();
+		for (MerchantPkiConfig merchantPkiConfig : merchantPkiConfigs) {
+			mpcKeysAndValues.put(merchantPkiConfig.getKey(), merchantPkiConfig.getValue());
 		}
 
-		mpc = mpcdao.getByMerchantidPkiidKey(null, mid, PKIIDMap.DKNEMIDJS_ID, "KeystorePassword");
-		value = (null != mpc) ? mpc.getValue() : null;
-		if (null != value) {
-			credentials.setKeystorepass(value);
-		}
-
-		mpc = mpcdao.getByMerchantidPkiidKey(null, mid, PKIIDMap.DKNEMIDJS_ID, "MerchantAlias");
-		value = (null != mpc) ? mpc.getValue() : null;
-		if (null != value) {
-			credentials.setKeyalias(value);
-		}
-
-		mpc = mpcdao.getByMerchantidPkiidKey(null, mid, PKIIDMap.DKNEMIDJS_ID, "MerchantAliasPwd");
-		value = (null != mpc) ? mpc.getValue() : null;
-		if (null != value) {
-			credentials.setKeyaliaspass(value);
-		}
-
-		mpc = mpcdao.getByMerchantidPkiidKey(null, mid, PKIIDMap.DKNEMIDJS_ID, "CertChainPath");
-		value = (null != mpc) ? mpc.getValue() : null;
-		if (null != value) {
-			credentials.setCertChainPath(value);
-		}
-		mpc = mpcdao.getByMerchantidPkiidKey(null, mid, PKIIDMap.DKNEMIDJS_ID, "DefaultOCSPUrl");
-		value = (null != mpc) ? mpc.getValue() : null;
-		if (null != value) {
-			credentials.setDefaultOCSPURL(value);
-		}
-		mpc = mpcdao.getByMerchantidPkiidKey(null, mid, PKIIDMap.DKNEMIDJS_ID, "SignOCSPRequests");
-		value = (null != mpc) ? mpc.getValue() : null;
-		if ((null != value) && ("true".equalsIgnoreCase(value))) {
+		// Populate KeyCredentials values
+		credentials.setKeystorepath(mpcKeysAndValues.get(KEYS[0]));
+		credentials.setKeystorepass(mpcKeysAndValues.get(KEYS[1]));
+		credentials.setKeyalias(mpcKeysAndValues.get(KEYS[2]));
+		credentials.setKeyaliaspass(mpcKeysAndValues.get(KEYS[3]));
+		credentials.setCertChainPath(mpcKeysAndValues.get(KEYS[4]));
+		credentials.setDefaultOCSPURL(mpcKeysAndValues.get(KEYS[5]));
+		if (Boolean.parseBoolean(mpcKeysAndValues.get(KEYS[6]))) {
 			credentials.setOCSPRequestSigning();
 		} else {
 			credentials.resetOCSPRequestSigning();
@@ -167,9 +151,8 @@ public class DAOUtil {
 				}
 				throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, "Session STEP is out of sequence [ExpectedStep=" + steps.toString() + "][FoundStep="
 						+ sd.getVal() + "]");
-			} else {
-				throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, "STEP session data not found in DB");
 			}
+			throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, "STEP session data not found in DB");
 		} catch (SQLException se) {
 			throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, "Cannot verify session step: " + se.getMessage());
 		}
@@ -241,9 +224,24 @@ public class DAOUtil {
 
 			if (null != sd) {
 				return sd.getVal();
-			} else {
-				return "";
 			}
+			return "";
+		} catch (SQLException se) {
+			EventLogger.dumpStack(se);
+			throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, "Unable to read session data");
+		}
+	}
+
+	public static Map<String, String> getSessionDataKeysAndValues(String sref, String[] keys) throws StatusCodeException {
+		try {
+			SessionDataDAO sessionDao = new SessionDataDAO();
+			Collection<SessionData> sessionDatas = sessionDao.getBySrefAndKeys(null, sref, keys);
+
+			Map<String, String> sessionDataKeysAndValues = new HashMap<String, String>();
+			for (SessionData sessionData : sessionDatas) {
+				sessionDataKeysAndValues.put(sessionData.getKey(), sessionData.getVal());
+			}
+			return sessionDataKeysAndValues;
 		} catch (SQLException se) {
 			EventLogger.dumpStack(se);
 			throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, "Unable to read session data");
@@ -273,9 +271,8 @@ public class DAOUtil {
 
 			if ((null != sods) && (sods.length > 0)) {
 				return sods[0];
-			} else {
-				throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, "No document data associated with sign process in DB");
 			}
+			throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, "No document data associated with sign process in DB");
 		} catch (SQLException se) {
 			throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, "Cannot retrieve document for sign process: " + se.getMessage());
 		}
@@ -298,7 +295,7 @@ public class DAOUtil {
 	public static String getCertificateTypes(int signerID) throws StatusCodeException {
 		try {
 			SignerAcceptPkiDAO sapdao = new SignerAcceptPkiDAO();
-			ArrayList saps = sapdao.getBySignerid(null, signerID);
+			List<SignerAcceptPki> saps = sapdao.getBySignerid(null, signerID);
 
 			if (null != saps) {
 				StringBuilder certTypes = new StringBuilder();
@@ -323,7 +320,7 @@ public class DAOUtil {
 	private static String getCertificateTypeOIDs(String certType) throws StatusCodeException {
 		try {
 			PkiCertificatePolicyDAO pcpdao = new PkiCertificatePolicyDAO();
-			ArrayList pcps = pcpdao.getByPkiid(null, PKIIDMap.DKNEMIDJS_ID);
+			List<PkiPolicy> pcps = pcpdao.getByPkiid(null, PKIIDMap.DKNEMIDJS_ID);
 
 			if (null != pcps) {
 				StringBuilder certOIDs = new StringBuilder();
@@ -360,4 +357,5 @@ public class DAOUtil {
 			throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, "Cannot retrieve web contect for SREF: " + se.getMessage());
 		}
 	}
+
 }
