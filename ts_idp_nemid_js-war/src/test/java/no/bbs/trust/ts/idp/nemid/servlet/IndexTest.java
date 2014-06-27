@@ -19,6 +19,7 @@ import no.bbs.trust.common.config.ConfigStarter;
 import no.bbs.trust.common.webapp.servlets.InitConfig;
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
 import no.bbs.trust.ts.idp.nemid.db.OracleConnectionFactory;
+import no.bbs.trust.ts.idp.nemid.tag.ChallengeGenerator;
 import no.bbs.trust.ts.idp.nemid.tag.OcesJsonParameterGenerator;
 import no.bbs.trust.ts.idp.nemid.utils.DAOUtil;
 import no.bbs.tt.trustsign.trustsignDAL.config.ConnectionFactories;
@@ -63,6 +64,7 @@ public class IndexTest {
 			assertNotNull(returnCode);
 			assertEquals(Dispatch.INCLUDE, returnCode.getDispatch());
 			assertEquals(TARGET, returnCode.getTarget());
+			assertClientTag((String) request.getAttribute("clienttag"));
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
@@ -82,6 +84,7 @@ public class IndexTest {
 			assertNotNull(returnCode);
 			assertEquals(Dispatch.INCLUDE, returnCode.getDispatch());
 			assertEquals(TARGET, returnCode.getTarget());
+			assertClientTag((String) request.getAttribute("clienttag"));
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
@@ -132,16 +135,21 @@ public class IndexTest {
 		SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
 		index.setSigningDocument(signingProcess, sref);
 		OcesJsonParameterGenerator clientGenerator = index.getClientGenerator();
-		String tag = clientGenerator.generateClientTag("standard", "500", "450", "en", sref);
-		System.out.println(tag);
+		String challenge = ChallengeGenerator.generateChallenge();
+		String clientTag = clientGenerator.generateClientTag("standard", "500", "450", "en", challenge, sref);
 
-		assertNotNull(tag);
-		assertTrue(tag.contains("<iframe id=\"nemid_iframe\""));
-		assertTrue(tag.contains("<script>function onNemIDMessage(e)"));
-		assertTrue(tag.contains("<form name=\"postBackForm\""));
-		assertTrue(tag.contains("\"SIGNTEXT_FORMAT\":\"text\""));
-		assertTrue(tag.contains("\"CLIENTMODE\":\"standard\""));
-		assertTrue(tag.contains("\"CLIENTFLOW\":\"ocessign2\""));
+		assertClientTag(clientTag);
+	}
+
+	private static void assertClientTag(String clientTag) {
+		assertNotNull(clientTag);
+		assertTrue(clientTag.contains("<iframe id=\"nemid_iframe\""));
+		assertTrue(clientTag.contains("<script>function onNemIDMessage(e)"));
+		assertTrue(clientTag.contains("<form name=\"postBackForm\""));
+		assertTrue(clientTag.contains("\"SIGNTEXT_FORMAT\":\"text\""));
+		assertTrue(clientTag.contains("\"CLIENTMODE\":\"standard\""));
+		assertTrue(clientTag.contains("\"CLIENTFLOW\":\"ocessign2\""));
+		assertTrue(clientTag.contains("\"SIGN_PROPERTIES\":\"challenge="));
 	}
 
 }
