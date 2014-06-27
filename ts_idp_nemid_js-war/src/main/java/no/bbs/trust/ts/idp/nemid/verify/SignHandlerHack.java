@@ -63,7 +63,7 @@ public class SignHandlerHack {
 		try {
 			OpensignSignature opensignSignature = createOpensignSignature(new String(loginData));
 
-//			validateChallenge(opensignSignature, challenge);
+			validateChallenge(opensignSignature, challenge);
 			if (logonto != null) {
 				validateLogonTo(opensignSignature, logonto);
 			}
@@ -142,7 +142,7 @@ public class SignHandlerHack {
 
 	private static void validateSignatureParameters(String challenge, OpensignSignature opensignSignature, String logonto) throws InternalException,
 			ServiceProviderException {
-//		validateChallenge(opensignSignature, challenge);
+		validateChallenge(opensignSignature, challenge);
 		validateVisibleToSignerForSignText(opensignSignature);
 		if (logonto != null)
 			validateLogonTo(opensignSignature, logonto);
