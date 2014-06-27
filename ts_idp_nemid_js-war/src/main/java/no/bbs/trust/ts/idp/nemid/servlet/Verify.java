@@ -78,9 +78,6 @@ public class Verify extends BaseServlet {
 		long start = System.currentTimeMillis();
 		logger.info("Verify signature");
 
-		String signedResponse = request.getParameter("response");
-		logger.debug("Signed response: " + signedResponse);
-
 		String sref = request.getParameter(ConfigKeys.PARAM_SREF);
 		int spid = (int) StringUtils.toLong(DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_SPID), 0);
 		SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
@@ -88,26 +85,15 @@ public class Verify extends BaseServlet {
 		// Check signing process, sref and step before proceeding
 		checkSigningProcessSrefAndStep(signingProcess, sref);
 
-		String result = request.getParameter("result");
-		logger.debug("Result: " + result);
-		//		if (!("" + result).equalsIgnoreCase("b2s=")) { // ok
-		//			if (("" + result).equalsIgnoreCase("Y2FuY2Vs")) { // cancel
-		//				return new ReturnCode(Dispatch.REDIRECT, getConfigProperty(ConfigKeys.CONFIG_NEMID_CANCELURL) + "?status=cancel&sref=" + sref);
-		//			}
-		//			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Signature verification failed. Reason: "
-		//					+ new String(Base64.decode("" + result)));
-		//		}
-
-		String signature = request.getParameter("signature");
-		signature = signedResponse;
+		String signedResponse = request.getParameter("response");
+		logger.debug("Signed response: " + signedResponse);
 		String challenge = request.getParameter("challenge");
-
-		byte[] xmldsig = Base64.decode(signature);
+		logger.debug("Challenge: " + challenge);
 
 		SignObjectData signObject = DAOUtil.getSignObjectData(signingProcess);
 
 		VerifyClientSignatureData vcsdata = new VerifyClientSignatureData();
-		vcsdata.setSignature(signature);
+		vcsdata.setSignature(signedResponse);
 		vcsdata.setB64Document(signObject.getObjectB64());
 		vcsdata.setChallenge(challenge);
 
@@ -146,6 +132,7 @@ public class Verify extends BaseServlet {
 		try {
 			logger.info("Verify XMLDSIG against signers document");
 
+			byte[] xmldsig = Base64.decode(signedResponse);
 			XMLDSIGValidator xdvalidator = new XMLDSIGValidator();
 			XMLDSIGContent xdcontent = xdvalidator.validateXMLDSig(xmldsig);
 
@@ -207,7 +194,7 @@ public class Verify extends BaseServlet {
 		logger.info("Signature verification completed OK. Store signature and revocation status");
 
 		Date signerTime = new Date();
-		DAOUtil.storeSignature(spid, signerTime, verifySign.getSignerCPR(), signerCN, signerCertPolicyOID, signature, verifySign.getB64ocsp());
+		DAOUtil.storeSignature(spid, signerTime, verifySign.getSignerCPR(), signerCN, signerCertPolicyOID, signedResponse, verifySign.getB64ocsp());
 		DAOUtil.updateSigningProcessStatus(spid);
 		notifyTE(mid, sref, signingProcess);
 		DAOUtil.updateSessionDataByKey(sref, ConfigKeys.SESSIONKEY_STEP, "7");

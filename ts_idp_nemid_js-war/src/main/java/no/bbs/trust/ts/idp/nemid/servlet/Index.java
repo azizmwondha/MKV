@@ -28,6 +28,7 @@ import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
 import no.bbs.trust.ts.idp.nemid.contants.Constants;
 import no.bbs.trust.ts.idp.nemid.event.NemIDActionEvent;
 import no.bbs.trust.ts.idp.nemid.event.NemIDPerformanceEvent;
+import no.bbs.trust.ts.idp.nemid.tag.ChallengeGenerator;
 import no.bbs.trust.ts.idp.nemid.tag.OcesJsonParameterGenerator;
 import no.bbs.trust.ts.idp.nemid.tag.Signer;
 import no.bbs.trust.ts.idp.nemid.utils.DAOUtil;
@@ -47,6 +48,7 @@ import no.bbs.tt.trustsign.trustsignDAL.vos.table.WebContext;
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Base64;
+import org.openoces.ooapi.utils.Base64Handler;
 
 import eu.nets.no.vas.esign.sdosigner.types.KeyCredentials;
 
@@ -100,9 +102,11 @@ public class Index extends BaseServlet {
 
 		createClientGenerator(mid);
 		setSigningDocument(signingProcess, sref);
-		String tag = clientGenerator.generateClientTag(clientMode, clientWidth, clientHeight, languageCode, sref);
-		logger.debug("NemID JS tag: " + tag);
-		request.setAttribute("clienttag", tag);
+		String challenge = Base64Handler.encode(ChallengeGenerator.generateChallenge());
+		String clientTag = clientGenerator.generateClientTag(clientMode, clientWidth, clientHeight, languageCode, challenge, sref);
+		logger.debug("NemID JS client tag: " + clientTag);
+		request.setAttribute("clienttag", clientTag);
+		request.setAttribute("challenge", challenge);
 
 		setupWebContext(sref, signingProcess, request);
 		request.setAttribute("sref", sref);
