@@ -44,14 +44,23 @@ public class NemIdProperties {
 
     private static void readProperties() {
         Properties properties = new Properties();
+        InputStream propertiesAsStream = null;
         try {
-            InputStream propertiesAsStream = NemIdProperties.class.getResourceAsStream("/nemid.properties");
+			propertiesAsStream = NemIdProperties.class.getResourceAsStream("/nemid.properties");
             if (propertiesAsStream == null) {
                 throw new IllegalStateException("/nemid.properties not found on classpath");
             }
             properties.load(propertiesAsStream);
         } catch (IOException e) {
             throw new IllegalStateException("Could not read property file nemid.properties from classpath", e);
+        } finally {
+        	try {
+        		if (propertiesAsStream != null) {
+    				propertiesAsStream.close();
+        		}
+			} catch (IOException e) {
+				// Close silently
+			}
         }
 
         serverUrlPrefix = getRequiredProperty(properties, "nemid.applet.server.url.prefix", " to the URL of the applet providing server, eg. https://applet.danid.dk");
@@ -67,9 +76,9 @@ public class NemIdProperties {
     }
 
     private static Environments.Environment[] getEnvironmentsFromProperty(Properties properties, String s) {
-        String environments = getRequiredProperty(properties, s, " to the environments to run against, eg. OCESI_DANID_ENV_PROD, " +
+        String environs = getRequiredProperty(properties, s, " to the environments to run against, eg. OCESI_DANID_ENV_PROD, " +
                 "OCESII_DANID_ENV_PROD or OCESII_DANID_ENV_EXTERNALTEST (use \",\" to separate environments)").toUpperCase();
-        String[] envs = environments.split(",");
+        String[] envs = environs.split(",");
         Environments.Environment[] environmentArray = new Environments.Environment[envs.length];
         for (int i = 0; i < envs.length; i++) {
             environmentArray[i] = Environments.Environment.valueOf(envs[i]);
