@@ -16,6 +16,7 @@ public class ConfigKeys {
 	public static final String SESSIONKEY_STATUS = "STATUS";
 	public static final String SESSIONKEY_STYLE = "STYLE";
 	public static final String SESSIONKEY_TZO = "TZO";
+	public static final String SESSIONKEY_CHALLENGE = "CHALLENGE";
 
 	public static final String CONFIG_NEMID_DOCURL = "nemid.url.document";
 	public static final String CONFIG_TRUSTENGINE_URL = "trustengine.url";

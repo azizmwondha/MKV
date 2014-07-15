@@ -155,7 +155,7 @@ public class OcesJsonParameterGenerator {
 
 	public String generateClientTag(String clientMode, String width, String height, String language, String challenge, String sref) {
 		return generateParametersTag(clientMode, language, challenge) + System.getProperty(LINE_SEPARATOR) + generateIframeTag(width, height)
-				+ System.getProperty(LINE_SEPARATOR) + generateScriptTag() + System.getProperty(LINE_SEPARATOR) + generatePostBackFormTag(sref, challenge);
+				+ System.getProperty(LINE_SEPARATOR) + generateScriptTag() + System.getProperty(LINE_SEPARATOR) + generatePostBackFormTag(sref);
 	}
 
 	private String generateParametersTag(String clientMode, String language, String challenge) {
@@ -184,9 +184,9 @@ public class OcesJsonParameterGenerator {
 		return scriptTag;
 	}
 
-	private static String generatePostBackFormTag(String sref, String challenge) {
+	private static String generatePostBackFormTag(String sref) {
 		String postBackFormTag = Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_POSTBACKFORM);
-		postBackFormTag = String.format(postBackFormTag, Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_VERIFYURL), sref, challenge);
+		postBackFormTag = String.format(postBackFormTag, Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_VERIFYURL), sref);
 		return postBackFormTag;
 	}
 

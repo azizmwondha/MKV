@@ -106,7 +106,7 @@ public class Index extends BaseServlet {
 		String clientTag = clientGenerator.generateClientTag(clientMode, clientWidth, clientHeight, languageCode, challenge, sref);
 		logger.debug("NemID JS client tag: " + clientTag);
 		request.setAttribute("clienttag", clientTag);
-		request.setAttribute("challenge", challenge);
+		DAOUtil.updateSessionDataByKey(sref, ConfigKeys.SESSIONKEY_CHALLENGE, challenge);
 
 		setupWebContext(sref, signingProcess, request);
 		request.setAttribute("sref", sref);

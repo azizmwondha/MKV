@@ -87,7 +87,7 @@ public class Verify extends BaseServlet {
 
 		String signedResponse = request.getParameter("response");
 		logger.debug("Signed response: " + signedResponse);
-		String challenge = request.getParameter("challenge");
+		String challenge = DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_CHALLENGE);
 		logger.debug("Challenge: " + challenge);
 
 		SignObjectData signObject = DAOUtil.getSignObjectData(signingProcess);
