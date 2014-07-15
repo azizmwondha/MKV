@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>no.bbs.trust</groupId>
 			<artifactId>common_basics</artifactId>
-			<version>1.3.4-SNAPSHOT</version>
+			<version>1.3.6</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -33,7 +33,7 @@
 		<dependency>
 			<groupId>no.bbs.trust</groupId>
 			<artifactId>common_webapp</artifactId>
-			<version>1.4.4-SNAPSHOT</version>
+			<version>1.4.7</version>
 			<scope>compile</scope>
 			<exclusions>
 				<exclusion>
@@ -87,7 +87,7 @@
 		<dependency>
 			<groupId>no.bbs.tt.trustsign</groupId>
 			<artifactId>seidsdosigner</artifactId>
-			<version>1.0.18</version>
+			<version>1.0.19</version>
 			<scope>compile</scope>
 			<exclusions>
 				<exclusion>
@@ -121,14 +121,14 @@
 		<dependency>
 			<groupId>no.bbs.tt.trustsign</groupId>
 			<artifactId>trustsigndal</artifactId>
-			<version>2.6.6-SNAPSHOT</version>
+			<version>2.6.8</version>
 			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>no.bbs.trust</groupId>
 			<artifactId>ts2_idp_common</artifactId>
-			<version>1.0.4</version>
+			<version>1.0.6</version>
 			<type>jar</type>
 			<exclusions>
 				<exclusion>
@@ -186,7 +186,7 @@
 		<dependency>
 			<groupId>no.bbs.trust</groupId>
 			<artifactId>amqcapi</artifactId>
-			<version>1.2.2</version>
+			<version>1.2.3</version>
 			<scope>compile</scope>
 		</dependency>
 		
