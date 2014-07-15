@@ -41,6 +41,7 @@ import no.bbs.tt.trustsign.te.xml.messages.TEMessage;
 import no.bbs.tt.trustsign.tecapi.communicator.Requestor;
 import no.bbs.tt.trustsign.trustsignDAL.constant.SessionKey;
 import no.bbs.tt.trustsign.trustsignDAL.dao.table.SessionDataDAO;
+import no.bbs.tt.trustsign.trustsignDAL.tx.TransactionHelper;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObject;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObjectData;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
@@ -49,6 +50,7 @@ import no.bbs.tt.trustsign.trustsignDAL.vos.table.WebContext;
 import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Base64;
 import org.openoces.ooapi.utils.Base64Handler;
+import org.springframework.transaction.TransactionStatus;
 
 import eu.nets.no.vas.esign.sdosigner.types.KeyCredentials;
 
@@ -57,15 +59,20 @@ import eu.nets.no.vas.esign.sdosigner.types.KeyCredentials;
  */
 public class Index extends BaseServlet {
 
+	private static final long serialVersionUID = 1L;
+
+	public static final String COMPONENT_NAME = "NemIDJS";
 	private static final String UTF_8 = "UTF-8";
 	private static final String ISO_8859_1 = "ISO-8859-1";
-	private static final long serialVersionUID = 1L;
 	private static final String[] SESSION_DATA_KEYS = new String[] { ConfigKeys.SESSIONKEY_SPID, ConfigKeys.SESSIONKEY_MID, ConfigKeys.SESSIONKEY_LOCALE,
 		ConfigKeys.SESSIONKEY_TZO };
 
-	public static final String COMPONENT_NAME = "NemIDJS";
-
+	private final TransactionHelper transactionHelper;
 	private OcesJsonParameterGenerator clientGenerator;
+
+	public Index() {
+		transactionHelper = new TransactionHelper();
+	}
 
 	@Override
 	protected ReturnCode serviceRequest(HttpServletRequest request, HttpServletResponse response) throws StatusCodeException {
@@ -76,59 +83,66 @@ public class Index extends BaseServlet {
 		String clientWidth = getClientWidth(request.getParameter(ConfigKeys.PARAM_CLIENT_WIDTH), clientMode);
 		String clientHeight = getClientHeight(request.getParameter(ConfigKeys.PARAM_CLIENT_HEIGHT), clientMode);
 
-		DAOUtil.validateSessionStep(sref, new int[] { 2, 4, 5, 6 });
-		Map<String, String> sessionDatas = DAOUtil.getSessionDataKeysAndValues(sref, SESSION_DATA_KEYS);
-
-		int spid = (int) StringUtils.toLong(sessionDatas.get(ConfigKeys.SESSIONKEY_SPID), 0);
-		SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
-
-		if (!sref.equalsIgnoreCase(signingProcess.getSignProcessRef())) {
-			logger.info("SignProcess reference updated since session started (OneTimeUrl) [PreviousSREF=" + sref + "][NewSREF="
-					+ signingProcess.getSignProcessRef() + "]");
-		}
-
-		DAOUtil.updateSessionDataByKey(sref, ConfigKeys.SESSIONKEY_STEP, "5");
-
-		String mid = sessionDatas.get(ConfigKeys.SESSIONKEY_MID);
-		String locale = sessionDatas.get(ConfigKeys.SESSIONKEY_LOCALE);
-		locale = (locale.trim().length() > 0) ? locale : LangSupport.getDefaultLanguage();
-		request.setAttribute("locale", locale);
-		String languageCode = null;
+		TransactionStatus tx = transactionHelper.getTransaction();
+		boolean commit = false;
 		try {
-			languageCode = new SessionDataDAO().getBySrefAndKey(sref, SessionKey.LOCALE).getVal();
-		} catch (SQLException e) {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, e, COMPONENT_NAME, sref);
+			DAOUtil.validateSessionStep(sref, new int[] { 2, 4, 5, 6 });
+			Map<String, String> sessionDatas = DAOUtil.getSessionDataKeysAndValues(sref, SESSION_DATA_KEYS);
+
+			int spid = (int) StringUtils.toLong(sessionDatas.get(ConfigKeys.SESSIONKEY_SPID), 0);
+			SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
+
+			if (!sref.equalsIgnoreCase(signingProcess.getSignProcessRef())) {
+				logger.info("SignProcess reference updated since session started (OneTimeUrl) [PreviousSREF=" + sref + "][NewSREF="
+						+ signingProcess.getSignProcessRef() + "]");
+			}
+
+			DAOUtil.updateSessionDataByKey(sref, ConfigKeys.SESSIONKEY_STEP, "5");
+
+			String mid = sessionDatas.get(ConfigKeys.SESSIONKEY_MID);
+			String locale = sessionDatas.get(ConfigKeys.SESSIONKEY_LOCALE);
+			locale = (locale.trim().length() > 0) ? locale : LangSupport.getDefaultLanguage();
+			request.setAttribute("locale", locale);
+			String languageCode = null;
+			try {
+				languageCode = new SessionDataDAO().getBySrefAndKey(sref, SessionKey.LOCALE).getVal();
+			} catch (SQLException e) {
+				throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, e, COMPONENT_NAME, sref);
+			}
+
+			createClientGenerator(mid);
+			setSigningDocument(signingProcess, sref);
+			String challenge = Base64Handler.encode(ChallengeGenerator.generateChallenge());
+			String clientTag = clientGenerator.generateClientTag(clientMode, clientWidth, clientHeight, languageCode, challenge, sref);
+			logger.debug("NemID JS client tag: " + clientTag);
+			request.setAttribute("clienttag", clientTag);
+			DAOUtil.updateSessionDataByKey(sref, ConfigKeys.SESSIONKEY_CHALLENGE, challenge);
+
+			setupWebContext(sref, signingProcess, request);
+			request.setAttribute("sref", sref);
+
+			// Parse signer deadline
+			long endtime = signingProcess.getDeadline().getTime();
+
+			SimpleDateFormat formatter = new SimpleDateFormat(LangSupport.getUserText("format.mediumdate", locale));
+			String tzos = sessionDatas.get(ConfigKeys.SESSIONKEY_TZO);
+			tzos = (tzos.trim().length() > 0) ? tzos : "0";
+			long tzo = Long.parseLong(tzos);
+
+			request.setAttribute("signstatus.deadline", formatter.format(new Date(endtime + tzo)));
+			request.setAttribute("tzo", tzos);
+
+			try {
+				request.setAttribute("statustable", getStatusTable(mid, sref, signingProcess));
+			} catch (StatusCodeException sce) {
+				logger.info("No status table available for SREF");
+			}
+			EventLogger.appendEvent(NemIDPerformanceEvent.DK_NEMID_GENERATE_CLIENT_TAG, start);
+			commit = true;
+			return new ReturnCode(Dispatch.INCLUDE, "/index.jsp");
+		} finally {
+			transactionHelper.commitOrRollback(tx, commit);
 		}
-
-		createClientGenerator(mid);
-		setSigningDocument(signingProcess, sref);
-		String challenge = Base64Handler.encode(ChallengeGenerator.generateChallenge());
-		String clientTag = clientGenerator.generateClientTag(clientMode, clientWidth, clientHeight, languageCode, challenge, sref);
-		logger.debug("NemID JS client tag: " + clientTag);
-		request.setAttribute("clienttag", clientTag);
-		DAOUtil.updateSessionDataByKey(sref, ConfigKeys.SESSIONKEY_CHALLENGE, challenge);
-
-		setupWebContext(sref, signingProcess, request);
-		request.setAttribute("sref", sref);
-
-		// Parse signer deadline
-		long endtime = signingProcess.getDeadline().getTime();
-
-		SimpleDateFormat formatter = new SimpleDateFormat(LangSupport.getUserText("format.mediumdate", locale));
-		String tzos = sessionDatas.get(ConfigKeys.SESSIONKEY_TZO);
-		tzos = (tzos.trim().length() > 0) ? tzos : "0";
-		long tzo = Long.parseLong(tzos);
-
-		request.setAttribute("signstatus.deadline", formatter.format(new Date(endtime + tzo)));
-		request.setAttribute("tzo", tzos);
-
-		try {
-			request.setAttribute("statustable", getStatusTable(mid, sref, signingProcess));
-		} catch (StatusCodeException sce) {
-			logger.info("No status table available for SREF");
-		}
-		EventLogger.appendEvent(NemIDPerformanceEvent.DK_NEMID_GENERATE_CLIENT_TAG, start);
-		return new ReturnCode(Dispatch.INCLUDE, "/index.jsp");
 	}
 
 	static String getClientMode(String clientMode) {
@@ -179,8 +193,8 @@ public class Index extends BaseServlet {
 		SignObjectData signObjectData = DAOUtil.getSignObjectData(signingProcess);
 		SignObject signObject = DAOUtil.getSignObject(signObjectData.getSignerObjectId());
 		String docType = signObjectData.getElementType();
-		String docTitle = DAOUtil.getSignObject(signObject.getSignerObjectId()).getTitle();
-		String docDescription = DAOUtil.getSignObject(signObject.getSignerObjectId()).getDescription();
+		String docTitle = signObject.getTitle();
+		String docDescription = signObject.getDescription();
 		logger.debug("Doc type: " + docType + ", title: " + docTitle + ", description: " + docDescription);
 
 		if ("txt,text,text/plain".indexOf(docType.toLowerCase()) > -1) {
@@ -217,7 +231,7 @@ public class Index extends BaseServlet {
 		return clientGenerator;
 	}
 
-	private void setupWebContext(String tid, SigningProcess sp, HttpServletRequest request) throws StatusCodeException {
+	private static void setupWebContext(String tid, SigningProcess sp, HttpServletRequest request) throws StatusCodeException {
 		WebContext wc = DAOUtil.getWebContext(sp.getWebcontextid());
 
 		// Web context and merchant URLs

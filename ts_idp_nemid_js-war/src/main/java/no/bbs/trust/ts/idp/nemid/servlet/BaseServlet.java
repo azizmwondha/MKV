@@ -1,6 +1,5 @@
 package no.bbs.trust.ts.idp.nemid.servlet;
 
-
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import javax.servlet.ServletException;
@@ -25,89 +24,74 @@ import org.apache.log4j.MDC;
 import org.apache.log4j.PropertyConfigurator;
 import org.bouncycastle.util.encoders.Base64;
 
-public abstract class BaseServlet extends BaseSignServlet
-{
+public abstract class BaseServlet extends BaseSignServlet {
+
+	private static final long serialVersionUID = 1L;
+
 	@Override
-	protected ReturnCode handleRequest(HttpServletRequest request, HttpServletResponse response) throws StatusCodeException
-	{
+	protected ReturnCode handleRequest(HttpServletRequest request, HttpServletResponse response) throws StatusCodeException {
 		long start = System.currentTimeMillis();
 		buildMDC(request);
 		dumpRequest(request);
-			
+
 		logger.info("[AE=" + NemIDActionEvent.REQUEST_RECEIVED.getCode() + "]");
 
-		try
-		{
+		try {
 			logger.debug("NemID incoming request");
 			return serviceRequest(request, response);
-		}
-		catch (StatusCodeException sce)
-		{
+		} catch (StatusCodeException sce) {
 			EventLogger.dumpStack(sce, Level.INFO);
 			no.bbs.trust.common.errors.xml.Error e = Errors.getInstance().getError(sce.getActionEvent().getCode());
-			logger.info("[StatusCode=" + sce.getActionEvent().getCode() + "][EventCode=" + sce.getActionEvent().toString() + "][StatusLabel=" + e.getLabel() + "]");
+			logger.info("[StatusCode=" + sce.getActionEvent().getCode() + "][EventCode=" + sce.getActionEvent().toString() + "][StatusLabel=" + e.getLabel()
+					+ "]");
 			logger.info("[StatusCodeMessage=" + sce.getMessage() + "]");
-			
+
 			String sref = request.getParameter(ConfigKeys.PARAM_SREF);
 			return new ReturnCode(Dispatch.REDIRECT, getConfigProperty(ConfigKeys.CONFIG_NEMID_STATUSURL) + "?status=" + e.getLabel() + "&sref=" + sref);
-		}
-		catch (Throwable t)
-		{
+		} catch (Throwable t) {
 			EventLogger.dumpStack(t, "INFO");
 			String sref = request.getParameter(ConfigKeys.PARAM_SREF);
 			return new ReturnCode(Dispatch.REDIRECT, getConfigProperty(ConfigKeys.CONFIG_NEMID_STATUSURL) + "?status=generalerror&sref=" + sref);
-		}
-		finally
-		{
+		} finally {
 			EventLogger.appendEvent(NemIDActionEvent.RESPONSE_SENT);
 			EventLogger.appendEvent(NemIDPerformanceEvent.DK_NEMID_HANDLE_REQUEST, start);
 			EventLogger.flush();
 		}
 	}
 
-	protected String getConfigProperty(String pname)
-	{
+	protected static String getConfigProperty(String pname) {
 		return Config.INSTANCE.getProperty(pname);
 	}
-	
-	protected byte[] decodeUTF8b64To88591Bytes(String b64in) throws StatusCodeException
-	{
-		try
-		{
+
+	protected static byte[] decodeUTF8b64To88591Bytes(String b64in) throws StatusCodeException {
+		try {
 			byte[] utfbytes = Base64.decode(b64in);
 			b64in = null;
 			return new String(utfbytes, "UTF-8").getBytes("ISO-8859-1");
-		}
-		catch (UnsupportedEncodingException uex)
-		{
+		} catch (UnsupportedEncodingException uex) {
 			EventLogger.dumpStack(uex, logger);
 			throw new StatusCodeException(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR, uex.getMessage());
 		}
 	}
 
 	/**
-	 * Initialise servlet.
+	 * Initialize servlet.
 	 */
-	public final void init() throws ServletException
-	{
-		if (null == logger)
-		{
+	public final void init() throws ServletException {
+		if (null == logger) {
 			String log4jPropFile = null;
 			String configDir = getInitParameter("configdir");
 
-			if (null != configDir)
-			{
+			if (null != configDir) {
 				File conf = new File(configDir);
-				if ((!conf.exists()) || (!conf.isDirectory()))
-				{
+				if ((!conf.exists()) || (!conf.isDirectory())) {
 					throw new UnavailableException("ConfigDir  (" + configDir + ") is not a valid Directory");
 				}
 
 				log4jPropFile = configDir + "/log4j.properties";
 
 				File logfile = new File(log4jPropFile);
-				if (!logfile.exists())
-				{
+				if (!logfile.exists()) {
 					throw new UnavailableException("Could not find log4j file: [" + log4jPropFile + "]");
 				}
 
@@ -117,12 +101,9 @@ public abstract class BaseServlet extends BaseSignServlet
 			logger.info("Initialized log4j to use " + no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER);
 		}
 
-		try
-		{
+		try {
 			doInit();
-		}
-		catch (Throwable t)
-		{
+		} catch (Throwable t) {
 			EventLogger.dumpStack(t);
 			throw new UnavailableException("Servlet Startup failed. " + t.getMessage());
 		}
@@ -131,8 +112,7 @@ public abstract class BaseServlet extends BaseSignServlet
 	/**
 	 * Clean up and terminate.
 	 */
-	public void destroy()
-	{
+	public void destroy() {
 		super.destroy();
 		logger.removeAllAppenders();
 	}
@@ -141,20 +121,16 @@ public abstract class BaseServlet extends BaseSignServlet
 
 	protected abstract ReturnCode serviceRequest(HttpServletRequest request, HttpServletResponse response) throws StatusCodeException;
 
-	private void buildMDC(HttpServletRequest request)
-	{
+	private void buildMDC(HttpServletRequest request) {
 		String sref = request.getParameter(ConfigKeys.PARAM_SREF);
-		if (null != sref)
-		{
+		if (null != sref) {
 			MDC.put("TID", sref);
-		}	
-		try
-		{
-			MDC.put("IP", "" + getClientIP(request));
 		}
-		catch (StatusCodeException sce)
-		{
+		try {
+			MDC.put("IP", "" + getClientIP(request));
+		} catch (StatusCodeException sce) {
 			EventLogger.dumpStack(sce, "DEBUG");
 		}
 	}
+
 }

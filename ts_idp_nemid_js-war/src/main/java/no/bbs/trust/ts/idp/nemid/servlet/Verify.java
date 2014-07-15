@@ -53,6 +53,7 @@ import no.bbs.tt.trustsign.trustsignDAL.dao.helpers.MerchantPropertiesHelperDAO;
 import no.bbs.tt.trustsign.trustsignDAL.dao.table.BaseorderDAO;
 import no.bbs.tt.trustsign.trustsignDAL.dao.table.SigningProcessDAO;
 import no.bbs.tt.trustsign.trustsignDAL.dao.table.StepDAO;
+import no.bbs.tt.trustsign.trustsignDAL.tx.TransactionHelper;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.Baseorder;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObjectData;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignerId;
@@ -61,6 +62,7 @@ import no.bbs.tt.trustsign.trustsignDAL.vos.table.Step;
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Base64;
+import org.springframework.transaction.TransactionStatus;
 
 /**
  *
@@ -72,144 +74,159 @@ public class Verify extends BaseServlet {
 
 	private static final String PKICONFIG_PIDSERVICEID = "PIDServiceId";
 	private static final String PKICONFIG_RIDSERVICEID = "RIDServiceId";
+	private static final String[] SESSION_DATA_KEYS = new String[] { ConfigKeys.SESSIONKEY_SPID, ConfigKeys.SESSIONKEY_CHALLENGE, ConfigKeys.SESSIONKEY_MID,
+		ConfigKeys.SESSIONKEY_LOCALE };
+
+	private final TransactionHelper transactionHelper;
+
+	public Verify() {
+		transactionHelper = new TransactionHelper();
+	}
 
 	@Override
 	protected ReturnCode serviceRequest(HttpServletRequest request, HttpServletResponse response) throws StatusCodeException {
 		long start = System.currentTimeMillis();
 		logger.info("Verify signature");
-
 		String sref = request.getParameter(ConfigKeys.PARAM_SREF);
-		int spid = (int) StringUtils.toLong(DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_SPID), 0);
-		SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
 
-		// Check signing process, sref and step before proceeding
-		checkSigningProcessSrefAndStep(signingProcess, sref);
-
-		String signedResponse = request.getParameter("response");
-		logger.debug("Signed response: " + signedResponse);
-		String challenge = DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_CHALLENGE);
-		logger.debug("Challenge: " + challenge);
-
-		SignObjectData signObject = DAOUtil.getSignObjectData(signingProcess);
-
-		VerifyClientSignatureData vcsdata = new VerifyClientSignatureData();
-		vcsdata.setSignature(signedResponse);
-		vcsdata.setB64Document(signObject.getObjectB64());
-		vcsdata.setChallenge(challenge);
-
-		vcsdata.setCertType(DAOUtil.getCertificateTypes(signingProcess.getSignerId()));
-
-		String mid = DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_MID);
-		String dtype = null;
-		if (signObject.getElementType().equalsIgnoreCase("pdf")) {
-			dtype = "application/pdf";
-		} else {
-			dtype = "text/plain";
-		}
-		vcsdata.setDocumentType(dtype);
-		vcsdata.setMid(mid);
-		//		vcsdata.setResult(result);
-
-		SignerId signerID = DAOUtil.getSignerID(signingProcess.getSignerId());
-		if (null != signerID) {
-			if ("SSN".equalsIgnoreCase("" + signerID.getIdKey())) {
-				vcsdata.setSignerCPR(signerID.getIdValue());
-			}
-			if ("PID".equalsIgnoreCase("" + signerID.getIdKey())) {
-				vcsdata.setSignerPID(signerID.getIdValue());
-			}
-			if ("RID".equalsIgnoreCase("" + signerID.getIdKey())) {
-				vcsdata.setSignerRID(signerID.getIdValue());
-			}
-		}
-
-		logger.info("Verify XMLDSIG signature");
-		VerifyClientSignatureResponseDataExt verifySign = verifySign(vcsdata);
-
-		String signerCN = null;
-		String signerCertPolicyOID = null;
-
+		TransactionStatus tx = transactionHelper.getTransaction();
+		boolean commit = false;
 		try {
-			logger.info("Verify XMLDSIG against signers document");
+			Map<String, String> sessionDatas = DAOUtil.getSessionDataKeysAndValues(sref, SESSION_DATA_KEYS);
+			int spid = (int) StringUtils.toLong(sessionDatas.get(ConfigKeys.SESSIONKEY_SPID), 0);
+			SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
 
-			byte[] xmldsig = Base64.decode(signedResponse);
-			XMLDSIGValidator xdvalidator = new XMLDSIGValidator();
-			XMLDSIGContent xdcontent = xdvalidator.validateXMLDSig(xmldsig);
+			// Check signing process, sref and step before proceeding
+			checkSigningProcessSrefAndStep(signingProcess, sref);
 
-			xdcontent.getNumberOfSignedObjects();
+			String signedResponse = request.getParameter("response");
+			logger.debug("Signed response: " + signedResponse);
+			String challenge = sessionDatas.get(ConfigKeys.SESSIONKEY_CHALLENGE);
+			logger.debug("Challenge: " + challenge);
 
-			X509Certificate signerCert = xdcontent.getSignerCertificate();
-			X509Parser xp = new X509Parser(signerCert);
-			signerCN = xp.getSubjectCommonName();
+			SignObjectData signObject = DAOUtil.getSignObjectData(signingProcess);
 
-			String[] oids = xp.getPolicyIdentifiers();
-			if ((null != oids) && (oids.length > 0)) {
-				StringBuilder sb = new StringBuilder();
+			VerifyClientSignatureData vcsdata = new VerifyClientSignatureData();
+			vcsdata.setSignature(signedResponse);
+			vcsdata.setB64Document(signObject.getObjectB64());
+			vcsdata.setChallenge(challenge);
 
-				for (String oid : oids) {
-					if (sb.length() > 0) {
-						sb.append(",");
-					}
-					sb.append(oid);
+			vcsdata.setCertType(DAOUtil.getCertificateTypes(signingProcess.getSignerId()));
+
+			String mid = sessionDatas.get(ConfigKeys.SESSIONKEY_MID);
+			String dtype = null;
+			if (signObject.getElementType().equalsIgnoreCase("pdf")) {
+				dtype = "application/pdf";
+			} else {
+				dtype = "text/plain";
+			}
+			vcsdata.setDocumentType(dtype);
+			vcsdata.setMid(mid);
+
+			SignerId signerID = DAOUtil.getSignerID(signingProcess.getSignerId());
+			if (null != signerID) {
+				if ("SSN".equalsIgnoreCase("" + signerID.getIdKey())) {
+					vcsdata.setSignerCPR(signerID.getIdValue());
 				}
-				signerCertPolicyOID = sb.toString();
+				if ("PID".equalsIgnoreCase("" + signerID.getIdKey())) {
+					vcsdata.setSignerPID(signerID.getIdValue());
+				}
+				if ("RID".equalsIgnoreCase("" + signerID.getIdKey())) {
+					vcsdata.setSignerRID(signerID.getIdValue());
+				}
 			}
-			logger.info("Signer info [SignerOID=" + signerCertPolicyOID + "][SignerCN=" + signerCN + "]");
-			logger.debug("Signer info [SignerCPR=" + verifySign.getSignerCPR() + "][SignerPID=" + verifySign.getSignerPID() + "][SignerRID="
-					+ verifySign.getSignerRID() + "]");
-		} catch (InstantiationException ie) {
-			EventLogger.dumpStack(ie);
-			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Cannot parse signature. Reason: " + ie.getMessage());
-		} catch (X509ParserException xpe) {
-			EventLogger.dumpStack(xpe);
-			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Cannot parse signer certificate. Reason: " + xpe.getMessage());
-		} catch (XMLDSValidationException xve) {
-			EventLogger.dumpStack(xve);
-			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Cannot verify XML signature. Reason: " + xve.getMessage());
-		} catch (Throwable t) {
-			EventLogger.dumpStack(t);
-			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Cannot verify XML signature. Reason: " + t.getMessage());
-		}
 
-		// Verify signer ID/SSN
-		logger.info("Verify signer ID (check CPR, PID, RID)");
-		DAOUtil.validateSignerID(signingProcess, verifySign.getSignerCPR(), "SSN");
+			logger.info("Verify XMLDSIG signature");
+			VerifyClientSignatureResponseDataExt verifySign = verifySign(vcsdata);
 
-		if (null != verifySign.getSignerPID()) {
-			String pid = "PID:" + verifySign.getSignerPID();
-			pid = pid.substring(pid.lastIndexOf(":") + 1);
-			logger.debug("Check PID[" + pid + "]");
-			DAOUtil.validateSignerID(signingProcess, pid, "PID");
-		}
-		if (null != verifySign.getSignerRID()) {
-			String rid = verifySign.getSignerRID().trim();
-			logger.debug("Check RID[" + rid + "]");
-			DAOUtil.validateSignerID(signingProcess, rid, "RID");
-		}
+			String signerCN = null;
+			String signerCertPolicyOID = null;
 
-		logger.info("Verify signer certificate type (check certificate policy)");
-		DAOUtil.validateSignerOIDs(signingProcess, signerCertPolicyOID);
+			try {
+				logger.info("Verify XMLDSIG against signers document");
 
-		// Status OK
-		logger.info("Signature verification completed OK. Store signature and revocation status");
+				byte[] xmldsig = Base64.decode(signedResponse);
+				XMLDSIGValidator xdvalidator = new XMLDSIGValidator();
+				XMLDSIGContent xdcontent = xdvalidator.validateXMLDSig(xmldsig);
 
-		Date signerTime = new Date();
-		DAOUtil.storeSignature(spid, signerTime, verifySign.getSignerCPR(), signerCN, signerCertPolicyOID, signedResponse, verifySign.getB64ocsp());
-		DAOUtil.updateSigningProcessStatus(spid);
-		notifyTE(mid, sref, signingProcess);
-		DAOUtil.updateSessionDataByKey(sref, ConfigKeys.SESSIONKEY_STEP, "7");
+				xdcontent.getNumberOfSignedObjects();
 
-		// Temporary fix to force a wait for OrderComplete
-		try {
-			if (MerchantPropertiesHelperDAO.waitForOrderComplete(Integer.parseInt(mid))) {
-				waitForOrderCompletion(spid);
+				X509Certificate signerCert = xdcontent.getSignerCertificate();
+				X509Parser xp = new X509Parser(signerCert);
+				signerCN = xp.getSubjectCommonName();
+
+				String[] oids = xp.getPolicyIdentifiers();
+				if ((null != oids) && (oids.length > 0)) {
+					StringBuilder sb = new StringBuilder();
+
+					for (String oid : oids) {
+						if (sb.length() > 0) {
+							sb.append(",");
+						}
+						sb.append(oid);
+					}
+					signerCertPolicyOID = sb.toString();
+				}
+				logger.info("Signer info [SignerOID=" + signerCertPolicyOID + "][SignerCN=" + signerCN + "]");
+				logger.debug("Signer info [SignerCPR=" + verifySign.getSignerCPR() + "][SignerPID=" + verifySign.getSignerPID() + "][SignerRID="
+						+ verifySign.getSignerRID() + "]");
+			} catch (InstantiationException ie) {
+				EventLogger.dumpStack(ie);
+				throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Cannot parse signature. Reason: " + ie.getMessage());
+			} catch (X509ParserException xpe) {
+				EventLogger.dumpStack(xpe);
+				throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Cannot parse signer certificate. Reason: " + xpe.getMessage());
+			} catch (XMLDSValidationException xve) {
+				EventLogger.dumpStack(xve);
+				throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Cannot verify XML signature. Reason: " + xve.getMessage());
+			} catch (Throwable t) {
+				EventLogger.dumpStack(t);
+				throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Cannot verify XML signature. Reason: " + t.getMessage());
 			}
-		} catch (SQLException e) {
-			logger.info("Got exception while checking database for waitForOrderComplete. " + e.getMessage());
-		}
 
-		EventLogger.appendEvent(NemIDPerformanceEvent.DK_NEMID_VERIFY_SIGNATURE, start);
-		return new ReturnCode(Dispatch.REDIRECT, getConfigProperty(ConfigKeys.CONFIG_NEMID_RECEIPTURL) + "?status=completed&sref=" + sref);
+			// Verify signer ID/SSN
+			logger.info("Verify signer ID (check CPR, PID, RID)");
+			DAOUtil.validateSignerID(signingProcess, verifySign.getSignerCPR(), "SSN");
+
+			if (null != verifySign.getSignerPID()) {
+				String pid = "PID:" + verifySign.getSignerPID();
+				pid = pid.substring(pid.lastIndexOf(":") + 1);
+				logger.debug("Check PID [" + pid + "]");
+				DAOUtil.validateSignerID(signingProcess, pid, "PID");
+			}
+			if (null != verifySign.getSignerRID()) {
+				String rid = verifySign.getSignerRID().trim();
+				logger.debug("Check RID [" + rid + "]");
+				DAOUtil.validateSignerID(signingProcess, rid, "RID");
+			}
+
+			logger.info("Verify signer certificate type (check certificate policy)");
+			DAOUtil.validateSignerOIDs(signingProcess, signerCertPolicyOID);
+
+			// Status OK
+			logger.info("Signature verification completed OK. Store signature and revocation status");
+
+			Date signerTime = new Date();
+			DAOUtil.storeSignature(spid, signerTime, verifySign.getSignerCPR(), signerCN, signerCertPolicyOID, signedResponse, verifySign.getB64ocsp());
+			DAOUtil.updateSigningProcessStatus(spid);
+			notifyTE(mid, sref, signingProcess);
+			DAOUtil.updateSessionDataByKey(sref, ConfigKeys.SESSIONKEY_STEP, "7");
+
+			// Temporary fix to force a wait for OrderComplete
+			try {
+				if (MerchantPropertiesHelperDAO.waitForOrderComplete(Integer.parseInt(mid))) {
+					waitForOrderCompletion(spid);
+				}
+			} catch (SQLException e) {
+				logger.info("Got exception while checking database for waitForOrderComplete. " + e.getMessage());
+			}
+
+			EventLogger.appendEvent(NemIDPerformanceEvent.DK_NEMID_VERIFY_SIGNATURE, start);
+			commit = true;
+			return new ReturnCode(Dispatch.REDIRECT, getConfigProperty(ConfigKeys.CONFIG_NEMID_RECEIPTURL) + "?status=completed&sref=" + sref);
+		} finally {
+			transactionHelper.commitOrRollback(tx, commit);
+		}
 	}
 
 	private static void checkSigningProcessSrefAndStep(SigningProcess signingProcess, String sref) throws StatusCodeException {
@@ -528,7 +545,7 @@ public class Verify extends BaseServlet {
 		return (resp.getStatus().getStatusCode() == 0);
 	}
 
-	private void notifyTE(String mid, String sref, SigningProcess sp) throws StatusCodeException {
+	private static void notifyTE(String mid, String sref, SigningProcess sp) throws StatusCodeException {
 		String orderID = DAOUtil.getOrderID(sp);
 
 		QueueMessageEvent qme = null;
