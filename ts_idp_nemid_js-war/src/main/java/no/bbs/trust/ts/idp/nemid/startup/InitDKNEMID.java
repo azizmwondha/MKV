@@ -107,9 +107,9 @@ public class InitDKNEMID extends HttpServlet {
 
 	@Override
 	public void destroy() {
-		super.destroy();
 		StackLogger.appendEvent(NemIDActionEvent.ACTION_IDP_DK_NEMID_LIFECYCLE);
 		Logger.getLogger(Constants.MAIN_LOGGER).info("Stopping " + ArtifactVersion.ARTIFACT_NAME + " " + ArtifactVersion.ARTIFACT_VERSION);
+		super.destroy();
 	}
 
 	private void initDKNEMID() {
@@ -191,4 +191,5 @@ public class InitDKNEMID extends HttpServlet {
 			Logger.getLogger(Constants.MAIN_LOGGER).info("Security providers already set for IDP[" + PKIIDMap.DKNEMID_NAME + "]");
 		}
 	}
+	
 }
