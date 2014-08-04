@@ -101,10 +101,10 @@ public class DAOUtil {
 		}
 	}
 
-	public static void updateSigningProcessStatus(int spid) throws StatusCodeException {
+	public static void updateSigningProcessStatus(SigningProcess signingProcess) throws StatusCodeException {
 		try {
 			SigningProcessDAO spdao = new SigningProcessDAO();
-			spdao.updateStatus(null, spid, StatusTypes.COMPLETE_ID);
+			spdao.updateStatus(null, signingProcess.getSignprocessId(), StatusTypes.COMPLETE_ID);
 		} catch (SQLException se) {
 			throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, "Cannot update SigningProcess status for SPID=" + se.getMessage());
 		}
