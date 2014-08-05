@@ -4,8 +4,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.cert.X509Certificate;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -188,9 +188,6 @@ public class Verify extends BaseServlet {
 	}
 
 	private static void verifySignature(VerifyClientSignatureResponseDataExt verifySign, SigningProcess signingProcess, String signedResponse) throws StatusCodeException {
-		logger.info("Verify XMLDSIG signature");
-//		VerifyClientSignatureResponseDataExt verifySign = verifySign(vcsdata);
-
 		String signerCN = null;
 		String signerCertPolicyOID = null;
 
@@ -270,7 +267,7 @@ public class Verify extends BaseServlet {
 			Step currStep = stepDao.getByStepId(null, signingProcess.getStepId());
 
 			// Decide if I'm in the latest step
-			ArrayList<Step> steps = stepDao.getByOrderIdAndMerchantId(null, currStep.getOrderId(), currStep.getMerchantId());
+			List<Step> steps = stepDao.getByOrderIdAndMerchantId(null, currStep.getOrderId(), currStep.getMerchantId());
 			for (Step step : steps) {
 				if (step.getStepNumber() > currStep.getStepNumber()) {
 					doneWaiting = true;
@@ -280,14 +277,14 @@ public class Verify extends BaseServlet {
 			if (!doneWaiting) {
 				logger.info("We are in the last step in order");
 			} else {
-				logger.info("We are not in the last step in order, returning imediately");
+				logger.info("We are not in the last step in order, returning immediately");
 				return;
 			}
 
 			// Decide if all other signingprocesses in my step is complete
 			if (!doneWaiting) {
 				SigningProcessDAO signingProcessDao = new SigningProcessDAO();
-				ArrayList<SigningProcess> spsInStep = signingProcessDao.getByStepId(null, currStep.getStepId());
+				List<SigningProcess> spsInStep = signingProcessDao.getByStepId(null, currStep.getStepId());
 				for (SigningProcess sp : spsInStep) {
 					if (sp.getSignprocessId() != signingProcess.getSignprocessId() && sp.getStatusId() < 10) {
 						doneWaiting = true;
