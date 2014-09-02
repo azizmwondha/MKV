@@ -42,6 +42,7 @@ import org.openoces.serviceprovider.ServiceProviderSetup;
 public class InitDKNEMID extends HttpServlet {
 
 	private static boolean IS_CACHE_REFRESH = false;
+	private final Logger logger = Logger.getLogger(Constants.MAIN_LOGGER);
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -51,7 +52,7 @@ public class InitDKNEMID extends HttpServlet {
 			} catch (Exception e) {
 				InitState.initFailed(this, "Some event codes have not been defined in the errormap.xml. Check the startup logs.");
 				StackLogger.appendEvent(NemIDActionEvent.ACTION_IDP_DK_NEMID_LIFECYCLE);
-				Logger.getLogger(Constants.MAIN_LOGGER).info("Startup failed. Some event codes have not been defined in the errormap.xml. Check the startup logs.");
+				logger.info("Startup failed. Some event codes have not been defined in the errormap.xml. Check the startup logs.");
 			}
 
 			InitState.assertInitCompletedWithoutErrors();
@@ -61,7 +62,7 @@ public class InitDKNEMID extends HttpServlet {
 			initIDPCache();
 			initDKNEMID();
 			StackLogger.appendEvent(NemIDActionEvent.ACTION_IDP_DK_NEMID_LIFECYCLE);
-			Logger.getLogger(Constants.MAIN_LOGGER).info("Starting " + ArtifactVersion.ARTIFACT_NAME + " " + ArtifactVersion.ARTIFACT_VERSION);
+			logger.info("Starting " + ArtifactVersion.ARTIFACT_NAME + " " + ArtifactVersion.ARTIFACT_VERSION);
 			InitState.assertInitCompletedWithoutErrors();
 		} catch (StatusCodeException sce) {
 			StackLogger.logStatusCode(sce);
@@ -91,24 +92,24 @@ public class InitDKNEMID extends HttpServlet {
 		if (0 == mid) {
 			MerchantContextCache.loadMerchantContexts(PKIIDMap.DKNEMIDJS_ID);
 			StackLogger.appendEvent(NemIDActionEvent.ACTION_LOAD_MERCHANT_CONTEXTS);
-			Logger.getLogger(Constants.MAIN_LOGGER).info("Merchant config for IDP[" + PKIIDMap.DKNEMID_NAME + "] loaded");
+			logger.info("Merchant config for IDP[" + PKIIDMap.DKNEMID_NAME + "] loaded");
 		} else {
 			MerchantContextCache.loadMerchantContextByMID(PKIIDMap.DKNEMIDJS_ID, mid);
 			StackLogger.appendEvent(NemIDActionEvent.ACTION_LOAD_MERCHANT_CONTEXTS);
-			Logger.getLogger(Constants.MAIN_LOGGER).info("Merchant config for MID[" + mid + "] IDP[" + PKIIDMap.DKNEMID_NAME + "] loaded");
+			logger.info("Merchant config for MID[" + mid + "] IDP[" + PKIIDMap.DKNEMID_NAME + "] loaded");
 		}
 	}
 
 	private void initIDPCache() throws StatusCodeException {
 		IDPConfigCache.loadIDPConfig(PKIIDMap.DKNEMIDJS_ID);
 		StackLogger.appendEvent(NemIDActionEvent.ACTION_LOAD_IDP_CONFIG);
-		Logger.getLogger(Constants.MAIN_LOGGER).info("IDP config for IDP[" + PKIIDMap.DKNEMID_NAME + "] loaded");
+		logger.info("IDP config for IDP[" + PKIIDMap.DKNEMID_NAME + "] loaded");
 	}
 
 	@Override
 	public void destroy() {
 		StackLogger.appendEvent(NemIDActionEvent.ACTION_IDP_DK_NEMID_LIFECYCLE);
-		Logger.getLogger(Constants.MAIN_LOGGER).info("Stopping " + ArtifactVersion.ARTIFACT_NAME + " " + ArtifactVersion.ARTIFACT_VERSION);
+		logger.info("Stopping " + ArtifactVersion.ARTIFACT_NAME + " " + ArtifactVersion.ARTIFACT_VERSION);
 		super.destroy();
 	}
 
@@ -151,7 +152,7 @@ public class InitDKNEMID extends HttpServlet {
 				Environments.setEnvironments(Environment.OCESII_DANID_ENV_PROD);
 			}
 			StackLogger.appendEvent(NemIDActionEvent.ACTION_LOAD_IDP_CONFIG);
-			Logger.getLogger(Constants.MAIN_LOGGER).info("NemID environment set to: " + danidEnvironment);
+			logger.info("NemID environment set to: " + danidEnvironment);
 
 			ServiceProviderSetup.setOcspRevocationChecker();
 
@@ -160,10 +161,10 @@ public class InitDKNEMID extends HttpServlet {
 
 			IS_CACHE_REFRESH = true;
 			StackLogger.appendEvent(NemIDActionEvent.ACTION_LOAD_OCES_CONFIG);
-			Logger.getLogger(Constants.MAIN_LOGGER).info("OCES config for IDP[" + PKIIDMap.DKNEMID_NAME + "] completed");
+			logger.info("OCES config for IDP[" + PKIIDMap.DKNEMID_NAME + "] completed");
 		} else {
 			StackLogger.appendEvent(NemIDActionEvent.ACTION_LOAD_OCES_CONFIG);
-			Logger.getLogger(Constants.MAIN_LOGGER).info("OCES config already set for IDP[" + PKIIDMap.DKNEMID_NAME + "]");
+			logger.info("OCES config already set for IDP[" + PKIIDMap.DKNEMID_NAME + "]");
 		}
 	}
 
@@ -172,7 +173,7 @@ public class InitDKNEMID extends HttpServlet {
 			Provider[] providers = Security.getProviders();
 
 			for (Provider provider : providers) {
-				Logger.getLogger(Constants.MAIN_LOGGER).debug("Security provider: " + provider.getName() + "[" + provider.getInfo() + "]");
+				logger.debug("Security provider: " + provider.getName() + "[" + provider.getInfo() + "]");
 			}
 
 			Provider bc = Security.getProvider("BC");
@@ -185,10 +186,10 @@ public class InitDKNEMID extends HttpServlet {
 			Security.addProvider(bcp);
 
 			StackLogger.appendEvent(NemIDActionEvent.ACTION_LOAD_IDP_CONFIG);
-			Logger.getLogger(Constants.MAIN_LOGGER).info("Registered security provider: " + bcp.getName() + "[" + bcp.getInfo() + "]");
+			logger.info("Registered security provider: " + bcp.getName() + "[" + bcp.getInfo() + "]");
 		} else {
 			StackLogger.appendEvent(NemIDActionEvent.ACTION_LOAD_IDP_CONFIG);
-			Logger.getLogger(Constants.MAIN_LOGGER).info("Security providers already set for IDP[" + PKIIDMap.DKNEMID_NAME + "]");
+			logger.info("Security providers already set for IDP[" + PKIIDMap.DKNEMID_NAME + "]");
 		}
 	}
 	
