@@ -77,8 +77,6 @@ public class Verify extends BaseServlet {
 
 	private final TransactionHelper transactionHelper;
 
-	private Map<String, String> sessionDatas;
-
 	public Verify() {
 		transactionHelper = new TransactionHelper();
 	}
@@ -92,6 +90,7 @@ public class Verify extends BaseServlet {
 		SigningProcess signingProcess;
 		TransactionStatus transactionStatus = transactionHelper.getTransaction();
 		boolean commit = false;
+		Map<String, String> sessionDatas;
 		try {
 			sessionDatas = DAOUtil.getSessionDataKeysAndValues(sref, SESSION_DATA_KEYS);
 			signingProcess = DAOUtil.getSigningProcess((int) StringUtils.toLong(sessionDatas.get(ConfigKeys.SESSIONKEY_SPID), 0));
