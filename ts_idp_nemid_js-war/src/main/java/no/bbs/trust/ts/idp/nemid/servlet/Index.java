@@ -4,7 +4,6 @@
  */
 package no.bbs.trust.ts.idp.nemid.servlet;
 
-import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.sql.SQLException;
@@ -16,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import eu.nets.no.vas.esign.sdosigner.types.KeyCredentials;
+import no.bbs.trust.common.basics.charset.Charsets;
 import no.bbs.trust.common.basics.exceptions.StatusCodeException;
 import no.bbs.trust.common.basics.types.Dispatch;
 import no.bbs.trust.common.basics.types.ReturnCode;
@@ -74,7 +74,7 @@ public class Index extends BaseServlet {
 	protected ReturnCode serviceRequest(HttpServletRequest request, HttpServletResponse response) throws StatusCodeException {
 		long start = System.currentTimeMillis();
 		logger.info("Get NemID client activation tag");
-		String sref = "" + request.getParameter(ConfigKeys.PARAM_SREF);
+		String sref = request.getParameter(ConfigKeys.PARAM_SREF);
 		String clientMode = getClientMode(request.getParameter(ConfigKeys.PARAM_CLIENTMODE));
 		String clientWidth = getClientWidth(request.getParameter(ConfigKeys.PARAM_CLIENT_WIDTH), clientMode);
 		String clientHeight = getClientHeight(request.getParameter(ConfigKeys.PARAM_CLIENT_HEIGHT), clientMode);
@@ -99,7 +99,7 @@ public class Index extends BaseServlet {
 			String locale = sessionDatas.get(ConfigKeys.SESSIONKEY_LOCALE);
 			locale = (locale.trim().length() > 0) ? locale : LangSupport.getDefaultLanguage();
 			request.setAttribute("locale", locale);
-			String languageCode = null;
+			String languageCode;
 			try {
 				languageCode = new SessionDataDAO().getBySrefAndKey(sref, SessionKey.LOCALE).getVal();
 			} catch (SQLException e) {
@@ -173,7 +173,7 @@ public class Index extends BaseServlet {
 	}
 
 	OcesJsonParameterGenerator createClientGenerator(String mid) throws StatusCodeException {
-		KeyCredentials credentials = null;
+		KeyCredentials credentials;
 		try {
 			credentials = DAOUtil.getMerchantCredentials(mid);
 		} catch (SQLException ex) {
@@ -193,9 +193,9 @@ public class Index extends BaseServlet {
 		String docDescription = signObject.getDescription();
 		logger.debug("Doc type: " + docType + ", title: " + docTitle + ", description: " + docDescription);
 
-		if ("txt,text,text/plain".indexOf(docType.toLowerCase()) > -1) {
+		if ("txt,text,text/plain".contains(docType.toLowerCase())) {
 			docType = "text";
-			String signText = utf8b642iso88591String(signObjectData.getObjectB64());
+			String signText = new String(Base64.decode(signObjectData.getObjectB64()), Charsets.UTF_8);
 			logger.debug("Document signText: " + signText);
 			clientGenerator.setSignText(signText, docType);
 		} else {
@@ -205,7 +205,7 @@ public class Index extends BaseServlet {
 
 			byte[] documentBytes = Base64.decode(signObjectData.getObjectB64());
 			try {
-				String docHash = new String(Base64.encode(HashUtil.hash(documentBytes, Constants.DIGEST_SHA2)));
+				String docHash = new String(Base64.encode(HashUtil.hash(documentBytes, Constants.DIGEST_SHA2)), Charsets.UTF_8);
 				attachment.setB64HashValue(docHash);
 				attachment.setB64HashAlgo(Constants.DIGEST_SHA2_SHORTNAME);
 			} catch (NoSuchAlgorithmException e) {
@@ -246,7 +246,6 @@ public class Index extends BaseServlet {
 	}
 
 	private SignerStatusTable[] getStatusTable(String mid, String sref, SigningProcess sp) throws StatusCodeException {
-		TEMessage temessage = null;
 		try {
 			GetStatusTableRequest gstq = new GetStatusTableRequest();
 			gstq.setSignProcessID("" + sp.getSignprocessId());
@@ -255,7 +254,7 @@ public class Index extends BaseServlet {
 			gstq.setTransId(sref);
 
 			Requestor requestor = new Requestor(getConfigProperty(ConfigKeys.CONFIG_TRUSTENGINE_URL), 10000L);
-			temessage = requestor.sendRequest(gstq);
+			TEMessage temessage = requestor.sendRequest(gstq);
 
 			if (temessage instanceof ErrorResponse) {
 				ErrorResponse ers = (ErrorResponse) temessage;
@@ -265,22 +264,10 @@ public class Index extends BaseServlet {
 
 			GetStatusTableResponse gsts = (GetStatusTableResponse) temessage;
 			return gsts.getStatusTable();
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			EventLogger.dumpStack(t, logger);
 			throw new StatusCodeException(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR, "Unable to finalize SigningProcess [SREF=" + sref + "] Reason"
 					+ t.getMessage());
-		}
-	}
-
-	private static String utf8b642iso88591String(String b64in) throws StatusCodeException {
-		try {
-			byte[] utfbytes = Base64.decode(b64in);
-			b64in = null;
-			byte[] isobytes = new String(utfbytes, UTF_8).getBytes(ISO_8859_1);
-			return new String(isobytes, ISO_8859_1);
-		} catch (UnsupportedEncodingException uex) {
-			EventLogger.dumpStack(uex, logger);
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR, uex.getMessage());
 		}
 	}
 }
