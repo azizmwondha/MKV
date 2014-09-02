@@ -1,60 +1,49 @@
 package no.bbs.trust.ts.idp.nemid.verify;
 
-public class VerifyClientSignatureResponseData extends AbstractData
-{
+public class VerifyClientSignatureResponseData extends AbstractData {
 	private String signature = null;
 	private String ocsp = null;
 	private String signerPID = null;
 	private String signerCPR = null;
 	private String signerRID = null;
 
-	public void setB64signature(String signature)
-	{
+	public void setB64signature(String signature) {
 		this.signature = signature;
 	}
 
-	public String getB64signature()
-	{
+	public String getB64signature() {
 		return signature;
 	}
 
-	public void setB64ocsp(String ocsp)
-	{
+	public void setB64ocsp(String ocsp) {
 		this.ocsp = ocsp;
 	}
 
-	public String getB64ocsp()
-	{
+	public String getB64ocsp() {
 		return ocsp;
 	}
 
-	public String getSignerPID()
-	{
+	public String getSignerPID() {
 		return signerPID;
 	}
 
-	public void setSignerPID(String signerPID)
-	{
+	public void setSignerPID(String signerPID) {
 		this.signerPID = signerPID;
 	}
 
-	public String getSignerCPR()
-	{
+	public String getSignerCPR() {
 		return signerCPR;
 	}
 
-	public void setSignerCPR(String signerCPR)
-	{
+	public void setSignerCPR(String signerCPR) {
 		this.signerCPR = signerCPR;
 	}
 
-	public String getSignerRID()
-	{
+	public String getSignerRID() {
 		return signerRID;
 	}
 
-	public void setSignerRID(String signerRID)
-	{
+	public void setSignerRID(String signerRID) {
 		this.signerRID = signerRID;
 	}
 }

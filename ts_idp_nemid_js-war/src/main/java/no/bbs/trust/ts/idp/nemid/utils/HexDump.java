@@ -1,7 +1,8 @@
 package no.bbs.trust.ts.idp.nemid.utils;
 
 public final class HexDump {
-	static char[] hexstr = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	static char[] hexstr = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+
 	/**
 	 * Convert byte value to hexadecimal string representation (for trace dumps)
 	 * @return java.lang.String
@@ -11,6 +12,7 @@ public final class HexDump {
 	static String tohex(byte value, int digits) {
 		return tohex((int) value, digits);
 	}
+
 	/**
 	 * Convert byte value to hexadecimal string representation (for trace dumps)
 	 * @return java.lang.String
@@ -31,20 +33,20 @@ public final class HexDump {
 
 		return String.valueOf(ret);
 	}
-	
+
 	public static String xdump(byte[] bytes) {
 		return xdump(bytes, 0, bytes.length);
 	}
-	
+
 	/**
 	 * Dumps data block in hexadecimal representation (part of trace action)
 	 * @param bytes byte[]
 	 */
 	public static String xdump(byte[] bytes, int srcPos, int length) {
-		if (bytes==null)
+		if (bytes == null)
 			return "null";
 		int len = length;
-		if (srcPos+length>bytes.length)
+		if (srcPos + length > bytes.length)
 			len = bytes.length;
 		int ofs = srcPos, count = 0;
 		int n;
@@ -95,9 +97,9 @@ public final class HexDump {
 
 		return outstr.toString();
 	}
-	
+
 	public static String hex(byte[] bytes) {
-		if (bytes==null)
+		if (bytes == null)
 			return "null";
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < bytes.length; i++)

@@ -22,9 +22,9 @@ public class Attachments {
 		b.append(endTag(XML_ELEM_ATTACHMENTS));
 		return b.toString();
 	}
-	
+
 	public void addAttachment(Attachment att) {
-		if(null==attachments) {
+		if (null == attachments) {
 			attachments = new ArrayList<Attachment>();
 		}
 		attachments.add(att);

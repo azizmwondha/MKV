@@ -6,16 +6,15 @@
 package no.bbs.trust.ts.idp.nemid.startup;
 
 import java.util.ArrayList;
+
 import no.bbs.trust.common.config.ConfigProperty;
 import no.bbs.trust.common.config.type.ConfigTypes;
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
 
 
-public class InitConfig extends no.bbs.trust.common.webapp.servlets.InitConfig
-{
+public class InitConfig extends no.bbs.trust.common.webapp.servlets.InitConfig {
 	@Override
-	public ArrayList<ConfigProperty> getConfigPropertySettings()
-	{
+	public ArrayList<ConfigProperty> getConfigPropertySettings() {
 		ArrayList<ConfigProperty> params = new ArrayList<ConfigProperty>();
 
 		ConfigProperty property = new ConfigProperty();

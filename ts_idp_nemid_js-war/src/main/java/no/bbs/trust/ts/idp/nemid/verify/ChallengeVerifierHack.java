@@ -34,10 +34,10 @@ import org.openoces.ooapi.signatures.SignatureProperty;
 import org.openoces.securitypackage.exceptions.ChallengeDoesNotMatchException;
 
 public class ChallengeVerifierHack {
-    static void verifyChallenge(OpensignAbstractSignature abstractSignature, String challenge) throws InternalException {
-        SignatureProperty signatureChallenge = abstractSignature.getSignatureProperties().get("challenge");
-        if (signatureChallenge==null || signatureChallenge.getValue()==null || !signatureChallenge.getValue().equals(challenge)) {
-            throw new ChallengeDoesNotMatchException("Challenge does not match expected value or expected value is null, expected="+challenge+", actual="+(signatureChallenge==null?"null":signatureChallenge.getValue()));
-        }
-    }
+	static void verifyChallenge(OpensignAbstractSignature abstractSignature, String challenge) throws InternalException {
+		SignatureProperty signatureChallenge = abstractSignature.getSignatureProperties().get("challenge");
+		if (signatureChallenge == null || signatureChallenge.getValue() == null || !signatureChallenge.getValue().equals(challenge)) {
+			throw new ChallengeDoesNotMatchException("Challenge does not match expected value or expected value is null, expected=" + challenge + ", actual=" + (signatureChallenge == null ? "null" : signatureChallenge.getValue()));
+		}
+	}
 }

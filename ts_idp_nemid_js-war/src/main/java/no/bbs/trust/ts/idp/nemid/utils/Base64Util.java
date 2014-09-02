@@ -1,6 +1,7 @@
 package no.bbs.trust.ts.idp.nemid.utils;
 
 import java.io.UnsupportedEncodingException;
+
 import org.bouncycastle.util.encoders.Base64;
 
 public class Base64Util {

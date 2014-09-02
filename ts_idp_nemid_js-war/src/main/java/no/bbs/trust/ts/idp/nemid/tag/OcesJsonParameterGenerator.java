@@ -35,14 +35,13 @@ import java.util.TreeMap;
 import no.bbs.trust.common.config.Config;
 import no.bbs.trust.ts.idp.nemid.attachments.Attachment;
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
-
 import org.openoces.ooapi.utils.Base64Handler;
 import org.openoces.ooapi.web.JSONException;
 import org.openoces.ooapi.web.JSONObject;
 
 /**
-* Generates valid JSON of the parameters for the JSClient.
-*/
+ * Generates valid JSON of the parameters for the JSClient.
+ */
 public class OcesJsonParameterGenerator {
 
 	private static final String LINE_SEPARATOR = "line.separator";

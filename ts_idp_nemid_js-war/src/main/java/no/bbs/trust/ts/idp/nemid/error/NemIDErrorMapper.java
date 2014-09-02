@@ -1,7 +1,6 @@
 package no.bbs.trust.ts.idp.nemid.error;
 
 import no.bbs.trust.common.config.Config;
-
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
 
 public class NemIDErrorMapper {
