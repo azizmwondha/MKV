@@ -12,10 +12,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import eu.nets.no.vas.esign.sdosigner.types.KeyCredentials;
 import no.bbs.trust.common.basics.exceptions.StatusCodeException;
 import no.bbs.trust.common.basics.types.Dispatch;
 import no.bbs.trust.common.basics.types.ReturnCode;
@@ -46,13 +46,10 @@ import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObject;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObjectData;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.WebContext;
-
 import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Base64;
 import org.openoces.ooapi.utils.Base64Handler;
 import org.springframework.transaction.TransactionStatus;
-
-import eu.nets.no.vas.esign.sdosigner.types.KeyCredentials;
 
 /**
  * @author azm
@@ -286,10 +283,4 @@ public class Index extends BaseServlet {
 			throw new StatusCodeException(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR, uex.getMessage());
 		}
 	}
-
-	@Override
-	public void doInit() throws ServletException {
-		// Empty
-	}
-
 }

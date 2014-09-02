@@ -1,6 +1,5 @@
 package no.bbs.trust.ts.idp.nemid.servlet;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -16,7 +15,6 @@ import no.bbs.trust.ts.idp.nemid.event.NemIDPerformanceEvent;
 import no.bbs.trust.ts.idp.nemid.utils.DAOUtil;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObjectData;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
-
 import org.bouncycastle.util.encoders.Base64;
 
 /**
@@ -57,10 +55,4 @@ public class GetDocument extends BaseServlet {
 		returnCode.addHeader("Access-Control-Allow-Origin", Config.INSTANCE.getProperty("nemid.client.origin"));
 		return returnCode;
 	}
-
-	@Override
-	public void doInit() throws ServletException {
-		//		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
 }

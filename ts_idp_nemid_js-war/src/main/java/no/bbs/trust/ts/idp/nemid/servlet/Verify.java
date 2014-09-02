@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -59,7 +58,6 @@ import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObjectData;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignerId;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.Step;
-
 import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Base64;
 import org.springframework.transaction.TransactionStatus;
@@ -584,10 +582,4 @@ public class Verify extends BaseServlet {
 			}
 		}
 	}
-
-	@Override
-	public void doInit() throws ServletException {
-		//		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
 }
