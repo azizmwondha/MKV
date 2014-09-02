@@ -68,7 +68,6 @@ public class Index extends BaseServlet {
 		ConfigKeys.SESSIONKEY_TZO };
 
 	private final TransactionHelper transactionHelper;
-	private OcesJsonParameterGenerator clientGenerator;
 
 	public Index() {
 		transactionHelper = new TransactionHelper();
@@ -110,8 +109,8 @@ public class Index extends BaseServlet {
 				throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, e, COMPONENT_NAME, sref);
 			}
 
-			createClientGenerator(mid);
-			setSigningDocument(signingProcess, sref);
+			OcesJsonParameterGenerator clientGenerator = createClientGenerator(mid);
+			setSigningDocument(clientGenerator, signingProcess, sref);
 			String challenge = Base64Handler.encode(ChallengeGenerator.generateChallenge());
 			String clientTag = clientGenerator.generateClientTag(clientMode, clientWidth, clientHeight, languageCode, challenge, sref);
 			logger.debug("NemID JS client tag: " + clientTag);
@@ -176,7 +175,7 @@ public class Index extends BaseServlet {
 		return height;
 	}
 
-	void createClientGenerator(String mid) throws StatusCodeException {
+	OcesJsonParameterGenerator createClientGenerator(String mid) throws StatusCodeException {
 		KeyCredentials credentials = null;
 		try {
 			credentials = DAOUtil.getMerchantCredentials(mid);
@@ -186,10 +185,10 @@ public class Index extends BaseServlet {
 		}
 
 		Signer signer = new Signer(credentials.getKeystorepath(), credentials.getKeystorepass(), credentials.getKeyalias(), credentials.getKeyaliaspass());
-		clientGenerator = new OcesJsonParameterGenerator(signer);
+		return new OcesJsonParameterGenerator(signer);
 	}
 
-	void setSigningDocument(SigningProcess signingProcess, String sref) throws StatusCodeException {
+	void setSigningDocument(OcesJsonParameterGenerator clientGenerator, SigningProcess signingProcess, String sref) throws StatusCodeException {
 		SignObjectData signObjectData = DAOUtil.getSignObjectData(signingProcess);
 		SignObject signObject = DAOUtil.getSignObject(signObjectData.getSignerObjectId());
 		String docType = signObjectData.getElementType();
@@ -225,10 +224,6 @@ public class Index extends BaseServlet {
 			logger.debug("Attachment: " + attachment.toXML());
 			clientGenerator.setSignPdf(docDescription, attachment);
 		}
-	}
-
-	OcesJsonParameterGenerator getClientGenerator() {
-		return clientGenerator;
 	}
 
 	private static void setupWebContext(String tid, SigningProcess sp, HttpServletRequest request) throws StatusCodeException {

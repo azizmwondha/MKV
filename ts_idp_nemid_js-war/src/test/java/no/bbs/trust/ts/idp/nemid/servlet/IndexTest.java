@@ -82,12 +82,11 @@ public class IndexTest {
 		Index index = new Index();
 		index.init(null);
 		String mid = DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_MID);
-		index.createClientGenerator(mid);
+		OcesJsonParameterGenerator clientGenerator = index.createClientGenerator(mid);
 
 		int spid = (int) StringUtils.toLong(DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_SPID), 0);
 		SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
-		index.setSigningDocument(signingProcess, sref);
-		OcesJsonParameterGenerator clientGenerator = index.getClientGenerator();
+		index.setSigningDocument(clientGenerator, signingProcess, sref);
 		String challenge = ChallengeGenerator.generateChallenge();
 		String clientTag = clientGenerator.generateClientTag("standard", "500", "450", "en", challenge, sref);
 
