@@ -47,6 +47,7 @@ import no.bbs.tt.bc.cryptlib.x509.X509ParserException;
 import no.bbs.tt.trustsign.te.common.constants.TEConstants;
 import no.bbs.tt.trustsign.trustsignDAL.constant.DbTableInfo;
 import no.bbs.tt.trustsign.trustsignDAL.constant.PKIConfigKeys;
+import no.bbs.tt.trustsign.trustsignDAL.constant.SignerIDTypes;
 import no.bbs.tt.trustsign.trustsignDAL.constant.StatusTypes;
 import no.bbs.tt.trustsign.trustsignDAL.dao.helpers.MerchantPropertiesHelperDAO;
 import no.bbs.tt.trustsign.trustsignDAL.dao.table.BaseorderDAO;
@@ -58,7 +59,6 @@ import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObjectData;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignerId;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.Step;
-import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Base64;
 import org.springframework.transaction.TransactionStatus;
 
@@ -67,8 +67,6 @@ import org.springframework.transaction.TransactionStatus;
  * @author azm
  */
 public class Verify extends BaseServlet {
-
-	private static final long serialVersionUID = 1L;
 
 	private static final String PKICONFIG_PIDSERVICEID = "PIDServiceId";
 	private static final String PKICONFIG_RIDSERVICEID = "RIDServiceId";
@@ -159,7 +157,7 @@ public class Verify extends BaseServlet {
 		vcsdata.setCertType(DAOUtil.getCertificateTypes(signingProcess.getSignerId()));
 
 		String mid = sessionDatas.get(ConfigKeys.SESSIONKEY_MID);
-		String dtype = null;
+		String dtype;
 		if (signObject.getElementType().equalsIgnoreCase("pdf")) {
 			dtype = "application/pdf";
 		} else {
@@ -170,13 +168,13 @@ public class Verify extends BaseServlet {
 
 		SignerId signerID = DAOUtil.getSignerID(signingProcess.getSignerId());
 		if (null != signerID) {
-			if ("SSN".equalsIgnoreCase("" + signerID.getIdKey())) {
+			if (SignerIDTypes.SSN.equals(signerID.getIdKey())) {
 				vcsdata.setSignerCPR(signerID.getIdValue());
 			}
-			if ("PID".equalsIgnoreCase("" + signerID.getIdKey())) {
+			if (SignerIDTypes.PID.equals(signerID.getIdKey())) {
 				vcsdata.setSignerPID(signerID.getIdValue());
 			}
-			if ("RID".equalsIgnoreCase("" + signerID.getIdKey())) {
+			if (SignerIDTypes.RID.equals(signerID.getIdKey())) {
 				vcsdata.setSignerRID(signerID.getIdValue());
 			}
 		}
@@ -185,7 +183,7 @@ public class Verify extends BaseServlet {
 	}
 
 	private static void verifySignature(VerifyClientSignatureResponseDataExt verifySign, SigningProcess signingProcess, String signedResponse) throws StatusCodeException {
-		String signerCN = null;
+		String signerCN;
 		String signerCertPolicyOID = null;
 
 		try {
@@ -400,8 +398,6 @@ public class Verify extends BaseServlet {
 
 			EventLogger.appendEvent(NemIDActionEvent.ACTION_DK_NEMID_SIGN_OK);
 			return responseData;
-		} catch (StatusCodeException sce) {
-			throw sce;
 		} catch (Throwable t) {
 			EventLogger.dumpStack(t);
 			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, t.getMessage());
@@ -425,12 +421,12 @@ public class Verify extends BaseServlet {
 		String proxyHost = Config.INSTANCE.getProperty(ConfigKeys.CPR_LOOKUP_PROXYHOST);
 		String proxyPort = Config.INSTANCE.getProperty(ConfigKeys.CPR_LOOKUP_PROXYPORT);
 
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("truststorepath: " + truststorepath);
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).trace("truststorepass: " + truststorepass);
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("truststoretype: " + truststoretype);
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("lookupURL: " + lookupURL);
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("proxyHost: " + proxyHost);
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("proxyPort: " + proxyPort);
+		logger.debug("truststorepath: " + truststorepath);
+		logger.trace("truststorepass: " + truststorepass);
+		logger.debug("truststoretype: " + truststoretype);
+		logger.debug("lookupURL: " + lookupURL);
+		logger.debug("proxyHost: " + proxyHost);
+		logger.debug("proxyPort: " + proxyPort);
 
 		MerchantContext mc = MerchantContextCache.getMerchantContext(mid);
 
@@ -448,8 +444,8 @@ public class Verify extends BaseServlet {
 			throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_SETUP_FAIL, "Unable to find rid keystore for Merchant[" + mid + "]");
 		}
 
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("CPRRequest keystore: " + keystorepath);
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("CPRRequest sto type: " + keystoretype);
+		logger.debug("CPRRequest keystore: " + keystorepath);
+		logger.debug("CPRRequest sto type: " + keystoretype);
 
 		ctx.setTruststore(truststorepath);
 		ctx.setTruststorePwd(truststorepass);
@@ -493,7 +489,7 @@ public class Verify extends BaseServlet {
 	}
 
 	private static boolean matchCPR2PID(String mid, String nemIDserviceID, String pid, String cpr) throws Exception {
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("Match sPID:" + pid + "/oCPR:" + cpr);
+		logger.debug("Match sPID:" + pid + "/oCPR:" + cpr);
 
 		if (StringUtils.isNullorEmpty(cpr) || StringUtils.isNullorEmpty(pid)) {
 			return false;
@@ -506,12 +502,12 @@ public class Verify extends BaseServlet {
 		String proxyHost = Config.INSTANCE.getProperty(ConfigKeys.CPR_LOOKUP_PROXYHOST);
 		String proxyPort = Config.INSTANCE.getProperty(ConfigKeys.CPR_LOOKUP_PROXYPORT);
 
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("truststorepath: " + truststorepath);
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).trace("truststorepass: " + truststorepass);
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("truststoretype: " + truststoretype);
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("lookupURL: " + lookupURL);
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("proxyHost: " + proxyHost);
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("proxyPort: " + proxyPort);
+		logger.debug("truststorepath: " + truststorepath);
+		logger.trace("truststorepass: " + truststorepass);
+		logger.debug("truststoretype: " + truststoretype);
+		logger.debug("lookupURL: " + lookupURL);
+		logger.debug("proxyHost: " + proxyHost);
+		logger.debug("proxyPort: " + proxyPort);
 
 		MerchantContext mc = MerchantContextCache.getMerchantContext(mid);
 
@@ -525,7 +521,7 @@ public class Verify extends BaseServlet {
 		String keystorepass = idpc.get(PKIConfigKeys.KEYSTORE_PASSWORD);
 		String keystoretype = (keystorepath.toLowerCase().endsWith(".p12")) ? "PKCS12" : "JKS";
 
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("CPRRequest keystore: " + keystorepath);
+		logger.debug("CPRRequest keystore: " + keystorepath);
 
 		int serviceId = (int) StringUtils.toLong(nemIDserviceID, 0);
 		int VOID_MERCHANT_ID = 127;
@@ -534,19 +530,19 @@ public class Verify extends BaseServlet {
 
 		int requestId = (int) (Math.random() * Integer.MAX_VALUE);
 
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).debug("CPRRequest ID: " + requestId);
+		logger.debug("CPRRequest ID: " + requestId);
 
 		MatchCPR2PIDRequest match;
 		try {
 			match = new MatchCPR2PIDRequest(serviceId, pid, cpr, requestId);
 		} catch (Exception e) {
-			Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).error(
+			logger.error(
 					"Unable to do a pid match for [Merchant=" + mid + "] Errormessage: " + e.getMessage());
 			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Unable to do a pid match for Merchant[" + mid + "]");
 		}
 		ResponseType resp = facade.sendCPRRegistryRequest(match);
 		EventLogger.appendEvent(NemIDActionEvent.ACTION_DK_NEMID_CPRMATCH);
-		Logger.getLogger(no.bbs.trust.common.basics.constants.Constants.MAIN_LOGGER).info(
+		logger.info(
 				"[MatchStatus=" + resp.getStatus().getStatusCode() + "][MatchMessage=" + resp.getStatus().getStatusText().get(0).getValue() + "]");
 		return (resp.getStatus().getStatusCode() == 0);
 	}
