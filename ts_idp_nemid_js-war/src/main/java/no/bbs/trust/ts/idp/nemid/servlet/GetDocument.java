@@ -47,7 +47,7 @@ public class GetDocument extends BaseServlet {
 		logger.info("[DocumentType=" + docType + "][DocumentSize=" + documentData.length + "]");
 		EventLogger.appendEvent(NemIDPerformanceEvent.DK_NEMID_GET_DOCUMENT, start);
 
-		if ("txt,text,text/plain".indexOf(docType.toLowerCase()) > -1) {
+		if ("txt,text,text/plain".contains(docType.toLowerCase())) {
 			return new ReturnCode(documentData, ContentType.TEXT_PLAIN, CharsetType.UTF_8);
 		}
 
