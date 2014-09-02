@@ -23,7 +23,6 @@
 */
 package no.bbs.trust.ts.idp.nemid.tag;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -32,6 +31,7 @@ import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
+import no.bbs.trust.common.basics.charset.Charsets;
 import no.bbs.trust.common.config.Config;
 import no.bbs.trust.ts.idp.nemid.attachments.Attachment;
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
@@ -145,11 +145,7 @@ public class OcesJsonParameterGenerator {
 			sb.append(key);
 			sb.append(parameters.get(key));
 		}
-		try {
-			return sb.toString().getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
+		return sb.toString().getBytes(Charsets.UTF_8);
 	}
 
 	public String generateClientTag(String clientMode, String width, String height, String language, String challenge, String sref) {
