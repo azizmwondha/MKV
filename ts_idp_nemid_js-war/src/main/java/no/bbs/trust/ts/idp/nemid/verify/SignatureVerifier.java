@@ -13,7 +13,6 @@ import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
 import no.bbs.trust.ts.idp.nemid.error.ErrorCodes;
 import no.bbs.trust.ts.idp.nemid.error.NemIDErrorMapper;
 import no.bbs.trust.ts.idp.nemid.event.NemIDActionEvent;
-import no.bbs.trust.ts.idp.nemid.utils.Base64Util;
 import no.bbs.tt.bc.cryptlib.ocsp.CertificateStatusException;
 import no.bbs.tt.bc.cryptlib.ocsp.OCSPData;
 import no.bbs.tt.bc.cryptlib.ocsp.OCSPRequestor;
@@ -149,7 +148,7 @@ public class SignatureVerifier {
 					proxyHost, proxyPort, proxyUser, proxyPass, 10000L, null, truststorepath, truststorepass);
 
 			byte[] bpOCSPResponse = ocspData.getBasicOCSPResponse();
-			return StringUtils.stripWhitespaces(new String(Base64Util.encode(bpOCSPResponse), CHARSET_ENCODING));
+			return StringUtils.stripWhitespaces(new String(Base64.encode(bpOCSPResponse, false), CHARSET_ENCODING));
 		} catch (CertificateStatusException ex) {
 			logger.info("OCSP response retrieval: " + ex.getMessage());
 		} catch (UnsupportedEncodingException ex) {
