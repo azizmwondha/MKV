@@ -297,21 +297,21 @@ public class DAOUtil {
 			SignerAcceptPkiDAO sapdao = new SignerAcceptPkiDAO();
 			List<SignerAcceptPki> saps = sapdao.getBySignerid(null, signerID);
 
-			if (null != saps) {
-				StringBuilder certTypes = new StringBuilder();
-				for (Object sapo : saps) {
-					SignerAcceptPki sap = (SignerAcceptPki) sapo;
-					if (sap.getPkiId() == PKIIDMap.DKNEMIDJS_ID) {
-						if (certTypes.length() > 0) {
-							certTypes.append(",");
-						}
-						certTypes.append(sap.getCertType());
-					}
-				}
-				return certTypes.toString();
+			if (null == saps) {
+				return null;
 			}
 
-			return null;
+			StringBuilder certTypes = new StringBuilder();
+			for (SignerAcceptPki sap : saps) {
+				if (sap.getPkiId() == PKIIDMap.DKNEMIDJS_ID) {
+					if (certTypes.length() > 0) {
+						certTypes.append(",");
+					}
+					certTypes.append(sap.getCertType());
+				}
+			}
+			return certTypes.toString();
+
 		} catch (SQLException se) {
 			throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, "Cannot retrieve cert types for SREF: " + se.getMessage());
 		}
