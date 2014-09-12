@@ -19,6 +19,7 @@ import no.bbs.tt.bc.cryptlib.ocsp.OCSPRequestor;
 import no.bbs.tt.bc.cryptlib.x509.X509Parser;
 
 import org.apache.log4j.Logger;
+import org.openoces.ooapi.certificate.CertificateStatus;
 import org.openoces.ooapi.certificate.FocesCertificate;
 import org.openoces.ooapi.certificate.MocesCertificate;
 import org.openoces.ooapi.certificate.PocesCertificate;
@@ -60,9 +61,15 @@ public class SignatureVerifier {
 			boolean isMoces = (status.getCertificate() instanceof MocesCertificate);
 			boolean isPoces = (status.getCertificate() instanceof PocesCertificate);
 
-			logger.info("CertificateStatus: " + status.getCertificateStatus());
+			CertificateStatus certificateStatus = status.getCertificateStatus();
+			logger.info("CertificateStatus: " + certificateStatus);
 			logger.info("CertificateType: " + (isFoces ? "F" : (isMoces ? "M" : (isPoces ? "P" : "Unknown-"))) + "OCES");
 			logger.debug("Signature Matches: " + status.signatureMatches());
+
+			if (!"VALID".equals(certificateStatus)) {
+				logger.info("Certificate not valid");
+				throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Invalid certificatestatus: " + certificateStatus);
+			}
 
 			if (isPoces) {
 				PocesCertificate poces = (PocesCertificate) status.getCertificate();
