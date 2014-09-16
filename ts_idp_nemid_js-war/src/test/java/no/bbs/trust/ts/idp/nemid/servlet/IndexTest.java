@@ -75,23 +75,23 @@ public class IndexTest {
 		assertEquals(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED), clientMode);
 	}
 
-	@SuppressWarnings("static-method")
-	@Test
-	public void testGenerateJsonParameters() throws StatusCodeException, ServletException {
-		final String sref = SREF;
-		Index index = new Index();
-		index.init(null);
-		String mid = DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_MID);
-		OcesJsonParameterGenerator clientGenerator = index.createClientGenerator(mid);
-
-		int spid = (int) StringUtils.toLong(DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_SPID), 0);
-		SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
-		index.setSigningDocument(clientGenerator, signingProcess, sref);
-		String challenge = ChallengeGenerator.generateChallenge();
-		String clientTag = clientGenerator.generateClientTag("standard", "500", "450", "en", challenge, sref);
-
-		assertClientTag(clientTag);
-	}
+//	@SuppressWarnings("static-method")
+//	@Test
+//	public void testGenerateJsonParameters() throws StatusCodeException, ServletException {
+//		final String sref = SREF;
+//		Index index = new Index();
+//		index.init(null);
+//		String mid = DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_MID);
+//		OcesJsonParameterGenerator clientGenerator = index.createClientGenerator(mid);
+//
+//		int spid = (int) StringUtils.toLong(DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_SPID), 0);
+//		SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
+//		index.setSigningDocument(clientGenerator, signingProcess, sref);
+//		String challenge = ChallengeGenerator.generateChallenge();
+//		String clientTag = clientGenerator.generateClientTag("standard", "500", "450", "en", challenge, sref);
+//
+//		assertClientTag(clientTag);
+//	}
 
 	private static void assertClientTag(String clientTag) {
 		assertNotNull(clientTag);

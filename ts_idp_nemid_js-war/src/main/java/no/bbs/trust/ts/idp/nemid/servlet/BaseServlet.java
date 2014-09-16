@@ -11,6 +11,8 @@ import no.bbs.trust.common.webapp.servlets.BaseSignServlet;
 import no.bbs.trust.ts.idp.nemid.event.NemIDActionEvent;
 import no.bbs.trust.ts.idp.nemid.event.NemIDPerformanceEvent;
 
+import org.apache.log4j.MDC;
+
 public abstract class BaseServlet extends BaseSignServlet {
 
 	@Override
@@ -35,5 +37,33 @@ public abstract class BaseServlet extends BaseSignServlet {
 
 	protected abstract ReturnCode serviceRequest(HttpServletRequest request, HttpServletResponse response) throws StatusCodeException;
 
+	@Override
+	protected String buildMDC(HttpServletRequest request, String tidParam) {
+		String sref = null;
+		try {
+			sref = request.getParameter(tidParam);
+		} catch (IllegalStateException e) {
+			String queryString = request.getQueryString();
+			if (queryString.startsWith("sref=")) {
+				sref = queryString.substring(5);
+			}
+
+		}
+
+		if (null != sref) {
+			updateMDCTID(sref);
+		} else {
+			sref = "no-tid-" + System.currentTimeMillis() + "-" + Math.random();
+			updateMDCTID(sref);
+			request.setAttribute("no-tid-sref", sref);
+		}
+		try {
+			MDC.remove("IP");
+			MDC.put("IP", "" + getClientIP(request));
+		} catch (StatusCodeException sce) {
+			EventLogger.dumpStack(sce, "DEBUG");
+		}
+		return sref;
+	}
 
 }

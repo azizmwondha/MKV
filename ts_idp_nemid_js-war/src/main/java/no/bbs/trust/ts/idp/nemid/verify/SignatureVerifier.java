@@ -66,7 +66,7 @@ public class SignatureVerifier {
 			logger.info("CertificateType: " + (isFoces ? "F" : (isMoces ? "M" : (isPoces ? "P" : "Unknown-"))) + "OCES");
 			logger.debug("Signature Matches: " + status.signatureMatches());
 
-			if (!"VALID".equals(certificateStatus)) {
+			if (!CertificateStatus.VALID.equals(certificateStatus)) {
 				logger.info("Certificate not valid");
 				throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Invalid certificatestatus: " + certificateStatus);
 			}

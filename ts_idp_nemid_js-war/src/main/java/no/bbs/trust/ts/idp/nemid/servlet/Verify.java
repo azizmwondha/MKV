@@ -1,6 +1,8 @@
 package no.bbs.trust.ts.idp.nemid.servlet;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.cert.X509Certificate;
 import java.sql.SQLException;
@@ -8,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -19,6 +22,7 @@ import no.bbs.trust.common.basics.exceptions.StatusCodeException;
 import no.bbs.trust.common.basics.types.Dispatch;
 import no.bbs.trust.common.basics.types.ReturnCode;
 import no.bbs.trust.common.basics.utils.EventLogger;
+import no.bbs.trust.common.basics.utils.RequestReader;
 import no.bbs.trust.common.basics.utils.StringUtils;
 import no.bbs.trust.common.config.Config;
 import no.bbs.trust.common.webapp.utils.StackLogger;
@@ -59,6 +63,7 @@ import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObjectData;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignerId;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.Step;
+
 import org.bouncycastle.util.encoders.Base64;
 import org.springframework.transaction.TransactionStatus;
 
@@ -71,7 +76,7 @@ public class Verify extends BaseServlet {
 	private static final String PKICONFIG_PIDSERVICEID = "PIDServiceId";
 	private static final String PKICONFIG_RIDSERVICEID = "RIDServiceId";
 	private static final String[] SESSION_DATA_KEYS = new String[] { ConfigKeys.SESSIONKEY_SPID, ConfigKeys.SESSIONKEY_CHALLENGE, ConfigKeys.SESSIONKEY_MID,
-		ConfigKeys.SESSIONKEY_LOCALE };
+			ConfigKeys.SESSIONKEY_LOCALE };
 
 	private final TransactionHelper transactionHelper;
 
@@ -96,7 +101,24 @@ public class Verify extends BaseServlet {
 			// Check signing process, sref and step before proceeding
 			checkSigningProcessSrefAndStep(signingProcess, sref);
 
-			String signedResponse = request.getParameter("response");
+			String signedResponse = null;
+			try {
+				signedResponse = request.getParameter("response");
+			} catch (IllegalStateException e) {
+				//response is to big for java sun server 7, get it from inputstream instead.
+				logger.debug("Error when getting response parameter." + e.getMessage(), e);
+			}
+
+			if (signedResponse == null) {
+				try {
+					signedResponse = extractResponse(request);
+				} catch (IOException ioException) {
+					logger.info("Not able to open request input stream to read response");
+					throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Not able to open request input stream for signingProcess: ["
+							+ signingProcess.getSignprocessId() + "]" + StatusTypes.getNameById(signingProcess.getStatusId()) + "]");
+				}
+			}
+
 			logger.debug("Signed response: " + signedResponse);
 
 			VerifyClientSignatureData verifyClientSignatureData = getVerifyClientSignatureData(signingProcess, signedResponse, sessionDatas);
@@ -126,6 +148,30 @@ public class Verify extends BaseServlet {
 		return new ReturnCode(Dispatch.REDIRECT, getConfigProperty(ConfigKeys.CONFIG_NEMID_RECEIPTURL) + "?status=completed&sref=" + sref);
 	}
 
+	@SuppressWarnings("resource")
+	private static String extractResponse(HttpServletRequest request) throws IOException {
+		ServletInputStream inputStream = null;
+		String signedResponse = null;
+		try {
+			inputStream = request.getInputStream();
+			String readRequest = RequestReader.readRequest(inputStream);
+			if (readRequest.startsWith("response=")) {
+				String decodedResponse = URLDecoder.decode(readRequest, "UTF-8");
+				logger.debug(decodedResponse);
+				signedResponse = decodedResponse.substring(9);
+			}
+		} finally {
+			if (inputStream != null) {
+				try {
+					inputStream.close();
+				} catch (IOException e1) {
+					inputStream = null;
+				}
+			}
+		}
+		return signedResponse;
+	}
+
 	private static void checkSigningProcessSrefAndStep(SigningProcess signingProcess, String sref) throws StatusCodeException {
 		// Check signing process status before proceeding
 		if ((signingProcess.getStatusId() != StatusTypes.READY_ID) && (signingProcess.getStatusId() != StatusTypes.INPROGRESS_ID)) {
@@ -144,7 +190,8 @@ public class Verify extends BaseServlet {
 		}
 	}
 
-	private static VerifyClientSignatureData getVerifyClientSignatureData(SigningProcess signingProcess, String signedResponse, Map<String, String> sessionDatas) throws StatusCodeException {
+	protected static VerifyClientSignatureData getVerifyClientSignatureData(SigningProcess signingProcess, String signedResponse,
+			Map<String, String> sessionDatas) throws StatusCodeException {
 		String challenge = sessionDatas.get(ConfigKeys.SESSIONKEY_CHALLENGE);
 		logger.debug("Challenge: " + challenge);
 		SignObjectData signObject = DAOUtil.getSignObjectData(signingProcess);
@@ -182,7 +229,8 @@ public class Verify extends BaseServlet {
 		return vcsdata;
 	}
 
-	private static void verifySignature(VerifyClientSignatureResponseDataExt verifySign, SigningProcess signingProcess, String signedResponse) throws StatusCodeException {
+	private static void verifySignature(VerifyClientSignatureResponseDataExt verifySign, SigningProcess signingProcess, String signedResponse)
+			throws StatusCodeException {
 		String signerCN;
 		String signerCertPolicyOID = null;
 
@@ -250,7 +298,8 @@ public class Verify extends BaseServlet {
 		logger.info("Signature verification completed OK. Store signature and revocation status");
 
 		Date signerTime = new Date();
-		DAOUtil.storeSignature(signingProcess.getSignprocessId(), signerTime, verifySign.getSignerCPR(), signerCN, signerCertPolicyOID, signedResponse, verifySign.getB64ocsp());
+		DAOUtil.storeSignature(signingProcess.getSignprocessId(), signerTime, verifySign.getSignerCPR(), signerCN, signerCertPolicyOID, signedResponse,
+				verifySign.getB64ocsp());
 	}
 
 	private static void waitForOrderCompletion(SigningProcess signingProcess) {
@@ -536,14 +585,12 @@ public class Verify extends BaseServlet {
 		try {
 			match = new MatchCPR2PIDRequest(serviceId, pid, cpr, requestId);
 		} catch (Exception e) {
-			logger.error(
-					"Unable to do a pid match for [Merchant=" + mid + "] Errormessage: " + e.getMessage());
+			logger.error("Unable to do a pid match for [Merchant=" + mid + "] Errormessage: " + e.getMessage());
 			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Unable to do a pid match for Merchant[" + mid + "]");
 		}
 		ResponseType resp = facade.sendCPRRegistryRequest(match);
 		EventLogger.appendEvent(NemIDActionEvent.ACTION_DK_NEMID_CPRMATCH);
-		logger.info(
-				"[MatchStatus=" + resp.getStatus().getStatusCode() + "][MatchMessage=" + resp.getStatus().getStatusText().get(0).getValue() + "]");
+		logger.info("[MatchStatus=" + resp.getStatus().getStatusCode() + "][MatchMessage=" + resp.getStatus().getStatusText().get(0).getValue() + "]");
 		return (resp.getStatus().getStatusCode() == 0);
 	}
 
@@ -566,7 +613,8 @@ public class Verify extends BaseServlet {
 		} catch (AMQAPIException exp) {
 			logger.fatal("Unable to register [QueueEvent=" + queueMessageEvent + "] - " + exp.getMessage());
 			EventLogger.dumpStack(exp);
-			throw new StatusCodeException(NemIDActionEvent.STATUS_AMQ_ERROR, "Unable to register [QueueEvent=" + queueMessageEvent + "] Reason" + exp.getMessage());
+			throw new StatusCodeException(NemIDActionEvent.STATUS_AMQ_ERROR, "Unable to register [QueueEvent=" + queueMessageEvent + "] Reason"
+					+ exp.getMessage());
 		} catch (UnsupportedEncodingException exp) {
 			logger.fatal("Error during queue message registration [QueueEvent=" + queueMessageEvent + "] - " + exp.getMessage());
 			EventLogger.dumpStack(exp);
