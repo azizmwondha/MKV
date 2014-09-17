@@ -9,11 +9,11 @@ import no.bbs.trust.common.basics.events.ActionEvent;
 public enum NemIDActionEvent implements ActionEvent {
 
 	/*
-	 * Code range 0x33000 - 0x330FF Reserved for DK_NEMID
+	 * Code range 0x33E00 - 0x33EFF Reserved for DK_NEMID_JS
 	 * --------------------------------------------------
-	 * 0x33000 - 0x3309F Action events
-	 * 0x330A0 - 0x330CF Measurement events
-	 * 0x330D0 - 0x330FF Performance events
+	 * 0x33E00 - 0x33E9F Action events
+	 * 0x33EA0 - 0x33ECF Measurement events
+	 * 0x33ED0 - 0x33EFF Performance events
 	 *
 	 * NB: Event group ranges can overlap (i.e. there is no problem if an action event
 	 * has the same code as a measurement event or a performance event).
