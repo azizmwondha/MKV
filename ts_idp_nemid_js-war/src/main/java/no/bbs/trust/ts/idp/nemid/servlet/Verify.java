@@ -369,88 +369,81 @@ public class Verify extends BaseServlet {
 	}
 
 	private static VerifyClientSignatureResponseDataExt verifySign(VerifyClientSignatureData verifyClientSignatureData) throws StatusCodeException {
-		try {
-			SignatureVerifier signatureVerifier = new SignatureVerifier(verifyClientSignatureData);
+		SignatureVerifier signatureVerifier = new SignatureVerifier(verifyClientSignatureData);
 
-			VerifyClientSignatureResponseDataExt responseData = signatureVerifier.handleVerifyClientSignatureData();
+		VerifyClientSignatureResponseDataExt responseData = signatureVerifier.handleVerifyClientSignatureData();
 
-			String mid = verifyClientSignatureData.getMid();
-			responseData.setMid(mid);
-			responseData.setTime(verifyClientSignatureData.getTime());
-			responseData.setTransref(verifyClientSignatureData.getTransref());
-			responseData.setB64signature(verifyClientSignatureData.getSignature());
+		String mid = verifyClientSignatureData.getMid();
+		responseData.setMid(mid);
+		responseData.setTime(verifyClientSignatureData.getTime());
+		responseData.setTransref(verifyClientSignatureData.getTransref());
+		responseData.setB64signature(verifyClientSignatureData.getSignature());
 
-			String signerPID = responseData.getSignerPID();
-			String signerRID = responseData.getSignerRID();
-			String orderPID = verifyClientSignatureData.getSignerPID();
-			String orderRID = verifyClientSignatureData.getSignerRID();
-			String orderCPR = verifyClientSignatureData.getSignerCPR();
+		String signerPID = responseData.getSignerPID();
+		String signerRID = responseData.getSignerRID();
+		String orderPID = verifyClientSignatureData.getSignerPID();
+		String orderRID = verifyClientSignatureData.getSignerRID();
+		String orderCPR = verifyClientSignatureData.getSignerCPR();
 
-			logger.debug("SignerPID: " + signerPID + "] IsNullOrEmpty=" + StringUtils.isNullorEmpty(signerPID));
-			logger.debug("SignerRID: " + signerRID + "] IsNullOrEmpty=" + StringUtils.isNullorEmpty(signerRID));
-			logger.debug("OrderPID: [" + orderPID + "] IsNullOrEmpty=" + StringUtils.isNullorEmpty(orderPID));
-			logger.debug("OrderRID: [" + orderRID + "] IsNullOrEmpty=" + StringUtils.isNullorEmpty(orderRID));
-			logger.debug("OrderCPR: [" + orderCPR + "] IsNullOrEmpty=" + StringUtils.isNullorEmpty(orderCPR));
-			logger.debug("OrderCertPolicy: " + verifyClientSignatureData.getCertType());
+		logger.debug("SignerPID: " + signerPID + "] IsNullOrEmpty=" + StringUtils.isNullorEmpty(signerPID));
+		logger.debug("SignerRID: " + signerRID + "] IsNullOrEmpty=" + StringUtils.isNullorEmpty(signerRID));
+		logger.debug("OrderPID: [" + orderPID + "] IsNullOrEmpty=" + StringUtils.isNullorEmpty(orderPID));
+		logger.debug("OrderRID: [" + orderRID + "] IsNullOrEmpty=" + StringUtils.isNullorEmpty(orderRID));
+		logger.debug("OrderCPR: [" + orderCPR + "] IsNullOrEmpty=" + StringUtils.isNullorEmpty(orderCPR));
+		logger.debug("OrderCertPolicy: " + verifyClientSignatureData.getCertType());
 
-			if (verifyClientSignatureData.getCertType() != null && verifyClientSignatureData.getCertType().equalsIgnoreCase("Personal")) {
-				if (signerPID == null || signerPID.equals("")) {
-					throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_CERT_TYPE_FAILED, "Expected POCES but signature cert was MOCES");
-				}
-			} else if (verifyClientSignatureData.getCertType() != null && verifyClientSignatureData.getCertType().equalsIgnoreCase("Employee")) {
-				if (signerRID == null || signerRID.equals("")) {
-					throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_CERT_TYPE_FAILED, "Expected MOCES but signature cert was POCES");
-				}
+		if (verifyClientSignatureData.getCertType() != null && verifyClientSignatureData.getCertType().equalsIgnoreCase("Personal")) {
+			if (signerPID == null || signerPID.equals("")) {
+				throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_CERT_TYPE_FAILED, "Expected POCES but signature cert was MOCES");
 			}
-
-			if (!StringUtils.isNullorEmpty(orderCPR)) {
-				if (signerPID != null && !signerPID.equals("")) {
-					logger.debug("Matching [OrderCPR=" + orderCPR + "] against [SignerPID=" + signerPID + "]");
-					MerchantContext mc = MerchantContextCache.getMerchantContext(mid);
-
-					if (null == mc) {
-						throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_CACHE_ERROR, "Unable to retrieve merchant context from cache for Merchant["
-								+ mid + "]");
-					}
-
-					Map<String, String> idpc = mc.getIdpConfig();
-					String serviceId = idpc.get(PKICONFIG_PIDSERVICEID);
-
-					if (!matchCPR2PID(mid, serviceId, signerPID, orderCPR)) {
-						StatusCodeException sce = new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_CPRMISMATCH, "CPR-PID mismatch");
-						StackLogger.logStatusCode(sce);
-						throw sce;
-					}
-					logger.info("CPR and PID match OK");
-					responseData.setSignerCPR(orderCPR);
-				} else if (signerRID != null && !signerRID.equals("")) {
-					logger.debug("Matching [OrderCPR=" + orderCPR + "] against [SignerRID=" + signerRID + "]");
-					MerchantContext mc = MerchantContextCache.getMerchantContext(mid);
-
-					if (null == mc) {
-						throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_CACHE_ERROR, "Unable to retrieve merchant context from cache for Merchant["
-								+ mid + "]");
-					}
-					if (!matchCPR2RID(mid, signerRID, orderCPR, responseData.certificate)) {
-						StatusCodeException sce = new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_CPRMISMATCH, "CPR-RID mismatch");
-						StackLogger.logStatusCode(sce);
-						throw sce;
-					}
-					logger.info("CPR and RID is matching");
-					responseData.setSignerCPR(orderCPR);
-				}
-			} else {
-				logger.info("Order does not contain any requirements on PID/RID/CPR");
+		} else if (verifyClientSignatureData.getCertType() != null && verifyClientSignatureData.getCertType().equalsIgnoreCase("Employee")) {
+			if (signerRID == null || signerRID.equals("")) {
+				throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_CERT_TYPE_FAILED, "Expected MOCES but signature cert was POCES");
 			}
-
-			logger.trace("responseData: " + responseData);
-
-			EventLogger.appendEvent(NemIDActionEvent.ACTION_DK_NEMID_SIGN_OK);
-			return responseData;
-		} catch (Throwable t) {
-			EventLogger.dumpStack(t);
-			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, t.getMessage());
 		}
+
+		if (!StringUtils.isNullorEmpty(orderCPR)) {
+			if (signerPID != null && !signerPID.equals("")) {
+				logger.debug("Matching [OrderCPR=" + orderCPR + "] against [SignerPID=" + signerPID + "]");
+				MerchantContext mc = MerchantContextCache.getMerchantContext(mid);
+
+				if (null == mc) {
+					throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_CACHE_ERROR, "Unable to retrieve merchant context from cache for Merchant["
+							+ mid + "]");
+				}
+
+				Map<String, String> idpc = mc.getIdpConfig();
+				String serviceId = idpc.get(PKICONFIG_PIDSERVICEID);
+
+				if (!matchCPR2PID(mid, serviceId, signerPID, orderCPR)) {
+					StatusCodeException sce = new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_CPRMISMATCH, "CPR-PID mismatch");
+					StackLogger.logStatusCode(sce);
+					throw sce;
+				}
+				logger.info("CPR and PID match OK");
+				responseData.setSignerCPR(orderCPR);
+			} else if (signerRID != null && !signerRID.equals("")) {
+				logger.debug("Matching [OrderCPR=" + orderCPR + "] against [SignerRID=" + signerRID + "]");
+				MerchantContext mc = MerchantContextCache.getMerchantContext(mid);
+
+				if (null == mc) {
+					throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_CACHE_ERROR, "Unable to retrieve merchant context from cache for Merchant["
+							+ mid + "]");
+				}
+				if (!matchCPR2RID(mid, signerRID, orderCPR, responseData.certificate)) {
+					throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_CPRMISMATCH, "CPR-RID mismatch");
+				}
+				logger.info("CPR and RID is matching");
+				responseData.setSignerCPR(orderCPR);
+			}
+		} else {
+			logger.info("Order does not contain any requirements on PID/RID/CPR");
+		}
+
+		logger.trace("responseData: " + responseData);
+
+		EventLogger.appendEvent(NemIDActionEvent.ACTION_DK_NEMID_SIGN_OK);
+		return responseData;
 	}
 
 	private static boolean matchCPR2RID(String mid, String rid, String cpr, byte[] certificate) throws StatusCodeException {
@@ -537,7 +530,7 @@ public class Verify extends BaseServlet {
 		}
 	}
 
-	private static boolean matchCPR2PID(String mid, String nemIDserviceID, String pid, String cpr) throws Exception {
+	private static boolean matchCPR2PID(String mid, String nemIDserviceID, String pid, String cpr) throws StatusCodeException {
 		logger.debug("Match sPID:" + pid + "/oCPR:" + cpr);
 
 		if (StringUtils.isNullorEmpty(cpr) || StringUtils.isNullorEmpty(pid)) {
@@ -574,21 +567,26 @@ public class Verify extends BaseServlet {
 
 		int serviceId = (int) StringUtils.toLong(nemIDserviceID, 0);
 		int VOID_MERCHANT_ID = 127;
-		CPRRegistryFacade facade = new CPRRegistryFacade(VOID_MERCHANT_ID, serviceId, keystorepath, keystorepass, keystoretype, truststorepath, truststorepass,
-				truststoretype, lookupURL, 5000, proxyHost, proxyPort, null, null);
+		CPRRegistryFacade facade;
+		try {
+			facade = new CPRRegistryFacade(VOID_MERCHANT_ID, serviceId, keystorepath, keystorepass, keystoretype, truststorepath, truststorepass,
+					truststoretype, lookupURL, 5000, proxyHost, proxyPort, null, null);
+		} catch (InstantiationException e) {
+			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Unable to create CPRRegistryFacade for Merchant[" + mid + "]");
+		}
 
 		int requestId = (int) (Math.random() * Integer.MAX_VALUE);
 
 		logger.debug("CPRRequest ID: " + requestId);
 
-		MatchCPR2PIDRequest match;
+		ResponseType resp;
 		try {
-			match = new MatchCPR2PIDRequest(serviceId, pid, cpr, requestId);
+			MatchCPR2PIDRequest match = new MatchCPR2PIDRequest(serviceId, pid, cpr, requestId);
+			resp = facade.sendCPRRegistryRequest(match);
 		} catch (Exception e) {
 			logger.error("Unable to do a pid match for [Merchant=" + mid + "] Errormessage: " + e.getMessage());
 			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Unable to do a pid match for Merchant[" + mid + "]");
 		}
-		ResponseType resp = facade.sendCPRRegistryRequest(match);
 		EventLogger.appendEvent(NemIDActionEvent.ACTION_DK_NEMID_CPRMATCH);
 		logger.info("[MatchStatus=" + resp.getStatus().getStatusCode() + "][MatchMessage=" + resp.getStatus().getStatusText().get(0).getValue() + "]");
 		return (resp.getStatus().getStatusCode() == 0);
