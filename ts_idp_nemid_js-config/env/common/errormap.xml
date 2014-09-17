@@ -222,42 +222,42 @@
 			</Error>
 			<Error>
 				<code>033E42</code>
-				<label>cancel</label>
+				<label>errorsigningdocument</label>
 				<action>D100</action>
 				<message>STATUS_BAD_PROTOCOL</message>
 				<severity>info</severity>
 			</Error>
 			<Error>
 				<code>033E43</code>
-				<label>insufficientsignpermission</label>
+				<label>errorauthenticating</label>
 				<action>D100</action>
 				<message>STATUS_UID_REVOKED</message>
 				<severity>info</severity>
 			</Error>
 			<Error>
 				<code>033E44</code>
-				<label>insufficientsignpermission</label>
+				<label>errorauthenticating</label>
 				<action>D100</action>
 				<message>STATUS_UID_INVALID</message>
 				<severity>info</severity>
 			</Error>
 			<Error>
 				<code>033E45</code>
-				<label>insufficientsignpermission</label>
+				<label>errorauthenticating</label>
 				<action>D100</action>
 				<message>STATUS_UID_EXPIRED</message>
 				<severity>info</severity>
 			</Error>
 			<Error>
 				<code>033E46</code>
-				<label>insufficientsignpermission</label>
+				<label>errorauthenticating</label>
 				<action>D100</action>
 				<message>STATUS_AUTH_FAILED</message>
 				<severity>info</severity>
 			</Error>
 			<Error>
 				<code>033E47</code>
-				<label>insufficientsignpermission</label>
+				<label>errorsigningdocument</label>
 				<action>D100</action>
 				<message>STATUS_DOC_INVALID</message>
 				<severity>info</severity>
