@@ -4,13 +4,13 @@ import java.io.UnsupportedEncodingException;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
+import no.bbs.trust.common.basics.events.ActionEvent;
 import no.bbs.trust.common.basics.exceptions.StatusCodeException;
 import no.bbs.trust.common.basics.utils.Base64;
 import no.bbs.trust.common.basics.utils.EventLogger;
 import no.bbs.trust.common.basics.utils.StringUtils;
 import no.bbs.trust.common.config.Config;
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
-import no.bbs.trust.ts.idp.nemid.error.ErrorCodes;
 import no.bbs.trust.ts.idp.nemid.error.NemIDErrorMapper;
 import no.bbs.trust.ts.idp.nemid.event.NemIDActionEvent;
 import no.bbs.tt.bc.cryptlib.ocsp.CertificateStatusException;
@@ -118,11 +118,10 @@ public class SignatureVerifier {
 			}
 			response.certificate = Base64.encode(status.getCertificate().getBytes(), false);
 		} catch (AppletException ae) {
-			logger.info("NemID error code: " + ae.getErrorCode() + ", message: " + ae.getMessage());
-			if (ErrorCodes.USERCANCEL.equals(NemIDErrorMapper.getErrorCodeFromNemIDCode(ae.getErrorCode()))) {
-				throw new StatusCodeException(NemIDActionEvent.STATUS_USER_CANCEL, "User cancelled signing: " + ae.getMessage());
-			}
-			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_CERT_TYPE_FAILED, "NemID error code: " + ae.getErrorCode() + ", message: " + ae.getMessage());
+			String errorCode = ae.getErrorCode();
+			ActionEvent actionEvent = NemIDErrorMapper.getActionEvent(errorCode);
+			logger.debug("NemID error code: " + errorCode + ", message: " + ae.getMessage() + ", action event: " + actionEvent);
+			throw new StatusCodeException(actionEvent, NemIDErrorMapper.getErrorCodeDescription(errorCode), errorCode);
 		} catch (Throwable t) {
 			EventLogger.dumpStack(t);
 			logger.info("Certificate status validation: " + t.getMessage());
