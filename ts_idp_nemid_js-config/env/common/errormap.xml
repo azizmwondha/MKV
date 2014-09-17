@@ -24,7 +24,6 @@
 				<message>REQUEST_RECEIVED</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E02</code>
 				<label>RESPONSE_SENT</label>
@@ -32,7 +31,6 @@
 				<message>RESPONSE_SENT</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E03</code>
 				<label>ACTION_IDP_DKNEMID_LIFECYCLE_STARTED</label>
@@ -40,7 +38,6 @@
 				<message>ACTION_IDP_DKNEMID_LIFECYCLE_STARTED</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E04</code>
 				<label>ACTION_IDP_DKNEMID_LIFECYCLE_STOPPED</label>
@@ -48,7 +45,6 @@
 				<message>ACTION_IDP_DKNEMID_LIFECYCLE_STOPPED</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E10</code>
 				<label>errorsigningdocument</label>
@@ -56,7 +52,6 @@
 				<message>STATUS_UNKNOWN_ERROR</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E11</code>
 				<label>merchant404</label>
@@ -64,7 +59,6 @@
 				<message>STATUS_IDP_CACHE_ERROR</message>
 				<severity>error</severity>
 			</Error>
-
 			<Error>
 				<code>033E12</code>
 				<label>errorsigningdocument</label>
@@ -72,7 +66,6 @@
 				<message>STATUS_DAL_SQL_ERROR</message>
 				<severity>warn</severity>
 			</Error>
-
 			<Error>
 				<code>033E13</code>
 				<label>errorsigningdocument</label>
@@ -80,7 +73,6 @@
 				<message>STATUS_NO_TRANSACTIONDATA_FOR_TID_GID</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E14</code>
 				<label>errorsigningdocument</label>
@@ -88,7 +80,6 @@
 				<message>STATUS_INVALID_STEP</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E15</code>
 				<label>signrefnotfound</label>
@@ -96,7 +87,6 @@
 				<message>STATUS_INVALID_STEP</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E16</code>
 				<label>statusamqerror</label>
@@ -104,7 +94,6 @@
 				<message>STATUS_AMQ_ERROR</message>
 				<severity>error</severity>
 			</Error>
-
 			<Error>
 				<code>033E17</code>
 				<label>statusencodingerror</label>
@@ -112,7 +101,6 @@
 				<message>STATUS_ENCODING_ERROR</message>
 				<severity>error</severity>
 			</Error>
-
 			<Error>
 				<code>033E20</code>
 				<label>errorsigningdocument</label>
@@ -120,7 +108,6 @@
 				<message>STATUS_NEMID_SERVICE_LOAD_FAILED</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E21</code>
 				<label>errorsigningdocument</label>
@@ -128,7 +115,6 @@
 				<message>STATUS_CREATE_SESSION_FAILED</message>
 				<severity>warn</severity>
 			</Error>
-
 			<Error>
 				<code>033E22</code>
 				<label>errorsigningdocument</label>
@@ -136,7 +122,6 @@
 				<message>STATUS_VERIFY_SIGN_FAILED</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E23</code>
 				<label>insufficientsignpermission</label>
@@ -144,7 +129,6 @@
 				<message>STATUS_VERIFY_CPRMISMATCH</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E24</code>
 				<label>insufficientsignpermission</label>
@@ -152,7 +136,6 @@
 				<message>STATUS_VERIFY_PIDMISMATCH</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E25</code>
 				<label>insufficientsignpermission</label>
@@ -168,21 +151,12 @@
 				<severity>info</severity>
 			</Error>
 			<Error>
-				<code>033E27</code>
-				<label>cancel</label>
-				<action>D100</action>
-				<message>STATUS_USER_CANCEL</message>
-				<severity>info</severity>
-			</Error>
-
-			<Error>
 				<code>033E29</code>
 				<label>signrefnotfound</label>
 				<action>D100</action>
 				<message>STATUS_VERIFY_INVALIDSTATUS</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E30</code>
 				<label>errorsigningdocument</label>
@@ -190,7 +164,6 @@
 				<message>STATUS_UNEXPECTED_INTERNAL_ERROR</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E31</code>
 				<label>errorsigningdocument</label>
@@ -198,7 +171,6 @@
 				<message>STATUS_IDP_OPERATION_FAILED</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E32</code>
 				<label>errorsigningdocument</label>
@@ -227,7 +199,62 @@
 				<message>STATUS_PID_LOOKUP_FAILED</message>
 				<severity>info</severity>
 			</Error>
-			
+			<Error>
+				<code>033E40</code>
+				<label>cancel</label>
+				<action>D100</action>
+				<message>STATUS_USER_CANCEL</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E41</code>
+				<label>cancel</label>
+				<action>D100</action>
+				<message>STATUS_OPER_CANCEL</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E42</code>
+				<label>cancel</label>
+				<action>D100</action>
+				<message>STATUS_BAD_PROTOCOL</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E43</code>
+				<label>insufficientsignpermission</label>
+				<action>D100</action>
+				<message>STATUS_UID_REVOKED</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E44</code>
+				<label>insufficientsignpermission</label>
+				<action>D100</action>
+				<message>STATUS_UID_INVALID</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E45</code>
+				<label>insufficientsignpermission</label>
+				<action>D100</action>
+				<message>STATUS_UID_EXPIRED</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E46</code>
+				<label>insufficientsignpermission</label>
+				<action>D100</action>
+				<message>STATUS_AUTH_FAILED</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E47</code>
+				<label>insufficientsignpermission</label>
+				<action>D100</action>
+				<message>STATUS_DOC_INVALID</message>
+				<severity>info</severity>
+			</Error>
 			<Error>
 				<code>033E98</code>
 				<label>info</label>
@@ -235,7 +262,6 @@
 				<message>ACTION_DK_NEMID_RIDMATCH</message>
 				<severity>info</severity>
 			</Error>
-			
 			<Error>
 				<code>033E99</code>
 				<label>info</label>
@@ -243,7 +269,6 @@
 				<message>ACTION_DK_NEMID_CPRMATCH</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E9A</code>
 				<label>info</label>
@@ -251,7 +276,6 @@
 				<message>ACTION_DK_NEMID_SIGN_OK</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E9B</code>
 				<label>info</label>
@@ -259,7 +283,6 @@
 				<message>ACTION_DK_NEMID_GENERATE_TAG</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E9C</code>
 				<label>info</label>
@@ -267,7 +290,6 @@
 				<message>ACTION_LOAD_OCES_CONFIG</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E9D</code>
 				<label>info</label>
@@ -275,7 +297,6 @@
 				<message>ACTION_LOAD_IDP_CONFIG</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E9E</code>
 				<label>info</label>
@@ -283,7 +304,6 @@
 				<message>ACTION_LOAD_MERCHANT_CONTEXTS</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>033E9F</code>
 				<label>info</label>
@@ -455,7 +475,6 @@
 				<message>SQL_ERROR</message>
 				<severity>warn</severity>
 			</Error>
-
 			<Error>
 				<code>030501</code>
 				<label>errorsigningdocument</label>
@@ -463,7 +482,6 @@
 				<message>MID_NOT_FOUND_IN_DB</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>030502</code>
 				<label>errorsigningdocument</label>
@@ -471,7 +489,6 @@
 				<message>MID_NOT_ENABLED_IN_DB</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>030503</code>
 				<label>errorsigningdocument</label>
@@ -479,7 +496,6 @@
 				<message>STATUS_NO_TRANSACTIONDATA_FOR_TID_GID</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>030504</code>
 				<label>errorsigningdocument</label>
@@ -487,7 +503,6 @@
 				<message>STATUS_INVALID_STEP</message>
 				<severity>info</severity>
 			</Error>
-
 			<Error>
 				<code>030505</code>
 				<label>errorsigningdocument</label>
