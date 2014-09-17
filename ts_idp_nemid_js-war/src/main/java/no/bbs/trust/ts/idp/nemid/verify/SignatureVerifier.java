@@ -68,7 +68,7 @@ public class SignatureVerifier {
 
 			if (!CertificateStatus.VALID.equals(certificateStatus)) {
 				logger.info("Certificate not valid");
-				throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_SIGN_FAILED, "Invalid certificatestatus: " + certificateStatus);
+					throw new StatusCodeException(NemIDActionEvent.STATUS_NOT_VALID_CERTIFICATE, "Invalid certificatestatus: " + certificateStatus);
 			}
 
 			if (isPoces) {

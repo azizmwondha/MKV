@@ -151,6 +151,13 @@
 				<severity>info</severity>
 			</Error>
 			<Error>
+				<code>033E27</code>
+				<label>invalidid</label>
+				<action>D100</action>
+				<message>STATUS_NOT_VALID_CERTIFICATE</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
 				<code>033E29</code>
 				<label>signrefnotfound</label>
 				<action>D100</action>
