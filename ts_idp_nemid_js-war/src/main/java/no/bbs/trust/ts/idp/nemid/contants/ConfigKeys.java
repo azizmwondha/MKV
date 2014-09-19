@@ -3,9 +3,9 @@ package no.bbs.trust.ts.idp.nemid.contants;
 public class ConfigKeys {
 
 	public static final String PARAM_SREF = "sref";
-	public static final String PARAM_CLIENTMODE = "clientmode";
-	public static final String PARAM_CLIENT_WIDTH = "width";
-	public static final String PARAM_CLIENT_HEIGHT = "height";
+	public static final String PARAM_CLIENTMODE = "nemid_clientmode";
+	public static final String PARAM_CLIENT_WIDTH = "nemid_width";
+	public static final String PARAM_CLIENT_HEIGHT = "nemid_height";
 
 	public static final String SESSIONKEY_STEP = "STEP";
 	public static final String SESSIONKEY_MID = "MERCHANTID";
