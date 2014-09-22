@@ -4,14 +4,14 @@
 	<groupId>no.bbs.trust</groupId>
 	<artifactId>ts_idp_nemid_js-war</artifactId>
 	<name>ts_idp_nemid_js - war</name>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.1</version>
 	<description>ts_idp_nemid_js - web</description>
 	<packaging>war</packaging>
 
 	<parent>
 		<artifactId>ts_idp_nemid_js</artifactId>
 		<groupId>no.bbs.trust</groupId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.0.1</version>
 	</parent>
 
 	<dependencies>
