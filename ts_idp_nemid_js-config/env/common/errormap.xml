@@ -229,28 +229,28 @@
 			</Error>
 			<Error>
 				<code>033E43</code>
-				<label>errorauthenticating</label>
+				<label>uid.revoked</label>
 				<action>D100</action>
 				<message>STATUS_UID_REVOKED</message>
 				<severity>info</severity>
 			</Error>
 			<Error>
 				<code>033E44</code>
-				<label>errorauthenticating</label>
+				<label>uid.invalid</label>
 				<action>D100</action>
 				<message>STATUS_UID_INVALID</message>
 				<severity>info</severity>
 			</Error>
 			<Error>
 				<code>033E45</code>
-				<label>errorauthenticating</label>
+				<label>uid.expired</label>
 				<action>D100</action>
 				<message>STATUS_UID_EXPIRED</message>
 				<severity>info</severity>
 			</Error>
 			<Error>
 				<code>033E46</code>
-				<label>errorauthenticating</label>
+				<label>errorsigningdocument</label>
 				<action>D100</action>
 				<message>STATUS_AUTH_FAILED</message>
 				<severity>info</severity>
