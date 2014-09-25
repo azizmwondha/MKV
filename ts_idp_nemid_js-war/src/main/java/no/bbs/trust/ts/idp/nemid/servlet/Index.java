@@ -52,17 +52,16 @@ import org.openoces.ooapi.utils.Base64Handler;
 import org.springframework.transaction.TransactionStatus;
 
 /**
- * @author azm
  */
 public class Index extends BaseServlet {
 
 	private static final long serialVersionUID = 1L;
 
 	public static final String COMPONENT_NAME = "NemIDJS";
-	private static final String UTF_8 = "UTF-8";
-	private static final String ISO_8859_1 = "ISO-8859-1";
 	private static final String[] SESSION_DATA_KEYS = new String[] { ConfigKeys.SESSIONKEY_SPID, ConfigKeys.SESSIONKEY_MID, ConfigKeys.SESSIONKEY_LOCALE,
-		ConfigKeys.SESSIONKEY_TZO };
+		ConfigKeys.SESSIONKEY_TZO, ConfigKeys.SESSIONKEY_NEMID_CLIENTMODE };
+
+	private Map<String, String> sessionDatas;
 
 	private final TransactionHelper transactionHelper;
 
@@ -75,16 +74,14 @@ public class Index extends BaseServlet {
 		long start = System.currentTimeMillis();
 		logger.info("Get NemID client activation tag");
 		String sref = request.getParameter(ConfigKeys.PARAM_SREF);
-		String clientMode = getClientMode(request.getParameter(ConfigKeys.PARAM_CLIENTMODE));
-		String clientWidth = getClientWidth(request.getParameter(ConfigKeys.PARAM_CLIENT_WIDTH), clientMode);
-		String clientHeight = getClientHeight(request.getParameter(ConfigKeys.PARAM_CLIENT_HEIGHT), clientMode);
 
 		TransactionStatus tx = transactionHelper.getTransaction();
 		boolean commit = false;
 		try {
 			DAOUtil.validateSessionStep(sref, new int[] { 2, 4, 5, 6 });
-			Map<String, String> sessionDatas = DAOUtil.getSessionDataKeysAndValues(sref, SESSION_DATA_KEYS);
+			sessionDatas = DAOUtil.getSessionDataKeysAndValues(sref, SESSION_DATA_KEYS);
 
+			String clientMode = getClientMode(request);
 			int spid = (int) StringUtils.toLong(sessionDatas.get(ConfigKeys.SESSIONKEY_SPID), 0);
 			SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
 
@@ -109,7 +106,7 @@ public class Index extends BaseServlet {
 			OcesJsonParameterGenerator clientGenerator = createClientGenerator(mid);
 			setSigningDocument(clientGenerator, signingProcess, sref);
 			String challenge = Base64Handler.encode(ChallengeGenerator.generateChallenge());
-			String clientTag = clientGenerator.generateClientTag(clientMode, clientWidth, clientHeight, languageCode, challenge, sref);
+			String clientTag = clientGenerator.generateClientTag(clientMode, languageCode, challenge, sref);
 			logger.debug("NemID JS client tag: " + clientTag);
 			request.setAttribute("clienttag", clientTag);
 			DAOUtil.updateSessionDataByKey(sref, ConfigKeys.SESSIONKEY_CHALLENGE, challenge);
@@ -141,38 +138,50 @@ public class Index extends BaseServlet {
 		}
 	}
 
-	static String getClientMode(String clientMode) {
-		String clientMode2 = clientMode;
+	String getClientMode(HttpServletRequest request) {
+		String clientMode = request.getParameter(ConfigKeys.PARAM_NEMID_CLIENTMODE);
+		if ((clientMode == null || "".equals(clientMode)) && sessionDatas != null) {
+			clientMode = sessionDatas.get(ConfigKeys.SESSIONKEY_NEMID_CLIENTMODE);
+		}
 
 		// Default to standard mode if no valid value is given
-		if (!Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD).equals(clientMode2)
-				&& !Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED).equals(clientMode2)) {
-			clientMode2 = Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD);
+		if (!Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD).equals(clientMode)
+				&& !Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED).equals(clientMode)) {
+			clientMode = Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD);
 		}
-		return clientMode2;
+		return clientMode;
 	}
 
-	private static String getClientWidth(String width, String clientMode) {
-		if (width == null || "".equals(width)) {
-			if (Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED).equals(clientMode)) {
-				return Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_LIMITED_WIDTH);
-			}
-			return Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_STANDARD_WIDTH);
-		}
-		return width;
-	}
+//	/**
+//	 * Gets the NemID client dimension (width or height) from the HttpServletRequest or from the session data.
+//	 * If the dimension is neither specified in the HttpServletRequest nor in the session data,
+//	 * the configured default dimension is return dependent on the NemID client mode.
+//	 *  
+//	 * @param request the HttpServletRequest
+//	 * @param dimensionParamName the HttpServletRequest parameter name
+//	 * @param dimensionSessionKey the session data key
+//	 * @param clientMode the current client mode
+//	 * @param defaultDimensionPropertyKeyStandard the default dimension property key for client mode "standard"
+//	 * @param defaultDimensionPropertyKeyLimited the default dimension property key for client mode "limited"
+//	 * @return
+//	 */
+//	String getClientDimension(HttpServletRequest request, String dimensionParamName, String dimensionSessionKey, String clientMode,
+//			String defaultDimensionPropertyKeyStandard, String defaultDimensionPropertyKeyLimited) {
+//		String dimension = request.getParameter(dimensionParamName);
+//		if ((dimension == null || "".equals(dimension)) && sessionDatas != null) {
+//			dimension = sessionDatas.get(dimensionSessionKey);
+//		}
+//
+//		if (dimension == null || "".equals(dimension)) {
+//			if (Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED).equals(clientMode)) {
+//				return Config.INSTANCE.getProperty(defaultDimensionPropertyKeyLimited);
+//			}
+//			return Config.INSTANCE.getProperty(defaultDimensionPropertyKeyStandard);
+//		}
+//		return dimension;
+//	}
 
-	private static String getClientHeight(String height, String clientMode) {
-		if (height == null || "".equals(height)) {
-			if (Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED).equals(clientMode)) {
-				return Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_LIMITED_HEIGHT);
-			}
-			return Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_STANDARD_HEIGHT);
-		}
-		return height;
-	}
-
-	OcesJsonParameterGenerator createClientGenerator(String mid) throws StatusCodeException {
+	static OcesJsonParameterGenerator createClientGenerator(String mid) throws StatusCodeException {
 		KeyCredentials credentials;
 		try {
 			credentials = DAOUtil.getMerchantCredentials(mid);
@@ -185,7 +194,7 @@ public class Index extends BaseServlet {
 		return new OcesJsonParameterGenerator(signer);
 	}
 
-	void setSigningDocument(OcesJsonParameterGenerator clientGenerator, SigningProcess signingProcess, String sref) throws StatusCodeException {
+	static void setSigningDocument(OcesJsonParameterGenerator clientGenerator, SigningProcess signingProcess, String sref) throws StatusCodeException {
 		SignObjectData signObjectData = DAOUtil.getSignObjectData(signingProcess);
 		SignObject signObject = DAOUtil.getSignObject(signObjectData.getSignerObjectId());
 		String docType = signObjectData.getElementType();

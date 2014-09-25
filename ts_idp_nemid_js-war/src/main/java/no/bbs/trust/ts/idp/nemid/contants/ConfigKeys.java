@@ -3,9 +3,7 @@ package no.bbs.trust.ts.idp.nemid.contants;
 public class ConfigKeys {
 
 	public static final String PARAM_SREF = "sref";
-	public static final String PARAM_CLIENTMODE = "nemid_clientmode";
-	public static final String PARAM_CLIENT_WIDTH = "nemid_width";
-	public static final String PARAM_CLIENT_HEIGHT = "nemid_height";
+	public static final String PARAM_NEMID_CLIENTMODE = "nemid_clientmode";
 
 	public static final String SESSIONKEY_STEP = "STEP";
 	public static final String SESSIONKEY_MID = "MERCHANTID";
@@ -17,6 +15,7 @@ public class ConfigKeys {
 	public static final String SESSIONKEY_STYLE = "STYLE";
 	public static final String SESSIONKEY_TZO = "TZO";
 	public static final String SESSIONKEY_CHALLENGE = "CHALLENGE";
+	public static final String SESSIONKEY_NEMID_CLIENTMODE = "NEMID_CLIENTMODE";
 
 	public static final String CONFIG_NEMID_DOCURL = "nemid.url.document";
 	public static final String CONFIG_TRUSTENGINE_URL = "trustengine.url";
@@ -84,10 +83,6 @@ public class ConfigKeys {
 	public static final String CONFIG_NEMID_CLIENTMODE_STANDARD = "nemid.clientmode.standard";
 	public static final String CONFIG_NEMID_CLIENTMODE_LIMITED = "nemid.clientmode.limited";
 	public static final String CONFIG_NEMID_CLIENTFLOW_SIGNING = "nemid.clientflow.signing";
-	public static final String CONFIG_NEMID_CLIENT_STANDARD_WIDTH = "nemid.client.standard.width";
-	public static final String CONFIG_NEMID_CLIENT_STANDARD_HEIGHT = "nemid.client.standard.height";
-	public static final String CONFIG_NEMID_CLIENT_LIMITED_WIDTH = "nemid.client.limited.width";
-	public static final String CONFIG_NEMID_CLIENT_LIMITED_HEIGHT = "nemid.client.limited.height";
 	public static final String CONFIG_NEMID_CLIENT_LAUNCHER = "nemid.client.launcher";
 	public static final String CONFIG_NEMID_CLIENT_ORIGIN = "nemid.client.origin";
 	public static final String CONFIG_NEMID_CLIENT_SP_ORIGIN = "nemid.client.sp.origin";

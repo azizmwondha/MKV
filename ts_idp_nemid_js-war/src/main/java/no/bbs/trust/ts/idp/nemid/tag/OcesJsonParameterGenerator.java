@@ -148,8 +148,8 @@ public class OcesJsonParameterGenerator {
 		return sb.toString().getBytes(Charsets.UTF_8);
 	}
 
-	public String generateClientTag(String clientMode, String width, String height, String language, String challenge, String sref) {
-		return generateParametersTag(clientMode, language, challenge) + System.getProperty(LINE_SEPARATOR) + generateIframeTag(width, height)
+	public String generateClientTag(String clientMode, String language, String challenge, String sref) {
+		return generateParametersTag(clientMode, language, challenge) + System.getProperty(LINE_SEPARATOR) + generateIframeTag(clientMode)
 				+ System.getProperty(LINE_SEPARATOR) + generateScriptTag() + System.getProperty(LINE_SEPARATOR) + generatePostBackFormTag(sref);
 	}
 
@@ -166,9 +166,9 @@ public class OcesJsonParameterGenerator {
 		return String.format(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_PARAMETERS), getParametersAsJSON());
 	}
 
-	private static String generateIframeTag(String width, String height) {
+	private static String generateIframeTag(String clientMode) {
 		String iframeTag = Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_IFRAME);
-		iframeTag = String.format(iframeTag, width, height, Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_LAUNCHER) + System.currentTimeMillis());
+		iframeTag = String.format(iframeTag, clientMode, Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_LAUNCHER) + System.currentTimeMillis());
 		return iframeTag;
 	}
 
