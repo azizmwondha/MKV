@@ -5,7 +5,7 @@
 <%
     String locale = (String) request.getAttribute("locale");
 %>
-<html>
+<html id=nemid_index_html>
 <head>
     <meta http-equiv="content-Type" content="text/html; charset=<%= Config.INSTANCE.getProperty(ConfigKeys.CONFIG_HTML_CHARSET)%>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
