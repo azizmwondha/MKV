@@ -26,10 +26,11 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 public class IndexTest {
 
-	protected static Logger logger = Logger.getLogger(Constants.MAIN_LOGGER);
+	protected static final Logger logger = Logger.getLogger(Constants.MAIN_LOGGER);
 
 	private static final String SREF = "A92ED314B462D52159965681E5FD4F3AA3AF7D28";
 
@@ -46,7 +47,9 @@ public class IndexTest {
 	@SuppressWarnings("static-method")
 	@Test
 	public void testGetClientModeNull() {
-		String clientMode = Index.getClientMode(null);
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setParameter(ConfigKeys.PARAM_NEMID_CLIENTMODE, (String) null);
+		String clientMode = new Index().getClientMode(request);
 		assertNotNull(clientMode);
 		assertEquals(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD), clientMode);
 	}
@@ -54,7 +57,9 @@ public class IndexTest {
 	@SuppressWarnings("static-method")
 	@Test
 	public void testGetClientModeEmpty() {
-		String clientMode = Index.getClientMode("");
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setParameter(ConfigKeys.PARAM_NEMID_CLIENTMODE, "");
+		String clientMode = new Index().getClientMode(request);
 		assertNotNull(clientMode);
 		assertEquals(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD), clientMode);
 	}
@@ -62,7 +67,9 @@ public class IndexTest {
 	@SuppressWarnings("static-method")
 	@Test
 	public void testGetClientModeStandard() {
-		String clientMode = Index.getClientMode("standard");
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setParameter(ConfigKeys.PARAM_NEMID_CLIENTMODE, "standard");
+		String clientMode = new Index().getClientMode(request);
 		assertNotNull(clientMode);
 		assertEquals(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD), clientMode);
 	}
@@ -70,28 +77,30 @@ public class IndexTest {
 	@SuppressWarnings("static-method")
 	@Test
 	public void testGetClientModeLimited() {
-		String clientMode = Index.getClientMode("limited");
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setParameter(ConfigKeys.PARAM_NEMID_CLIENTMODE, "limited");
+		String clientMode = new Index().getClientMode(request);
 		assertNotNull(clientMode);
 		assertEquals(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED), clientMode);
 	}
 
-//	@SuppressWarnings("static-method")
-//	@Test
-//	public void testGenerateJsonParameters() throws StatusCodeException, ServletException {
-//		final String sref = SREF;
-//		Index index = new Index();
-//		index.init(null);
-//		String mid = DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_MID);
-//		OcesJsonParameterGenerator clientGenerator = index.createClientGenerator(mid);
-//
-//		int spid = (int) StringUtils.toLong(DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_SPID), 0);
-//		SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
-//		index.setSigningDocument(clientGenerator, signingProcess, sref);
-//		String challenge = ChallengeGenerator.generateChallenge();
-//		String clientTag = clientGenerator.generateClientTag("standard", "500", "450", "en", challenge, sref);
-//
-//		assertClientTag(clientTag);
-//	}
+	@SuppressWarnings("static-method")
+	@Test
+	public void testGenerateJsonParameters() throws StatusCodeException, ServletException {
+		final String sref = SREF;
+		Index index = new Index();
+		index.init(null);
+		String mid = DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_MID);
+		OcesJsonParameterGenerator clientGenerator = index.createClientGenerator(mid);
+
+		int spid = (int) StringUtils.toLong(DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_SPID), 0);
+		SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
+		index.setSigningDocument(clientGenerator, signingProcess, sref);
+		String challenge = ChallengeGenerator.generateChallenge();
+		String clientTag = clientGenerator.generateClientTag("standard", "en", challenge, sref);
+
+		assertClientTag(clientTag);
+	}
 
 	private static void assertClientTag(String clientTag) {
 		assertNotNull(clientTag);
