@@ -1,7 +1,8 @@
 package no.bbs.trust.ts.idp.nemid.utils;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import java.sql.SQLException;
 import java.util.Map;
@@ -22,8 +23,8 @@ public class DaoUtilTest {
 
 	private static final String SREF = "AE910DF8E2D812F5E53831032437F078C5F76260";
 	private static final String[] SESSION_DATA_KEYS = new String[] { ConfigKeys.SESSIONKEY_SPID, ConfigKeys.SESSIONKEY_MID, ConfigKeys.SESSIONKEY_LOCALE,
-			ConfigKeys.SESSIONKEY_TZO };
-	private static final String[] SESSION_DATA_VALUES = new String[] { "289223", "1001", "en", "7200000" };
+			ConfigKeys.SESSIONKEY_TZO, ConfigKeys.SESSIONKEY_NEMID_CLIENTMODE };
+	private static final String[] SESSION_DATA_VALUES = new String[] { "289223", "1001", "en", "7200000", "" };
 
 	private static final String MID = "1001";
 	private static final String[] MERCHANT_PKI_CONFIG_VALUES = new String[] { "/opt/BBS/properties/ts_idp_nemid/keysandcerts/DanIDTestTU.p12", "Test1234",
