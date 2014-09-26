@@ -16,11 +16,9 @@
 <body class="iframe">
 	<div class="ipage">
 		<div class="main">
-			<div class="nemid_client">
-				<!-- Client tag -->
-				<%= (String) request.getAttribute("clienttag") %>
-				<!-- /Client tag -->
-			</div>
+			<!-- Client tag -->
+			<%= (String) request.getAttribute("clienttag") %>
+			<!-- /Client tag -->
 			
 			<!-- Signer status table -->
 			<jsp:include page="inc_statustable.jsp"></jsp:include>
