@@ -69,14 +69,15 @@ import org.springframework.transaction.TransactionStatus;
 
 /**
  *
- * @author azm
  */
 public class Verify extends BaseServlet {
+
+	private static final long serialVersionUID = 1L;
 
 	private static final String PKICONFIG_PIDSERVICEID = "PIDServiceId";
 	private static final String PKICONFIG_RIDSERVICEID = "RIDServiceId";
 	private static final String[] SESSION_DATA_KEYS = new String[] { ConfigKeys.SESSIONKEY_SPID, ConfigKeys.SESSIONKEY_CHALLENGE, ConfigKeys.SESSIONKEY_MID,
-			ConfigKeys.SESSIONKEY_LOCALE };
+			"", "" };
 
 	private final TransactionHelper transactionHelper;
 
@@ -148,7 +149,6 @@ public class Verify extends BaseServlet {
 		return new ReturnCode(Dispatch.REDIRECT, getConfigProperty(ConfigKeys.CONFIG_NEMID_RECEIPTURL) + "?status=completed&sref=" + sref);
 	}
 
-	@SuppressWarnings("resource")
 	private static String extractResponse(HttpServletRequest request) throws IOException {
 		ServletInputStream inputStream = null;
 		String signedResponse = null;
