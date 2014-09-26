@@ -88,6 +88,7 @@ public class ConfigKeys {
 	public static final String CONFIG_NEMID_CLIENT_SP_ORIGIN = "nemid.client.sp.origin";
 	public static final String CONFIG_NEMID_CLIENT_URL = "nemid.client.url";
 
+	public static final String CONFIG_NEMID_CLIENTTAG_DIV = "nemid.clienttag.div";
 	public static final String CONFIG_NEMID_CLIENTTAG_PARAMETERS = "nemid.clienttag.parameters";
 	public static final String CONFIG_NEMID_CLIENTTAG_IFRAME = "nemid.clienttag.iframe";
 	public static final String CONFIG_NEMID_CLIENTTAG_POSTBACKFORM = "nemid.clienttag.postbackform";
