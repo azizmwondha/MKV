@@ -106,7 +106,8 @@ public class Index extends BaseServlet {
 			OcesJsonParameterGenerator clientGenerator = createClientGenerator(mid);
 			setSigningDocument(clientGenerator, signingProcess, sref);
 			String challenge = Base64Handler.encode(ChallengeGenerator.generateChallenge());
-			String clientTag = clientGenerator.generateClientTag(clientMode, languageCode, challenge, sref);
+			String nemidTag = clientGenerator.generateClientTag(clientMode, languageCode, challenge, sref);
+			String clientTag = String.format(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_DIV), " " + clientMode, nemidTag);
 			logger.debug("NemID JS client tag: " + clientTag);
 			request.setAttribute("clienttag", clientTag);
 			DAOUtil.updateSessionDataByKey(sref, ConfigKeys.SESSIONKEY_CHALLENGE, challenge);
