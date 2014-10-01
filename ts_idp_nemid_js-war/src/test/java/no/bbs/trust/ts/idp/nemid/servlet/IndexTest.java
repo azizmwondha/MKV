@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.security.Security;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 
@@ -33,6 +35,7 @@ public class IndexTest {
 	protected static final Logger logger = Logger.getLogger(Constants.MAIN_LOGGER);
 
 	private static final String SREF = "A92ED314B462D52159965681E5FD4F3AA3AF7D28";
+	private static final Map<String, String> SESSION_DATAS = new HashMap<String, String>();
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -49,7 +52,7 @@ public class IndexTest {
 	public void testGetClientModeNull() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setParameter(ConfigKeys.PARAM_NEMID_CLIENTMODE, (String) null);
-		String clientMode = new Index().getClientMode(request);
+		String clientMode = Index.getClientMode(request, SESSION_DATAS);
 		assertNotNull(clientMode);
 		assertEquals(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD), clientMode);
 	}
@@ -59,7 +62,7 @@ public class IndexTest {
 	public void testGetClientModeEmpty() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setParameter(ConfigKeys.PARAM_NEMID_CLIENTMODE, "");
-		String clientMode = new Index().getClientMode(request);
+		String clientMode = Index.getClientMode(request, SESSION_DATAS);
 		assertNotNull(clientMode);
 		assertEquals(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD), clientMode);
 	}
@@ -69,7 +72,7 @@ public class IndexTest {
 	public void testGetClientModeStandard() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setParameter(ConfigKeys.PARAM_NEMID_CLIENTMODE, "standard");
-		String clientMode = new Index().getClientMode(request);
+		String clientMode = Index.getClientMode(request, SESSION_DATAS);
 		assertNotNull(clientMode);
 		assertEquals(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD), clientMode);
 	}
@@ -79,7 +82,7 @@ public class IndexTest {
 	public void testGetClientModeLimited() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setParameter(ConfigKeys.PARAM_NEMID_CLIENTMODE, "limited");
-		String clientMode = new Index().getClientMode(request);
+		String clientMode = Index.getClientMode(request, SESSION_DATAS);
 		assertNotNull(clientMode);
 		assertEquals(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED), clientMode);
 	}
