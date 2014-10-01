@@ -153,35 +153,6 @@ public class Index extends BaseServlet {
 		return clientMode;
 	}
 
-//	/**
-//	 * Gets the NemID client dimension (width or height) from the HttpServletRequest or from the session data.
-//	 * If the dimension is neither specified in the HttpServletRequest nor in the session data,
-//	 * the configured default dimension is return dependent on the NemID client mode.
-//	 *  
-//	 * @param request the HttpServletRequest
-//	 * @param dimensionParamName the HttpServletRequest parameter name
-//	 * @param dimensionSessionKey the session data key
-//	 * @param clientMode the current client mode
-//	 * @param defaultDimensionPropertyKeyStandard the default dimension property key for client mode "standard"
-//	 * @param defaultDimensionPropertyKeyLimited the default dimension property key for client mode "limited"
-//	 * @return
-//	 */
-//	String getClientDimension(HttpServletRequest request, String dimensionParamName, String dimensionSessionKey, String clientMode,
-//			String defaultDimensionPropertyKeyStandard, String defaultDimensionPropertyKeyLimited) {
-//		String dimension = request.getParameter(dimensionParamName);
-//		if ((dimension == null || "".equals(dimension)) && sessionDatas != null) {
-//			dimension = sessionDatas.get(dimensionSessionKey);
-//		}
-//
-//		if (dimension == null || "".equals(dimension)) {
-//			if (Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED).equals(clientMode)) {
-//				return Config.INSTANCE.getProperty(defaultDimensionPropertyKeyLimited);
-//			}
-//			return Config.INSTANCE.getProperty(defaultDimensionPropertyKeyStandard);
-//		}
-//		return dimension;
-//	}
-
 	static OcesJsonParameterGenerator createClientGenerator(String mid) throws StatusCodeException {
 		KeyCredentials credentials;
 		try {
@@ -255,7 +226,7 @@ public class Index extends BaseServlet {
 		}
 	}
 
-	private SignerStatusTable[] getStatusTable(String mid, String sref, SigningProcess sp) throws StatusCodeException {
+	private static SignerStatusTable[] getStatusTable(String mid, String sref, SigningProcess sp) throws StatusCodeException {
 		try {
 			GetStatusTableRequest gstq = new GetStatusTableRequest();
 			gstq.setSignProcessID("" + sp.getSignprocessId());
@@ -280,4 +251,5 @@ public class Index extends BaseServlet {
 					+ t.getMessage());
 		}
 	}
+
 }

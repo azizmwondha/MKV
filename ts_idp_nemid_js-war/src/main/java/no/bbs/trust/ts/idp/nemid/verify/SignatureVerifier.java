@@ -120,7 +120,7 @@ public class SignatureVerifier {
 		} catch (AppletException ae) {
 			String errorCode = ae.getErrorCode();
 			ActionEvent actionEvent = NemIDErrorMapper.getActionEvent(errorCode);
-			logger.debug("NemID error code: " + errorCode + ", message: " + ae.getMessage() + ", action event: " + actionEvent);
+			logger.info("NemID error code: " + errorCode + ", message: " + ae.getMessage() + ", action event: " + actionEvent);
 			throw new StatusCodeException(actionEvent, NemIDErrorMapper.getErrorCodeDescription(errorCode), errorCode);
 		} catch (Throwable t) {
 			EventLogger.dumpStack(t);
