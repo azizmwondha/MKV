@@ -57,11 +57,9 @@ public class Index extends BaseServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String COMPONENT_NAME = "NemIDJS";
+	private static final String COMPONENT_NAME = "NemIDJS";
 	private static final String[] SESSION_DATA_KEYS = new String[] { ConfigKeys.SESSIONKEY_SPID, ConfigKeys.SESSIONKEY_MID, ConfigKeys.SESSIONKEY_LOCALE,
 		ConfigKeys.SESSIONKEY_TZO, ConfigKeys.SESSIONKEY_NEMID_CLIENTMODE };
-
-	private Map<String, String> sessionDatas;
 
 	private final TransactionHelper transactionHelper;
 
@@ -79,9 +77,9 @@ public class Index extends BaseServlet {
 		boolean commit = false;
 		try {
 			DAOUtil.validateSessionStep(sref, new int[] { 2, 4, 5, 6 });
-			sessionDatas = DAOUtil.getSessionDataKeysAndValues(sref, SESSION_DATA_KEYS);
+			Map<String, String> sessionDatas = DAOUtil.getSessionDataKeysAndValues(sref, SESSION_DATA_KEYS);
 
-			String clientMode = getClientMode(request);
+			String clientMode = getClientMode(request, sessionDatas);
 			int spid = (int) StringUtils.toLong(sessionDatas.get(ConfigKeys.SESSIONKEY_SPID), 0);
 			SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
 
@@ -139,7 +137,7 @@ public class Index extends BaseServlet {
 		}
 	}
 
-	String getClientMode(HttpServletRequest request) {
+	static String getClientMode(HttpServletRequest request, Map<String, String> sessionDatas) {
 		String clientMode = request.getParameter(ConfigKeys.PARAM_NEMID_CLIENTMODE);
 		if ((clientMode == null || "".equals(clientMode)) && sessionDatas != null) {
 			clientMode = sessionDatas.get(ConfigKeys.SESSIONKEY_NEMID_CLIENTMODE);
