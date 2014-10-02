@@ -5,7 +5,7 @@
 
 	<context-param>
 		<param-name>config.dir</param-name>
-		<param-value>/opt/BBS/properties/ts_idp_nemid_js/</param-value>
+		<param-value>/opt/BBS/properties/ts_idp_dk_nemid_js/</param-value>
 	</context-param>
 
 	<servlet>
