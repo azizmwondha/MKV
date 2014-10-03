@@ -4,14 +4,14 @@
 	<groupId>no.bbs.trust</groupId>
 	<artifactId>ts_idp_nemid_js-config</artifactId>
 	<name>ts_idp_nemid_js - config </name>
-	<version>1.0.4</version>
+	<version>1.0.5-SNAPSHOT</version>
 	<description>ts_idp_nemid_js - configuration</description>
 	<packaging>pom</packaging>
 
 	<parent>
 		<artifactId>ts_idp_nemid_js</artifactId>
 		<groupId>no.bbs.trust</groupId>
-		<version>1.0.4</version>
+		<version>1.0.5-SNAPSHOT</version>
 	</parent>
 
 	<build>
