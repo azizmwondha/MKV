@@ -34,7 +34,7 @@ public enum NemIDPerformanceEvent implements PerformanceEvent {
 	DK_NEMID_OCSP_LOOKUP("33ED6"),
 	DK_NEMID_CREATE_SDO("33ED7"),
 	DK_NEMID_SEAL_SDO("33ED8"),
-	DK_NEMID_RID_MATCH("33ED6");
+	DK_NEMID_RID_MATCH("33ED9");
 	//@formatter:on
 
 	private String eventcode;
