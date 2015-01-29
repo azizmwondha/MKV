@@ -92,6 +92,10 @@
 					<groupId>oracle</groupId>
 					<artifactId>ojdbc6</artifactId>
 				</exclusion>
+				<exclusion>
+					<artifactId>xalan</artifactId>
+					<groupId>xalan</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
