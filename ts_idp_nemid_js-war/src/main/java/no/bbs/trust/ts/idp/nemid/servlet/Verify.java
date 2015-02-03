@@ -18,6 +18,7 @@ import no.bbs.trust.amqcapi.AMQAPIException;
 import no.bbs.trust.amqcapi.MessageQueueProducer;
 import no.bbs.trust.amqcapi.QueueMessageEvent;
 import no.bbs.trust.amqcapi.constants.AMQConstants;
+import no.bbs.trust.amqcapi.message.FinalizeSigningProcessMessage;
 import no.bbs.trust.common.basics.exceptions.StatusCodeException;
 import no.bbs.trust.common.basics.types.Dispatch;
 import no.bbs.trust.common.basics.types.ReturnCode;
@@ -599,11 +600,10 @@ public class Verify extends BaseServlet {
 		MessageQueueProducer messageQueueProducer = null;
 		try {
 			messageQueueProducer = new MessageQueueProducer(AMQConstants.QUEUE_FINALIZE_SP, getConfigProperty(Constants.ACTIVEMQ_URL));
-			queueMessageEvent = new QueueMessageEvent();
-			queueMessageEvent.put(Constants.TID, sref);
-			queueMessageEvent.put(DbTableInfo.BO_ORDERID, URLEncoder.encode(orderId, TEConstants.CHARSET_UTF8));
-			queueMessageEvent.put(DbTableInfo.BO_MERCHANTID, mid);
-			queueMessageEvent.put(DbTableInfo.SIGPRO_SIGNPROSID, "" + signingProcess.getSignprocessId());
+
+			String encodedOrderId = URLEncoder.encode(orderId, TEConstants.CHARSET_UTF8);
+			FinalizeSigningProcessMessage message = new FinalizeSigningProcessMessage(sref, encodedOrderId, mid, signingProcess.getSignprocessId());
+			queueMessageEvent = message.toMessageEvent();
 			logger.info("Registering [Event=" + queueMessageEvent + "]");
 
 			messageQueueProducer.sendMessage(queueMessageEvent);
