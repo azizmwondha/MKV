@@ -180,10 +180,6 @@ public class Index extends BaseServlet {
 
 		// Web context and merchant URLs
 		updateWCattributes(ConfigKeys.SESSIONKEY_STYLE, "styleurl", wc.getStyleUrl(), tid, request);
-
-		// SE_BID application URLs
-		request.setAttribute("verifyurl", getConfigProperty(ConfigKeys.CONFIG_NEMID_TAG_VERIFYURL));
-		request.setAttribute("docurl", getConfigProperty(ConfigKeys.CONFIG_NEMID_DOCURL));
 	}
 
 	private static void updateWCattributes(String sessionKey, String attrName, String wcURL, String tid, HttpServletRequest request) throws StatusCodeException {

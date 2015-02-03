@@ -87,16 +87,6 @@
 				</PathConstraints>
 			</EndPoint>
 			<EndPoint>
-				<path>/getdoc.html</path>
-				<description>NemID document</description>
-				<PathConstraints>
-					<PathConstraint>
-						<description>Get document by SREF</description>
-						<methods>get,post</methods>
-					</PathConstraint>
-				</PathConstraints>
-			</EndPoint>
-			<EndPoint>
 				<path>/verify.html</path>
 				<description>NemID verify</description>
 				<PathConstraints>

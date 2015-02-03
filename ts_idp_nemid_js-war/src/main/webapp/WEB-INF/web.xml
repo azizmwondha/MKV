@@ -46,13 +46,6 @@
 	</servlet>
 
 	<servlet>
-		<display-name>dknemid_document</display-name>
-		<servlet-name>dknemid_document</servlet-name>
-		<servlet-class>no.bbs.trust.ts.idp.nemid.servlet.GetDocument</servlet-class>
-		<load-on-startup>127</load-on-startup>
-	</servlet>
-
-	<servlet>
 		<display-name>dknemid_verify</display-name>
 		<servlet-name>dknemid_verify</servlet-name>
 		<servlet-class>no.bbs.trust.ts.idp.nemid.servlet.Verify</servlet-class>
@@ -69,11 +62,6 @@
 	<servlet-mapping>
 		<servlet-name>dknemid_index</servlet-name>
 		<url-pattern>/index.html</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>dknemid_document</servlet-name>
-		<url-pattern>/getdoc.html</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
