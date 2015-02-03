@@ -59,6 +59,13 @@
 		<load-on-startup>127</load-on-startup>
 	</servlet>
 
+	<servlet>
+		<display-name>dknemid_refresh</display-name>
+		<servlet-name>dknemid_refresh</servlet-name>
+		<servlet-class>no.bbs.trust.ts.idp.nemid.servlet.RefreshCache</servlet-class>
+		<load-on-startup>127</load-on-startup>
+	</servlet>
+
 	<servlet-mapping>
 		<servlet-name>dknemid_index</servlet-name>
 		<url-pattern>/index.html</url-pattern>
@@ -75,7 +82,7 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>dk_nemid_initidp</servlet-name>
+		<servlet-name>dknemid_refresh</servlet-name>
 		<url-pattern>/refresh.cache</url-pattern>
 	</servlet-mapping>
 
