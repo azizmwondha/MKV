@@ -75,30 +75,6 @@
 			</exclusions>
 		</dependency>
 
-		<!-- ############################################################################# -->
-		<!-- SDO libraries -->
-
-		<dependency>
-			<groupId>no.bbs.tt.trustsign</groupId>
-			<artifactId>seidsdosigner</artifactId>
-			<version>1.0.19</version>
-			<scope>compile</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.bouncycastle</groupId>
-					<artifactId>bcprov-jdk16</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>oracle</groupId>
-					<artifactId>ojdbc6</artifactId>
-				</exclusion>
-				<exclusion>
-					<artifactId>xalan</artifactId>
-					<groupId>xalan</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
 		<dependency>
 			<groupId>no.bbs.trust</groupId>
 			<artifactId>common_config</artifactId>
@@ -286,32 +262,13 @@
 			<scope>compile</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>xom</groupId>
-			<artifactId>xom</artifactId>
-			<version>1.2.5</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>xalan</artifactId>
-					<groupId>xalan</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>xercesImpl</artifactId>
-					<groupId>xerces</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>xml-apis</artifactId>
-					<groupId>xml-apis</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>xmlsec</groupId>
-			<artifactId>xmlsec</artifactId>
-			<version>1.4.1</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
+        <dependency>
+            <groupId>xmlsec</groupId>
+            <artifactId>xmlsec</artifactId>
+            <version>1.4.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 			<version>2.4</version>
