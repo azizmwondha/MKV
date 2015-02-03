@@ -14,7 +14,6 @@ import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
 import no.bbs.trust.ts.idp.nemid.event.NemIDActionEvent;
 import no.bbs.tt.trustsign.trustsignDAL.constant.PKIIDMap;
 import no.bbs.tt.trustsign.trustsignDAL.constant.StatusTypes;
-import no.bbs.tt.trustsign.trustsignDAL.dao.table.MerchantPkiConfigDAO;
 import no.bbs.tt.trustsign.trustsignDAL.dao.table.PkiCertificatePolicyDAO;
 import no.bbs.tt.trustsign.trustsignDAL.dao.table.SessionDataDAO;
 import no.bbs.tt.trustsign.trustsignDAL.dao.table.SignObjectDAO;
@@ -25,7 +24,6 @@ import no.bbs.tt.trustsign.trustsignDAL.dao.table.SignerIdDAO;
 import no.bbs.tt.trustsign.trustsignDAL.dao.table.SigningProcessDAO;
 import no.bbs.tt.trustsign.trustsignDAL.dao.table.StepDAO;
 import no.bbs.tt.trustsign.trustsignDAL.dao.table.WebContextDAO;
-import no.bbs.tt.trustsign.trustsignDAL.vos.table.MerchantPkiConfig;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.PkiPolicy;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SessionData;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObject;
@@ -36,40 +34,8 @@ import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignerId;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.Step;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.WebContext;
-import eu.nets.no.vas.esign.sdosigner.types.KeyCredentials;
 
 public class DAOUtil {
-
-	public static KeyCredentials getMerchantCredentials(String midf) throws SQLException {
-		final String[] KEYS = new String[] { "Keystore", "KeystorePassword", "MerchantAlias", "MerchantAliasPwd", "CertChainPath", "DefaultOCSPUrl",
-		"SignOCSPRequests" };
-
-		int mid = Integer.parseInt(midf);
-		KeyCredentials credentials = new KeyCredentials();
-
-		// Get MerchantPkiConfig from database
-		MerchantPkiConfigDAO mpcDao = new MerchantPkiConfigDAO();
-		Collection<MerchantPkiConfig> merchantPkiConfigs = mpcDao.getByMerchantidPkiidKeys(null, mid, PKIIDMap.DKNEMIDJS_ID, KEYS);
-		Map<String, String> mpcKeysAndValues = new HashMap<String, String>();
-		for (MerchantPkiConfig merchantPkiConfig : merchantPkiConfigs) {
-			mpcKeysAndValues.put(merchantPkiConfig.getKey(), merchantPkiConfig.getValue());
-		}
-
-		// Populate KeyCredentials values
-		credentials.setKeystorepath(mpcKeysAndValues.get(KEYS[0]));
-		credentials.setKeystorepass(mpcKeysAndValues.get(KEYS[1]));
-		credentials.setKeyalias(mpcKeysAndValues.get(KEYS[2]));
-		credentials.setKeyaliaspass(mpcKeysAndValues.get(KEYS[3]));
-		credentials.setCertChainPath(mpcKeysAndValues.get(KEYS[4]));
-		credentials.setDefaultOCSPURL(mpcKeysAndValues.get(KEYS[5]));
-		if (Boolean.parseBoolean(mpcKeysAndValues.get(KEYS[6]))) {
-			credentials.setOCSPRequestSigning();
-		} else {
-			credentials.resetOCSPRequestSigning();
-		}
-
-		return credentials;
-	}
 
 	public static String getOrderID(SigningProcess sp) throws StatusCodeException {
 		try {

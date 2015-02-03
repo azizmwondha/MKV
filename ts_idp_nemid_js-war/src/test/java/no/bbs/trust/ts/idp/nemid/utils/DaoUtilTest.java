@@ -1,10 +1,5 @@
 package no.bbs.trust.ts.idp.nemid.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-
-import java.sql.SQLException;
 import java.util.Map;
 
 import no.bbs.trust.common.basics.exceptions.StatusCodeException;
@@ -13,11 +8,11 @@ import no.bbs.trust.common.webapp.servlets.InitConfig;
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
 import no.bbs.trust.ts.idp.nemid.db.OracleConnectionFactory;
 import no.bbs.tt.trustsign.trustsignDAL.config.ConnectionFactories;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import eu.nets.no.vas.esign.sdosigner.types.KeyCredentials;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class DaoUtilTest {
 
@@ -67,21 +62,6 @@ public class DaoUtilTest {
 		assertEquals(SESSION_DATA_VALUES[1], sessionDataKeysAndValues.get(SESSION_DATA_KEYS[1]));
 		assertEquals(SESSION_DATA_VALUES[2], sessionDataKeysAndValues.get(SESSION_DATA_KEYS[2]));
 		assertEquals(SESSION_DATA_VALUES[3], sessionDataKeysAndValues.get(SESSION_DATA_KEYS[3]));
-	}
-
-	@SuppressWarnings("static-method")
-	@Test
-	public void testGetMerchantCredentials() throws SQLException {
-		KeyCredentials credentials = DAOUtil.getMerchantCredentials(MID);
-
-		assertNotNull(credentials);
-		assertEquals(MERCHANT_PKI_CONFIG_VALUES[0], credentials.getKeystorepath());
-		assertEquals(MERCHANT_PKI_CONFIG_VALUES[1], credentials.getKeystorepass());
-		assertEquals(MERCHANT_PKI_CONFIG_VALUES[2], credentials.getKeyalias());
-		assertEquals(MERCHANT_PKI_CONFIG_VALUES[3], credentials.getKeyaliaspass());
-		assertEquals(MERCHANT_PKI_CONFIG_VALUES[4], credentials.getCertChainPath());
-		assertEquals(MERCHANT_PKI_CONFIG_VALUES[5], credentials.getDefaultOCSPURL());
-		assertFalse(credentials.isSigningOCSPRequests());
 	}
 
 }

@@ -12,7 +12,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import eu.nets.no.vas.esign.sdosigner.types.KeyCredentials;
 import no.bbs.trust.common.basics.exceptions.StatusCodeException;
 import no.bbs.trust.common.basics.types.Dispatch;
 import no.bbs.trust.common.basics.types.ReturnCode;
@@ -27,12 +26,15 @@ import no.bbs.trust.ts.idp.nemid.tag.ChallengeGenerator;
 import no.bbs.trust.ts.idp.nemid.tag.OcesJsonParameterGenerator;
 import no.bbs.trust.ts.idp.nemid.tag.Signer;
 import no.bbs.trust.ts.idp.nemid.utils.DAOUtil;
+import no.bbs.trust.ts2.idp.common.context.merchant.MerchantContext;
+import no.bbs.trust.ts2.idp.common.context.merchant.MerchantContextCache;
 import no.bbs.tt.trustsign.te.xml.messages.ErrorResponse;
 import no.bbs.tt.trustsign.te.xml.messages.GetStatusTableRequest;
 import no.bbs.tt.trustsign.te.xml.messages.GetStatusTableResponse;
 import no.bbs.tt.trustsign.te.xml.messages.SignerStatusTable;
 import no.bbs.tt.trustsign.te.xml.messages.TEMessage;
 import no.bbs.tt.trustsign.tecapi.communicator.Requestor;
+import no.bbs.tt.trustsign.trustsignDAL.constant.PKIConfigKeys;
 import no.bbs.tt.trustsign.trustsignDAL.constant.SessionKey;
 import no.bbs.tt.trustsign.trustsignDAL.dao.table.SessionDataDAO;
 import no.bbs.tt.trustsign.trustsignDAL.tx.TransactionHelper;
@@ -144,15 +146,15 @@ public class Index extends BaseServlet {
 	}
 
 	static OcesJsonParameterGenerator createClientGenerator(String mid) throws StatusCodeException {
-		KeyCredentials credentials;
-		try {
-			credentials = DAOUtil.getMerchantCredentials(mid);
-		} catch (SQLException ex) {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, "Unable to obtain key credentials for Merchant [" + mid + "] "
-					+ ex.getMessage());
-		}
+		MerchantContext merchantContext = MerchantContextCache.getMerchantContext(mid);
+		Map<String, String> idpConfig = merchantContext.getIdpConfig();
 
-		Signer signer = new Signer(credentials.getKeystorepath(), credentials.getKeystorepass(), credentials.getKeyalias(), credentials.getKeyaliaspass());
+		String keystorePath = idpConfig.get(PKIConfigKeys.KEYSTORE);
+		String keystorePwd = idpConfig.get(PKIConfigKeys.KEYSTORE_PASSWORD);
+		String keyAlias = idpConfig.get(PKIConfigKeys.MERCHANT_ALIAS);
+		String keyAliasPwd = idpConfig.get(PKIConfigKeys.MERCHANT_ALIAS_PASSWORD);
+
+		Signer signer = new Signer(keystorePath, keystorePwd, keyAlias, keyAliasPwd);
 		return new OcesJsonParameterGenerator(signer);
 	}
 
