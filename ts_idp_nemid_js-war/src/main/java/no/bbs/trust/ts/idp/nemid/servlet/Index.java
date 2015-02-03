@@ -4,8 +4,6 @@
  */
 package no.bbs.trust.ts.idp.nemid.servlet;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import eu.nets.no.vas.esign.sdosigner.types.KeyCredentials;
-import no.bbs.trust.common.basics.charset.Charsets;
 import no.bbs.trust.common.basics.exceptions.StatusCodeException;
 import no.bbs.trust.common.basics.types.Dispatch;
 import no.bbs.trust.common.basics.types.ReturnCode;
@@ -23,16 +20,13 @@ import no.bbs.trust.common.basics.utils.EventLogger;
 import no.bbs.trust.common.basics.utils.StringUtils;
 import no.bbs.trust.common.config.Config;
 import no.bbs.trust.common.i18n.LangSupport;
-import no.bbs.trust.ts.idp.nemid.attachments.Attachment;
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
-import no.bbs.trust.ts.idp.nemid.contants.Constants;
 import no.bbs.trust.ts.idp.nemid.event.NemIDActionEvent;
 import no.bbs.trust.ts.idp.nemid.event.NemIDPerformanceEvent;
 import no.bbs.trust.ts.idp.nemid.tag.ChallengeGenerator;
 import no.bbs.trust.ts.idp.nemid.tag.OcesJsonParameterGenerator;
 import no.bbs.trust.ts.idp.nemid.tag.Signer;
 import no.bbs.trust.ts.idp.nemid.utils.DAOUtil;
-import no.bbs.tt.bc.cryptlib.util.HashUtil;
 import no.bbs.tt.trustsign.te.xml.messages.ErrorResponse;
 import no.bbs.tt.trustsign.te.xml.messages.GetStatusTableRequest;
 import no.bbs.tt.trustsign.te.xml.messages.GetStatusTableResponse;
@@ -46,8 +40,6 @@ import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObject;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObjectData;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.WebContext;
-import org.apache.log4j.Logger;
-import org.bouncycastle.util.encoders.Base64;
 import org.openoces.ooapi.utils.Base64Handler;
 import org.springframework.transaction.TransactionStatus;
 
@@ -102,7 +94,7 @@ public class Index extends BaseServlet {
 			}
 
 			OcesJsonParameterGenerator clientGenerator = createClientGenerator(mid);
-			setSigningDocument(clientGenerator, signingProcess, sref);
+			setSigningDocument(clientGenerator, signingProcess);
 			String challenge = Base64Handler.encode(ChallengeGenerator.generateChallenge());
 			String nemidTag = clientGenerator.generateClientTag(clientMode, languageCode, challenge, sref);
 			String clientTag = String.format(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_DIV), " " + clientMode, nemidTag);
@@ -164,7 +156,7 @@ public class Index extends BaseServlet {
 		return new OcesJsonParameterGenerator(signer);
 	}
 
-	static void setSigningDocument(OcesJsonParameterGenerator clientGenerator, SigningProcess signingProcess, String sref) throws StatusCodeException {
+	static void setSigningDocument(OcesJsonParameterGenerator clientGenerator, SigningProcess signingProcess) throws StatusCodeException {
 		SignObjectData signObjectData = DAOUtil.getSignObjectData(signingProcess);
 		SignObject signObject = DAOUtil.getSignObject(signObjectData.getSignerObjectId());
 		String docType = signObjectData.getElementType();
@@ -172,34 +164,13 @@ public class Index extends BaseServlet {
 		String docDescription = signObject.getDescription();
 		logger.debug("Doc type: " + docType + ", title: " + docTitle + ", description: " + docDescription);
 
+		String signText = signObjectData.getObjectB64();
 		if ("txt,text,text/plain".contains(docType.toLowerCase())) {
 			docType = "text";
-			String signText = new String(Base64.decode(signObjectData.getObjectB64()), Charsets.UTF_8);
-			logger.debug("Document signText: " + signText);
-			clientGenerator.setSignText(signText, docType);
 		} else {
-			Attachment attachment = new Attachment();
-			attachment.setTitle(docTitle);
-			attachment.setMimeType(docType);
-
-			byte[] documentBytes = Base64.decode(signObjectData.getObjectB64());
-			try {
-				String docHash = new String(Base64.encode(HashUtil.hash(documentBytes, Constants.DIGEST_SHA2)), Charsets.UTF_8);
-				attachment.setB64HashValue(docHash);
-				attachment.setB64HashAlgo(Constants.DIGEST_SHA2_SHORTNAME);
-			} catch (NoSuchAlgorithmException e) {
-				Logger.getLogger(Index.class.getName()).error(e);
-			} catch (NoSuchProviderException e) {
-				Logger.getLogger(Index.class.getName()).error(e);
-			}
-
-			String docUrl = getConfigProperty(ConfigKeys.CONFIG_NEMID_DOCURL) + "?" + ConfigKeys.PARAM_SREF + "=" + sref;
-			attachment.setPath(docUrl);
-			attachment.setSize(documentBytes.length);
-
-			logger.debug("Attachment: " + attachment.toXML());
-			clientGenerator.setSignPdf(docDescription, attachment);
+			docType = "pdf";
 		}
+		clientGenerator.setSignText(signText, docType);
 	}
 
 	private static void setupWebContext(String tid, SigningProcess sp, HttpServletRequest request) throws StatusCodeException {

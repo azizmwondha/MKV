@@ -33,7 +33,6 @@ import java.util.TreeMap;
 
 import no.bbs.trust.common.basics.charset.Charsets;
 import no.bbs.trust.common.config.Config;
-import no.bbs.trust.ts.idp.nemid.attachments.Attachment;
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
 import org.openoces.ooapi.utils.Base64Handler;
 import org.openoces.ooapi.web.JSONException;
@@ -102,20 +101,11 @@ public class OcesJsonParameterGenerator {
 	}
 
 	/**
-	 * Utility method that Base64-encodes the received sign text and inserts the SIGNTEXT and SIGNTEXT_FORMAT parameters in the internal parameter collection.
-	 * @param signText
-	 * @param format
+	 * Sets the SIGNTEXT (base64 encoded document to be signed) and SIGNTEXT_FORMAT client parameters.
 	 */
-	public void setSignText(String signText, String format) {
-		addParameter("SIGNTEXT", Base64Handler.encode(signText));
+	public void setSignText(String signTextBase64, String format) {
+		addParameter("SIGNTEXT", signTextBase64);
 		addParameter("SIGNTEXT_FORMAT", format);
-	}
-
-	public void setSignPdf(String signText, Attachment pdf) {
-		addParameter("SIGNTEXT", Base64Handler.encode(signText));
-		addParameter("SIGNTEXT_FORMAT", "pdf");
-		addParameter("SIGNTEXT_URI", pdf.getPath());
-		addParameter("SIGNTEXT_REMOTE_HASH", pdf.getB64HashValue());
 	}
 
 	private void addClientflowParam(boolean sign) {

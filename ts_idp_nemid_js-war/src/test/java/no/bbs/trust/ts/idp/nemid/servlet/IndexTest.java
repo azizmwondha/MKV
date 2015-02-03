@@ -98,7 +98,7 @@ public class IndexTest {
 
 		int spid = (int) StringUtils.toLong(DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_SPID), 0);
 		SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
-		Index.setSigningDocument(clientGenerator, signingProcess, sref);
+		Index.setSigningDocument(clientGenerator, signingProcess);
 		String challenge = ChallengeGenerator.generateChallenge();
 		String clientTag = clientGenerator.generateClientTag("standard", "en", challenge, sref);
 
