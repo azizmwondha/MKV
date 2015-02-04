@@ -1,9 +1,6 @@
 package no.bbs.trust.ts.idp.nemid.servlet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
+import java.net.URL;
 import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,14 +18,20 @@ import no.bbs.trust.ts.idp.nemid.db.OracleConnectionFactory;
 import no.bbs.trust.ts.idp.nemid.tag.ChallengeGenerator;
 import no.bbs.trust.ts.idp.nemid.tag.OcesJsonParameterGenerator;
 import no.bbs.trust.ts.idp.nemid.utils.DAOUtil;
+import no.bbs.trust.ts2.idp.common.context.merchant.MerchantContext;
+import no.bbs.trust.ts2.idp.common.context.merchant.MerchantContextCache;
 import no.bbs.tt.trustsign.trustsignDAL.config.ConnectionFactories;
+import no.bbs.tt.trustsign.trustsignDAL.constant.PKIConfigKeys;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
-
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class IndexTest {
 
@@ -90,6 +93,17 @@ public class IndexTest {
 	@SuppressWarnings("static-method")
 	@Test
 	public void testGenerateJsonParameters() throws StatusCodeException, ServletException {
+		MerchantContext context = new MerchantContext();
+		HashMap<String, String> idpConfig = new HashMap<String, String>();
+		context.setIdpConfig(idpConfig);
+		MerchantContextCache.addMerchantContext("1001", context);
+
+		String certFilename = findCert("VOCES_gyldig.p12");
+		idpConfig.put(PKIConfigKeys.KEYSTORE, certFilename);
+		idpConfig.put(PKIConfigKeys.KEYSTORE_PASSWORD, "Test1234");
+		idpConfig.put(PKIConfigKeys.MERCHANT_ALIAS, "nets danid a/s - tu voces gyldig");
+		idpConfig.put(PKIConfigKeys.MERCHANT_ALIAS_PASSWORD, "Test1234");
+
 		final String sref = SREF;
 		Index index = new Index();
 		index.init(null);
@@ -103,6 +117,11 @@ public class IndexTest {
 		String clientTag = clientGenerator.generateClientTag("standard", "en", challenge, sref);
 
 		assertClientTag(clientTag);
+	}
+
+	private String findCert(String certFilename) {
+		URL certificate = getClass().getClassLoader().getResource(certFilename);
+		return certificate.getFile();
 	}
 
 	private static void assertClientTag(String clientTag) {
