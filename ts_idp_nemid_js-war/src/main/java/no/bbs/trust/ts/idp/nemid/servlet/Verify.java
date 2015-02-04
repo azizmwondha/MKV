@@ -49,8 +49,6 @@ import no.bbs.tt.bc.cryptlib.ds.XMLDSIGValidator;
 import no.bbs.tt.bc.cryptlib.ds.XMLDSValidationException;
 import no.bbs.tt.bc.cryptlib.x509.X509Parser;
 import no.bbs.tt.bc.cryptlib.x509.X509ParserException;
-import no.bbs.tt.trustsign.te.common.constants.TEConstants;
-import no.bbs.tt.trustsign.trustsignDAL.constant.DbTableInfo;
 import no.bbs.tt.trustsign.trustsignDAL.constant.PKIConfigKeys;
 import no.bbs.tt.trustsign.trustsignDAL.constant.SignerIDTypes;
 import no.bbs.tt.trustsign.trustsignDAL.constant.StatusTypes;
@@ -157,7 +155,7 @@ public class Verify extends BaseServlet {
 			inputStream = request.getInputStream();
 			String readRequest = RequestReader.readRequest(inputStream);
 			if (readRequest.startsWith("response=")) {
-				String decodedResponse = URLDecoder.decode(readRequest, "UTF-8");
+				String decodedResponse = URLDecoder.decode(readRequest, no.bbs.trust.ts2.idp.common.util.Constants.CHARSET_UTF8);
 				logger.debug(decodedResponse);
 				signedResponse = decodedResponse.substring(9);
 			}
@@ -601,7 +599,7 @@ public class Verify extends BaseServlet {
 		try {
 			messageQueueProducer = new MessageQueueProducer(AMQConstants.QUEUE_FINALIZE_SP, getConfigProperty(Constants.ACTIVEMQ_URL));
 
-			String encodedOrderId = URLEncoder.encode(orderId, TEConstants.CHARSET_UTF8);
+			String encodedOrderId = URLEncoder.encode(orderId, no.bbs.trust.ts2.idp.common.util.Constants.CHARSET_UTF8);
 			FinalizeSigningProcessMessage message = new FinalizeSigningProcessMessage(sref, encodedOrderId, mid, signingProcess.getSignprocessId());
 			queueMessageEvent = message.toMessageEvent();
 			logger.info("Registering [Event=" + queueMessageEvent + "]");
