@@ -96,15 +96,7 @@ public class DAOUtil {
 	public static void validateSessionStep(String sref, int[] expectedSteps) throws StatusCodeException {
 		try {
 			SessionDataDAO sessionDao = new SessionDataDAO();
-			SessionData sd = sessionDao.getBySrefAndKey(sref, ConfigKeys.SESSIONKEY_PKIID);
-			if (null != sd) {
-				if (!sd.getVal().equalsIgnoreCase("" + PKIIDMap.DKNEMIDJS_ID)) {
-					throw new StatusCodeException(NemIDActionEvent.STATUS_DAL_SQL_ERROR, "Selected PKIID is out of range [ExpectedPKIID="
-							+ PKIIDMap.DKNEMIDJS_ID + "][FoundPKIID=" + sd.getVal() + "]");
-				}
-			}
-
-			sd = sessionDao.getBySrefAndKey(sref, ConfigKeys.SESSIONKEY_STEP);
+			SessionData sd = sessionDao.getBySrefAndKey(sref, ConfigKeys.SESSIONKEY_STEP);
 			if (null != sd) {
 				String sessionStep = sd.getVal();
 				StringBuilder steps = new StringBuilder();
