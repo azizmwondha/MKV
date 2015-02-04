@@ -28,12 +28,7 @@ import no.bbs.trust.ts.idp.nemid.tag.Signer;
 import no.bbs.trust.ts.idp.nemid.utils.DAOUtil;
 import no.bbs.trust.ts2.idp.common.context.merchant.MerchantContext;
 import no.bbs.trust.ts2.idp.common.context.merchant.MerchantContextCache;
-import no.bbs.tt.trustsign.te.xml.messages.ErrorResponse;
-import no.bbs.tt.trustsign.te.xml.messages.GetStatusTableRequest;
-import no.bbs.tt.trustsign.te.xml.messages.GetStatusTableResponse;
-import no.bbs.tt.trustsign.te.xml.messages.SignerStatusTable;
-import no.bbs.tt.trustsign.te.xml.messages.TEMessage;
-import no.bbs.tt.trustsign.tecapi.communicator.Requestor;
+import no.bbs.trust.ts2.idp.common.statustable.StatusTableRetriever;
 import no.bbs.tt.trustsign.trustsignDAL.constant.PKIConfigKeys;
 import no.bbs.tt.trustsign.trustsignDAL.constant.SessionKey;
 import no.bbs.tt.trustsign.trustsignDAL.dao.table.SessionDataDAO;
@@ -42,6 +37,7 @@ import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObject;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObjectData;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.WebContext;
+
 import org.openoces.ooapi.utils.Base64Handler;
 import org.springframework.transaction.TransactionStatus;
 
@@ -53,7 +49,7 @@ public class Index extends BaseServlet {
 
 	private static final String COMPONENT_NAME = "NemIDJS";
 	private static final String[] SESSION_DATA_KEYS = new String[] { ConfigKeys.SESSIONKEY_SPID, ConfigKeys.SESSIONKEY_MID, ConfigKeys.SESSIONKEY_LOCALE,
-		ConfigKeys.SESSIONKEY_TZO, ConfigKeys.SESSIONKEY_NEMID_CLIENTMODE };
+			ConfigKeys.SESSIONKEY_TZO, ConfigKeys.SESSIONKEY_NEMID_CLIENTMODE };
 
 	private final TransactionHelper transactionHelper;
 
@@ -119,10 +115,11 @@ public class Index extends BaseServlet {
 			request.setAttribute("tzo", tzos);
 
 			try {
-				request.setAttribute("statustable", getStatusTable(mid, sref, signingProcess));
-			} catch (StatusCodeException sce) {
-				logger.info("No status table available for SREF");
+				request.setAttribute("statustable", StatusTableRetriever.getStatusTable(mid, signingProcess)); //invoking method from common IDP
+			} catch (Exception exp) {
+				logger.warn("Error in retrieving status table for SREF=" + sref + ", message=" + exp.toString());
 			}
+
 			EventLogger.appendEvent(NemIDPerformanceEvent.DK_NEMID_GENERATE_CLIENT_TAG, start);
 			commit = true;
 			return new ReturnCode(Dispatch.INCLUDE, "/index.jsp");
@@ -145,7 +142,7 @@ public class Index extends BaseServlet {
 		return clientMode;
 	}
 
-	static OcesJsonParameterGenerator createClientGenerator(String mid) throws StatusCodeException {
+	static OcesJsonParameterGenerator createClientGenerator(String mid) {
 		MerchantContext merchantContext = MerchantContextCache.getMerchantContext(mid);
 		Map<String, String> idpConfig = merchantContext.getIdpConfig();
 
@@ -192,31 +189,4 @@ public class Index extends BaseServlet {
 			logger.debug("InsertOrder webcontext [" + attrName + "=" + wcURL + "]");
 		}
 	}
-
-	private static SignerStatusTable[] getStatusTable(String mid, String sref, SigningProcess sp) throws StatusCodeException {
-		try {
-			GetStatusTableRequest gstq = new GetStatusTableRequest();
-			gstq.setSignProcessID("" + sp.getSignprocessId());
-			gstq.setOrderID(DAOUtil.getOrderID(sp));
-			gstq.setMerchantID(mid);
-			gstq.setTransId(sref);
-
-			Requestor requestor = new Requestor(getConfigProperty(ConfigKeys.CONFIG_TRUSTENGINE_URL), 10000L);
-			TEMessage temessage = requestor.sendRequest(gstq);
-
-			if (temessage instanceof ErrorResponse) {
-				ErrorResponse ers = (ErrorResponse) temessage;
-				throw new StatusCodeException(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR, "Unable to get status table [SREF=" + sref + "][ErrorCode="
-						+ ers.getErrorCode() + "][ErrorText=" + ers.getErrorText() + "]");
-			}
-
-			GetStatusTableResponse gsts = (GetStatusTableResponse) temessage;
-			return gsts.getStatusTable();
-		} catch (Exception t) {
-			EventLogger.dumpStack(t, logger);
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UNEXPECTED_INTERNAL_ERROR, "Unable to finalize SigningProcess [SREF=" + sref + "] Reason"
-					+ t.getMessage());
-		}
-	}
-
 }
