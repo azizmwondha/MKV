@@ -115,7 +115,7 @@ public class Index extends BaseServlet {
 			request.setAttribute("tzo", tzos);
 
 			try {
-				request.setAttribute("statustable", StatusTableRetriever.getStatusTable(mid, signingProcess)); //invoking method from common IDP
+				request.setAttribute("statustable", new StatusTableRetriever().getStatusTable(mid, signingProcess)); //invoking method from common IDP
 			} catch (Exception exp) {
 				logger.warn("Error in retrieving status table for SREF=" + sref + ", message=" + exp.toString());
 			}
