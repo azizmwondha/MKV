@@ -5,7 +5,7 @@ public final class ArtifactVersion {
 	private ArtifactVersion() {
 	}
 
-    public static final String ARTIFACT_VERSION = "1.0.7-SNAPSHOT";
+    public static final String ARTIFACT_VERSION = "1.0.7";
 	public static final String ARTIFACT_NAME = "ts_idp_nemid_js-war";
 
 }
