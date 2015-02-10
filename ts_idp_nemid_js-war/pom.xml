@@ -148,7 +148,7 @@
 		<dependency>
 			<groupId>no.bbs.trust</groupId>
 			<artifactId>amqcapi</artifactId>
-			<version>1.2.4</version>
+			<version>1.3.0</version>
 			<scope>compile</scope>
 		</dependency>
 		

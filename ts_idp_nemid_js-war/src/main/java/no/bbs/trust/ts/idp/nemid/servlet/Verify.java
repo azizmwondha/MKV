@@ -14,11 +14,11 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import no.bbs.trust.amqcapi.AMQAPIException;
 import no.bbs.trust.amqcapi.MessageQueueProducer;
-import no.bbs.trust.amqcapi.QueueMessageEvent;
 import no.bbs.trust.amqcapi.constants.AMQConstants;
 import no.bbs.trust.amqcapi.message.FinalizeSigningProcessMessage;
+import no.bbs.trust.amqcapi.types.AMQAPIException;
+import no.bbs.trust.amqcapi.types.QueueMessageEvent;
 import no.bbs.trust.common.basics.exceptions.StatusCodeException;
 import no.bbs.trust.common.basics.types.Dispatch;
 import no.bbs.trust.common.basics.types.ReturnCode;
@@ -62,7 +62,6 @@ import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObjectData;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignerId;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.Step;
-
 import org.bouncycastle.util.encoders.Base64;
 import org.springframework.transaction.TransactionStatus;
 
