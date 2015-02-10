@@ -116,8 +116,10 @@ public class Index extends BaseServlet {
 
 			try {
 				request.setAttribute("statustable", new StatusTableRetriever().getStatusTable(mid, signingProcess)); //invoking method from common IDP
-			} catch (Exception exp) {
-				logger.warn("Error in retrieving status table for SREF=" + sref + ", message=" + exp.toString());
+			} catch (StatusCodeException exp) {
+				logger.warn("StatusCodeException :: Error in retrieving status table for SREF=" + sref + ", message=" + exp.toString());
+			} catch (SQLException exp) {
+				logger.warn("SQLException :: Error in retrieving status table for SREF=" + sref + ", message=" + exp.toString());
 			}
 
 			EventLogger.appendEvent(NemIDPerformanceEvent.DK_NEMID_GENERATE_CLIENT_TAG, start);
