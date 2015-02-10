@@ -5,7 +5,7 @@
 	<artifactId>ts_idp_nemid_js</artifactId>
 	<packaging>pom</packaging>
 	<name>ts_idp_nemid_js web archive</name>
-	<version>1.0.8</version>
+	<version>1.0.9-SNAPSHOT</version>
 	<inceptionYear>2014</inceptionYear>
 	<description>ts_idp_nemid_js</description>
   
@@ -21,9 +21,9 @@
 	</modules>
 
 	<scm>
-		<connection>scm:svn:https://tt-source.bbsas.no/svn/trust/ts_idp_nemid_js/tags/ts_idp_nemid_js-1.0.8</connection>
-		<developerConnection>scm:svn:https://tt-source.bbsas.no/svn/trust/ts_idp_nemid_js/tags/ts_idp_nemid_js-1.0.8</developerConnection>
-		<url>https://tt-source.bbsas.no/svn/trust/ts_idp_nemid_js/tags/ts_idp_nemid_js-1.0.8</url>
+		<connection>scm:svn:https://tt-source.bbsas.no/svn/trust/ts_idp_nemid_js/trunk</connection>
+		<developerConnection>scm:svn:https://tt-source.bbsas.no/svn/trust/ts_idp_nemid_js/trunk</developerConnection>
+		<url>https://tt-source.bbsas.no/svn/trust/ts_idp_nemid_js/trunk</url>
 	</scm>
 
     <build>
