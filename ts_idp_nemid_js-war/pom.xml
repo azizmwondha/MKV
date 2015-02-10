@@ -267,6 +267,10 @@
 		<finalName>ts_idp_dk_nemid_js-${pom.version}</finalName>
 
 		<plugins>
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.4.1</version>
+            </plugin>
 			<plugin>
 				<groupId>no.bbs.tt.plugins</groupId>
 				<artifactId>maven-version-plugin</artifactId>
