@@ -598,8 +598,7 @@ public class Verify extends BaseServlet {
 		try {
 			messageQueueProducer = new MessageQueueProducer(AMQConstants.QUEUE_FINALIZE_SP, getConfigProperty(Constants.ACTIVEMQ_URL));
 
-			String encodedOrderId = URLEncoder.encode(orderId, no.bbs.trust.ts2.idp.common.util.Constants.CHARSET_UTF8);
-			FinalizeSigningProcessMessage message = new FinalizeSigningProcessMessage(sref, encodedOrderId, mid, signingProcess.getSignprocessId());
+			FinalizeSigningProcessMessage message = new FinalizeSigningProcessMessage(sref, orderId, mid, signingProcess.getSignprocessId());
 			queueMessageEvent = message.toMessageEvent();
 			logger.info("Registering [Event=" + queueMessageEvent + "]");
 
@@ -610,10 +609,6 @@ public class Verify extends BaseServlet {
 			EventLogger.dumpStack(exp);
 			throw new StatusCodeException(NemIDActionEvent.STATUS_AMQ_ERROR, "Unable to register [QueueEvent=" + queueMessageEvent + "] Reason"
 					+ exp.getMessage());
-		} catch (UnsupportedEncodingException exp) {
-			logger.fatal("Error during queue message registration [QueueEvent=" + queueMessageEvent + "] - " + exp.getMessage());
-			EventLogger.dumpStack(exp);
-			throw new StatusCodeException(NemIDActionEvent.STATUS_ENCODING_ERROR, "Unable to encode order ID [" + orderId + "] Reason" + exp.getMessage());
 		} finally {
 			if (messageQueueProducer != null) {
 				messageQueueProducer.close();
