@@ -90,8 +90,10 @@ public class InitDKNEMID extends HttpServlet {
 
 		ServiceProviderSetup.setOcspRevocationChecker();
 
-		System.setProperty("proxyHost", Config.INSTANCE.getProperty(ConfigKeys.CPR_LOOKUP_PROXYHOST));
-		System.setProperty("proxyPort", Config.INSTANCE.getProperty(ConfigKeys.CPR_LOOKUP_PROXYPORT));
+		System.setProperty("http.proxyHost", Config.INSTANCE.getProperty(ConfigKeys.CPR_LOOKUP_PROXYHOST));
+		System.setProperty("http.proxyPort", Config.INSTANCE.getProperty(ConfigKeys.CPR_LOOKUP_PROXYPORT));
+		System.setProperty("https.proxyHost", Config.INSTANCE.getProperty(ConfigKeys.CPR_LOOKUP_PROXYHOST));
+		System.setProperty("https.proxyPort", Config.INSTANCE.getProperty(ConfigKeys.CPR_LOOKUP_PROXYPORT));
 
 		EventLogger.appendEvent(NemIDActionEvent.ACTION_LOAD_OCES_CONFIG);
 		logger.info("OCES config for IDP[" + PKIIDMap.DKNEMID_NAME + "] completed");
