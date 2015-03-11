@@ -1,3 +1,0 @@
-create-reverse-proxy --config=SignWeb_FE --vs=SignWeb_FE --server=http://192.168.140.9:8021 --uri-prefix=/dknemid
-set-reverse-proxy-prop --config=SignWeb_FE --vs=SignWeb_FE --uri-prefix=/dknemid proxy-agent="webserver v1.0"
-deploy-config --restart SignWeb_FE
