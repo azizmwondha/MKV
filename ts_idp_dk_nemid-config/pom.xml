@@ -15,7 +15,6 @@
 	</parent>
 
     <build>
-        <finalName>ts_idp_dk_nemid_js-config-${pom.version}</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
