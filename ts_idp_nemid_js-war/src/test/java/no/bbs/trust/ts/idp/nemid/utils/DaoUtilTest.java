@@ -21,17 +21,11 @@ public class DaoUtilTest {
 			ConfigKeys.SESSIONKEY_TZO, ConfigKeys.SESSIONKEY_NEMID_CLIENTMODE };
 	private static final String[] SESSION_DATA_VALUES = new String[] { "289223", "1001", "en", "7200000", "" };
 
-	private static final String MID = "1001";
-	private static final String[] MERCHANT_PKI_CONFIG_VALUES = new String[] { "/opt/BBS/properties/ts_idp_nemid/keysandcerts/DanIDTestTU.p12", "Test1234",
-			"danid a/s - danid test tu", "Test1234", null, null, null };
-
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		InitConfig config = new InitConfig();
 		ConfigStarter.initConfig(config.getConfigPropertySources("../ts_idp_nemid_js-config/env/common"), config.getConfigPropertySettings());
-		if (ConnectionFactories.getInstance().getNumberOfConnectionFactories() == 0) {
-			ConnectionFactories.getInstance().registerDBConnectionFactory(new OracleConnectionFactory());
-		}
+		ConnectionFactories.getInstance().registerDBConnectionFactory(new OracleConnectionFactory());
 	}
 
 	@SuppressWarnings("static-method")
