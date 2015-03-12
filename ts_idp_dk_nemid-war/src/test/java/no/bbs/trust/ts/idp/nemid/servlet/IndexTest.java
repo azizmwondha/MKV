@@ -43,7 +43,7 @@ public class IndexTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		InitConfig config = new InitConfig();
-		ConfigStarter.initConfig(config.getConfigPropertySources("../ts_idp_nemid_js-config/env/common"), config.getConfigPropertySettings());
+		ConfigStarter.initConfig(config.getConfigPropertySources("../ts_idp_dk_nemid-config/env/common"), config.getConfigPropertySettings());
 		ConnectionFactories.getInstance().registerDBConnectionFactory(new OracleConnectionFactory());
 		Security.addProvider(new BouncyCastleProvider());
 	}

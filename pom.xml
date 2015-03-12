@@ -2,12 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>no.bbs.trust</groupId>
-	<artifactId>ts_idp_nemid_js</artifactId>
+	<artifactId>ts_idp_dk_nemid</artifactId>
 	<packaging>pom</packaging>
-	<name>ts_idp_nemid_js web archive</name>
+	<name>ts_idp_dk_nemid</name>
 	<version>1.0.11-SNAPSHOT</version>
 	<inceptionYear>2014</inceptionYear>
-	<description>ts_idp_nemid_js</description>
 
     <parent>
         <groupId>eu.nets.sis</groupId>
@@ -16,8 +15,8 @@
     </parent>
 
 	<modules>
-		<module>ts_idp_nemid_js-war</module>
-		<module>ts_idp_nemid_js-config</module>
+		<module>ts_idp_dk_nemid-war</module>
+		<module>ts_idp_dk_nemid-config</module>
 	</modules>
 
 	<scm>
