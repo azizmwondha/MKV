@@ -16,6 +16,11 @@
 
     <build>
         <finalName>ts_idp_dk_nemid_js-${pom.version}</finalName>
+        <plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+            </plugin>
+        </plugins>
     </build>
 
 	<dependencies>
