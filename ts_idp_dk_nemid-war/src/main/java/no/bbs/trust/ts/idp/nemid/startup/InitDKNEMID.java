@@ -18,12 +18,10 @@ import no.bbs.trust.common.webapp.utils.StackLogger;
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
 import no.bbs.trust.ts.idp.nemid.event.NemIDActionEvent;
 import no.bbs.trust.ts.idp.nemid.utils.NemIDUtils;
-import no.bbs.trust.ts.idp.nemid.war.version.ArtifactVersion;
 import no.bbs.trust.ts2.idp.common.context.idprovider.IDPConfigCache;
 import no.bbs.trust.ts2.idp.common.context.merchant.MerchantContextCache;
 import no.bbs.tt.bc.cryptlib.util.BCCryptoLoader;
 import no.bbs.tt.trustsign.trustsignDAL.constant.PKIIDMap;
-
 import org.apache.log4j.Logger;
 import org.openoces.ooapi.environment.Environments;
 import org.openoces.ooapi.environment.Environments.Environment;
@@ -51,7 +49,6 @@ public class InitDKNEMID extends HttpServlet {
 			initIDPCache();
 			NemIDUtils.initDKNEMID();
 			EventLogger.appendEvent(NemIDActionEvent.ACTION_IDP_DK_NEMID_LIFECYCLE);
-			logger.info("Starting " + ArtifactVersion.ARTIFACT_NAME + " " + ArtifactVersion.ARTIFACT_VERSION);
 			InitState.assertInitCompletedWithoutErrors();
 		} catch (StatusCodeException sce) {
 			StackLogger.logStatusCode(sce);
@@ -73,7 +70,6 @@ public class InitDKNEMID extends HttpServlet {
 	@Override
 	public void destroy() {
 		EventLogger.appendEvent(NemIDActionEvent.ACTION_IDP_DK_NEMID_LIFECYCLE);
-		logger.info("Stopping " + ArtifactVersion.ARTIFACT_NAME + " " + ArtifactVersion.ARTIFACT_VERSION);
 		super.destroy();
 	}
 
