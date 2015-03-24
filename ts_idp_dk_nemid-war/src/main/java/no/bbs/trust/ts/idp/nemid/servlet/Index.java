@@ -103,15 +103,9 @@ public class Index extends BaseServlet {
 			setupWebContext(sref, signingProcess, request);
 			request.setAttribute("sref", sref);
 
-			// Parse signer deadline
-			long endtime = signingProcess.getDeadline().getTime();
+			request.setAttribute("deadline", signingProcess.getDeadline());
 
-			SimpleDateFormat formatter = new SimpleDateFormat(LangSupport.getUserText("format.mediumdate", locale));
 			String tzos = sessionDatas.get(ConfigKeys.SESSIONKEY_TZO);
-			tzos = (tzos.trim().length() > 0) ? tzos : "0";
-			long tzo = Long.parseLong(tzos);
-
-			request.setAttribute("signstatus.deadline", formatter.format(new Date(endtime + tzo)));
 			request.setAttribute("tzo", tzos);
 
 			try {
