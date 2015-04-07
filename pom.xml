@@ -20,9 +20,7 @@
 	</modules>
 
 	<scm>
-		<connection>scm:svn:https://tt-source.bbsas.no/svn/trust/ts_idp_nemid_js/trunk</connection>
-		<developerConnection>scm:svn:https://tt-source.bbsas.no/svn/trust/ts_idp_nemid_js/trunk</developerConnection>
-		<url>https://tt-source.bbsas.no/svn/trust/ts_idp_nemid_js/trunk</url>
+		<developerConnection>scm:svn:https://tt-source.bbsas.no/svn/trust/ts_idp_dk_nemid/trunk</developerConnection>
 	</scm>
 
 </project>
