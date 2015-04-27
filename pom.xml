@@ -11,13 +11,20 @@
     <parent>
         <groupId>eu.nets.sis</groupId>
         <artifactId>sis-parent-pom</artifactId>
-        <version>1.0.2</version>
+        <version>1.0.4</version>
     </parent>
 
 	<modules>
 		<module>ts_idp_dk_nemid-war</module>
 		<module>ts_idp_dk_nemid-config</module>
 	</modules>
+
+	<properties>
+		<tomcat-port>7711</tomcat-port>
+		<tomcat-contextpath>/dknemidjs</tomcat-contextpath>
+		<tomcat-proxy>yes</tomcat-proxy>
+		<tomcat-java-opts>-Xms256m –Xmx512m</tomcat-java-opts>
+	</properties>
 
 	<scm>
 		<developerConnection>scm:svn:https://tt-source.bbsas.no/svn/trust/ts_idp_dk_nemid/trunk</developerConnection>
