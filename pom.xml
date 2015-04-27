@@ -20,7 +20,7 @@
 	</modules>
 
 	<properties>
-		<tomcat-port>7711</tomcat-port>
+		<tomcat-port>7716</tomcat-port>
 		<tomcat-contextpath>/dknemidjs</tomcat-contextpath>
 		<tomcat-proxy>yes</tomcat-proxy>
 		<tomcat-java-opts>-Xms256m –Xmx512m</tomcat-java-opts>
