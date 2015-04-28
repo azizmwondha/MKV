@@ -5,7 +5,7 @@
 	<artifactId>ts_idp_dk_nemid</artifactId>
 	<packaging>pom</packaging>
 	<name>ts_idp_dk_nemid</name>
-	<version>1.0.12-SNAPSHOT</version>
+	<version>1.0.12</version>
 	<inceptionYear>2014</inceptionYear>
 
     <parent>
@@ -27,7 +27,7 @@
 	</properties>
 
 	<scm>
-		<developerConnection>scm:svn:https://tt-source.bbsas.no/svn/trust/ts_idp_dk_nemid/trunk</developerConnection>
+		<developerConnection>scm:svn:https://tt-source.bbsas.no/svn/trust/ts_idp_dk_nemid/tags/ts_idp_dk_nemid-1.0.12</developerConnection>
 	</scm>
 
 </project>
