@@ -570,7 +570,7 @@ public class Verify extends BaseServlet {
 			facade = new CPRRegistryFacade(VOID_MERCHANT_ID, serviceId, keystorepath, keystorepass, keystoretype, truststorepath, truststorepass,
 					truststoretype, lookupURL, 5000, proxyHost, proxyPort, null, null);
 		} catch (InstantiationException e) {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Unable to create CPRRegistryFacade for Merchant[" + mid + "]");
+			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Unable to create CPRRegistryFacade for Merchant[" + mid + "]", e);
 		}
 
 		int requestId = (int) (Math.random() * Integer.MAX_VALUE);
@@ -583,7 +583,7 @@ public class Verify extends BaseServlet {
 			resp = facade.sendCPRRegistryRequest(match);
 		} catch (Exception e) {
 			logger.warn("Unable to do a pid match for [Merchant=" + mid + "] Errormessage: " + e.getMessage());
-			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Unable to do a pid match for Merchant[" + mid + "]");
+			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Unable to do a pid match for Merchant[" + mid + "]", e);
 		}
 		EventLogger.appendEvent(NemIDActionEvent.ACTION_DK_NEMID_CPRMATCH);
 		logger.info("[MatchStatus=" + resp.getStatus().getStatusCode() + "][MatchMessage=" + resp.getStatus().getStatusText().get(0).getValue() + "]");
