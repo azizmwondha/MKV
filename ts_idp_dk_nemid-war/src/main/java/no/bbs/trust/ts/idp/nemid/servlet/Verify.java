@@ -502,7 +502,7 @@ public class Verify extends BaseServlet {
 			RIDFacade facade = RIDFacadeFactory.getRIDFacade(ctx);
 			resp = facade.matchCPRRID(rid, cpr, certificate, serviceid);
 		} catch (Exception e) {
-			logger.warn("Unable to do a rid match for [Merchant=" + mid + "] Errormessage: " + e.getMessage());
+			logger.warn("Unable to do a rid match for [MerchantID=" + mid + "] Errormessage: " + e.getMessage());
 			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Unable to do a rid match for [MerchantID=" + mid + "]");
 		} finally {
 			EventLogger.appendEvent(NemIDPerformanceEvent.DK_NEMID_RID_MATCH, start);
@@ -582,8 +582,8 @@ public class Verify extends BaseServlet {
 			MatchCPR2PIDRequest match = new MatchCPR2PIDRequest(serviceId, pid, cpr, requestId);
 			resp = facade.sendCPRRegistryRequest(match);
 		} catch (Exception e) {
-			logger.warn("Unable to do a pid match for [Merchant=" + mid + "] Errormessage: " + e.getMessage());
-			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Unable to do a pid match for Merchant[" + mid + "]", e);
+			logger.warn("Unable to do a pid match for [MerchantID=" + mid + "] Errormessage: " + e.getMessage());
+			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Unable to do a pid match for [MerchantID=" + mid + "]", e);
 		}
 		EventLogger.appendEvent(NemIDActionEvent.ACTION_DK_NEMID_CPRMATCH);
 		logger.info("[MatchStatus=" + resp.getStatus().getStatusCode() + "][MatchMessage=" + resp.getStatus().getStatusText().get(0).getValue() + "]");
