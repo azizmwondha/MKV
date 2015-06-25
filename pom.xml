@@ -11,7 +11,7 @@
     <parent>
         <groupId>eu.nets.sis</groupId>
         <artifactId>sis-parent-pom</artifactId>
-        <version>1.0.5</version>
+        <version>1.0.6</version>
     </parent>
 
 	<modules>
@@ -23,7 +23,7 @@
 		<tomcat-port>7716</tomcat-port>
 		<tomcat-contextpath>dknemidjs</tomcat-contextpath>
 		<tomcat-proxy>yes</tomcat-proxy>
-		<tomcat-java-opts>-Xms256m -Xmx512m</tomcat-java-opts>
+		<tomcat-java-opts>-Xms256m -Xmx512m -Xloggc:/opt/service/logs/maintenance/gc-${project.parent.artifactId}.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=1M</tomcat-java-opts>
 		<tomcat-context>sis-context.xml</tomcat-context>
 		<tomcat-server>3vtsapp</tomcat-server>
 	</properties>
