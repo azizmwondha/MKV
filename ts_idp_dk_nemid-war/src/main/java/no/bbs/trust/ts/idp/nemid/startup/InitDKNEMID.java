@@ -8,6 +8,8 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
+import no.bbs.trust.amqcapi.types.AMQAPIException;
+import no.bbs.trust.amqcapi.utils.AMQConnector;
 import no.bbs.trust.common.basics.constants.Constants;
 import no.bbs.trust.common.basics.exceptions.StatusCodeException;
 import no.bbs.trust.common.basics.utils.EventLogger;
@@ -48,10 +50,20 @@ public class InitDKNEMID extends HttpServlet {
 			initMerchantCache();
 			initIDPCache();
 			NemIDUtils.initDKNEMID();
+			initActiveMQConnection();
 			EventLogger.appendEvent(NemIDActionEvent.ACTION_IDP_DK_NEMID_LIFECYCLE);
 			InitState.assertInitCompletedWithoutErrors();
 		} catch (StatusCodeException sce) {
 			StackLogger.logStatusCode(sce);
+		}
+	}
+
+	private void initActiveMQConnection() throws ServletException {
+		String amqUrl = Config.INSTANCE.getProperty(no.bbs.trust.ts.idp.nemid.contants.Constants.ACTIVEMQ_URL);
+		try {
+			AMQConnector.init(amqUrl, null, AMQConnector.PoolSize.XSMALL_16);
+		} catch (AMQAPIException e) {
+			throw new ServletException("Unable to initialize ActiveMQ connection", e);
 		}
 	}
 

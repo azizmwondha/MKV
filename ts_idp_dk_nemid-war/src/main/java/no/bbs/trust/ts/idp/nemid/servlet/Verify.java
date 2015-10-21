@@ -1,9 +1,7 @@
 package no.bbs.trust.ts.idp.nemid.servlet;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.security.cert.X509Certificate;
 import java.sql.SQLException;
 import java.util.Date;
@@ -594,7 +592,7 @@ public class Verify extends BaseServlet {
 		String orderId = DAOUtil.getOrderID(signingProcess);
 
 		QueueMessageEvent queueMessageEvent = null;
-		MessageQueueProducer messageQueueProducer = null;
+		MessageQueueProducer messageQueueProducer;
 		try {
 			messageQueueProducer = new MessageQueueProducer(AMQConstants.QUEUE_FINALIZE_SP, getConfigProperty(Constants.ACTIVEMQ_URL));
 
@@ -603,16 +601,11 @@ public class Verify extends BaseServlet {
 			logger.info("Registering [Event=" + queueMessageEvent + "]");
 
 			messageQueueProducer.sendMessage(queueMessageEvent);
-			messageQueueProducer.close();
 		} catch (AMQAPIException exp) {
 			logger.fatal("Unable to register [QueueEvent=" + queueMessageEvent + "] - " + exp.getMessage());
 			EventLogger.dumpStack(exp);
 			throw new StatusCodeException(NemIDActionEvent.STATUS_AMQ_ERROR, "Unable to register [QueueEvent=" + queueMessageEvent + "] Reason"
 					+ exp.getMessage());
-		} finally {
-			if (messageQueueProducer != null) {
-				messageQueueProducer.close();
-			}
 		}
 	}
 }
