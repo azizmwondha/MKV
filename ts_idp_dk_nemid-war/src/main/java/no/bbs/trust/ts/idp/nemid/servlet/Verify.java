@@ -29,7 +29,6 @@ import no.bbs.trust.cprregclientapi.CPRRegistryFacade;
 import no.bbs.trust.cprregclientapi.MatchCPR2PIDRequest;
 import no.bbs.trust.cprregclientapi.ResponseType;
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
-import no.bbs.trust.ts.idp.nemid.contants.Constants;
 import no.bbs.trust.ts.idp.nemid.event.NemIDActionEvent;
 import no.bbs.trust.ts.idp.nemid.event.NemIDPerformanceEvent;
 import no.bbs.trust.ts.idp.nemid.utils.DAOUtil;
@@ -60,6 +59,7 @@ import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObjectData;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignerId;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.Step;
+
 import org.bouncycastle.util.encoders.Base64;
 import org.springframework.transaction.TransactionStatus;
 
@@ -594,7 +594,7 @@ public class Verify extends BaseServlet {
 		QueueMessageEvent queueMessageEvent = null;
 		MessageQueueProducer messageQueueProducer;
 		try {
-			messageQueueProducer = new MessageQueueProducer(AMQConstants.QUEUE_FINALIZE_SP, getConfigProperty(Constants.ACTIVEMQ_URL));
+			messageQueueProducer = new MessageQueueProducer(AMQConstants.QUEUE_FINALIZE_SP);
 
 			FinalizeSigningProcessMessage message = new FinalizeSigningProcessMessage(sref, orderId, mid, signingProcess.getSignprocessId());
 			queueMessageEvent = message.toMessageEvent();
