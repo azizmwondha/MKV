@@ -22,6 +22,7 @@ import no.bbs.trust.ts2.idp.common.context.merchant.MerchantContext;
 import no.bbs.trust.ts2.idp.common.context.merchant.MerchantContextCache;
 import no.bbs.tt.trustsign.trustsignDAL.config.ConnectionFactories;
 import no.bbs.tt.trustsign.trustsignDAL.constant.PKIConfigKeys;
+import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignerId;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -112,7 +113,9 @@ public class IndexTest {
 		SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
 		Index.setSigningDocument(clientGenerator, signingProcess);
 		String challenge = ChallengeGenerator.generateChallenge();
-		String clientTag = clientGenerator.generateClientTag("standard", "en", challenge, sref);
+		SignerId signerID = DAOUtil.getSignerID(signingProcess.getSignerId());
+		String signerIDValue = null==signerID ? "" : signerID.getIdValue();
+		String clientTag = clientGenerator.generateClientTag("standard", "en", challenge, sref, signerIDValue);
 
 		assertClientTag(clientTag);
 	}

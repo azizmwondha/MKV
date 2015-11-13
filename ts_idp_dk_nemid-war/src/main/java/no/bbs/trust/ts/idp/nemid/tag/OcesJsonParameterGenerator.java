@@ -32,6 +32,7 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 
 import no.bbs.trust.common.basics.charset.Charsets;
+import no.bbs.trust.common.basics.utils.StringUtils;
 import no.bbs.trust.common.config.Config;
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
 import org.openoces.ooapi.utils.Base64Handler;
@@ -138,12 +139,12 @@ public class OcesJsonParameterGenerator {
 		return sb.toString().getBytes(Charsets.UTF_8);
 	}
 
-	public String generateClientTag(String clientMode, String language, String challenge, String sref) {
-		return generateParametersTag(clientMode, language, challenge) + System.getProperty(LINE_SEPARATOR) + generateIframeTag()
+	public String generateClientTag(String clientMode, String language, String challenge, String sref, String cpr) {
+		return generateParametersTag(clientMode, language, challenge, cpr) + System.getProperty(LINE_SEPARATOR) + generateIframeTag()
 				+ System.getProperty(LINE_SEPARATOR) + generateScriptTag() + System.getProperty(LINE_SEPARATOR) + generatePostBackFormTag(sref);
 	}
 
-	private String generateParametersTag(String clientMode, String language, String challenge) {
+	private String generateParametersTag(String clientMode, String language, String challenge, String cpr) {
 		// Set parameter values
 		addParameter("CLIENTFLOW", Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTFLOW_SIGNING));
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
@@ -152,7 +153,11 @@ public class OcesJsonParameterGenerator {
 		addParameter("ORIGIN", Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_SP_ORIGIN));
 		addParameter("CLIENTMODE", clientMode);
 		addParameter("LANGUAGE", language);
-		addParameter("SIGN_PROPERTIES", "challenge=" + challenge);
+		String signProperties = "challenge=" + challenge;
+		if(!StringUtils.isNullorEmpty(cpr)) {
+			signProperties += ",cpr=" + cpr;
+		}
+		addParameter("SIGN_PROPERTIES", signProperties);
 		return String.format(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_PARAMETERS), getParametersAsJSON());
 	}
 

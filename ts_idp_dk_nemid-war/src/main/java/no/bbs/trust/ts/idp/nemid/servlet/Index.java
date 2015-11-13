@@ -5,8 +5,6 @@
 package no.bbs.trust.ts.idp.nemid.servlet;
 
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +33,7 @@ import no.bbs.tt.trustsign.trustsignDAL.dao.table.SessionDataDAO;
 import no.bbs.tt.trustsign.trustsignDAL.tx.TransactionHelper;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObject;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObjectData;
+import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignerId;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.WebContext;
 
@@ -94,7 +93,10 @@ public class Index extends BaseServlet {
 			OcesJsonParameterGenerator clientGenerator = createClientGenerator(mid);
 			setSigningDocument(clientGenerator, signingProcess);
 			String challenge = Base64Handler.encode(ChallengeGenerator.generateChallenge());
-			String nemidTag = clientGenerator.generateClientTag(clientMode, languageCode, challenge, sref);
+			SignerId signerID = DAOUtil.getSignerID(signingProcess.getSignerId());
+			String signerIDValue = null==signerID ? "" : signerID.getIdValue();
+			logger.debug("[CPR=" + signerIDValue + "]");
+			String nemidTag = clientGenerator.generateClientTag(clientMode, languageCode, challenge, sref, signerIDValue);
 			String clientTag = String.format(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_DIV), " " + clientMode, nemidTag);
 			logger.debug("NemID JS client tag: " + clientTag);
 			request.setAttribute("clienttag", clientTag);
