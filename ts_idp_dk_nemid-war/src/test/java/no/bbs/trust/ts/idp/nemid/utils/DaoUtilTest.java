@@ -16,10 +16,10 @@ import static org.junit.Assert.assertNotNull;
 
 public class DaoUtilTest {
 
-	private static final String SREF = "AE910DF8E2D812F5E53831032437F078C5F76260";
+	private static final String SREF = "5AB9A24E14737AB9F614BC2F96CC02B2B62729F5";
 	private static final String[] SESSION_DATA_KEYS = new String[] { ConfigKeys.SESSIONKEY_SPID, ConfigKeys.SESSIONKEY_MID, ConfigKeys.SESSIONKEY_LOCALE,
 			ConfigKeys.SESSIONKEY_TZO, ConfigKeys.SESSIONKEY_NEMID_CLIENTMODE };
-	private static final String[] SESSION_DATA_VALUES = new String[] { "289223", "1001", "en", "7200000", "" };
+	private static final String[] SESSION_DATA_VALUES = new String[] { "446693", "1001", "no", "0", "" };
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
