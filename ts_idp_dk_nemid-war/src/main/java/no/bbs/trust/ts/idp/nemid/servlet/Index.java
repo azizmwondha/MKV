@@ -93,9 +93,17 @@ public class Index extends BaseServlet {
 			OcesJsonParameterGenerator clientGenerator = createClientGenerator(mid);
 			setSigningDocument(clientGenerator, signingProcess);
 			String challenge = Base64Handler.encode(ChallengeGenerator.generateChallenge());
+
 			SignerId signerID = DAOUtil.getSignerID(signingProcess.getSignerId());
 			String signerIDValue = null==signerID ? "" : signerID.getIdValue();
-			logger.debug("[CPR=" + signerIDValue + "]");
+
+			MerchantContext merchantContext = MerchantContextCache.getMerchantContext(mid);
+			String includeCPRinSDO = merchantContext.getIdpConfig().getOrDefault(PKIConfigKeys.INCLUDE_CPR_IN_SDO, "false");
+			if(!Boolean.valueOf(includeCPRinSDO)) {
+				signerIDValue = "";
+			}
+			logger.debug("[includeCPRinSDO=" + includeCPRinSDO + "] [CPR=" + signerIDValue + "]");
+
 			String nemidTag = clientGenerator.generateClientTag(clientMode, languageCode, challenge, sref, signerIDValue);
 			String clientTag = String.format(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_DIV), " " + clientMode, nemidTag);
 			logger.debug("NemID JS client tag: " + clientTag);
