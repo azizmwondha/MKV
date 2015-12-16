@@ -29,6 +29,12 @@
 			<version>1.0.17</version>
 		</dependency>
 
+		<dependency>
+			<groupId>no.bbs.tt.trustsign</groupId>
+			<artifactId>trustsigndal</artifactId>
+			<version>2.7.10</version>
+		</dependency>
+
         <!-- ############################################################################# -->
         <!-- Crypto dependencies -->
 
