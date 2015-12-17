@@ -38,7 +38,7 @@ public class IndexTest {
 
 	protected static final Logger logger = Logger.getLogger(Constants.MAIN_LOGGER);
 
-	private static final String SREF = "A92ED314B462D52159965681E5FD4F3AA3AF7D28";
+	private static final String SREF = "5AB9A24E14737AB9F614BC2F96CC02B2B62729F5";
 	private static final Map<String, String> SESSION_DATAS = new HashMap<String, String>();
 
 	@BeforeClass
