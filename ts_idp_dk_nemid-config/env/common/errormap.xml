@@ -517,6 +517,14 @@
 				<message>STATUS_GID_IP_MISMATCH</message>
 				<severity>info</severity>
 			</Error>
+			<!-- common_cache status code -->
+			<Error>
+				<code>03010C</code>
+				<name>CACHE_ERROR</name>
+				<label>cacheerror</label>
+				<message>Cache error</message>
+				<severity>error</severity>
+			</Error>
 		</Errors>
 	</ErrorMap>
 </ErrorMapper>
