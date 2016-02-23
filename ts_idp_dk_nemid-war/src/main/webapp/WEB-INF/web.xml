@@ -31,13 +31,21 @@
 		<servlet-class>no.bbs.trust.common.webapp.servlets.InitI18n</servlet-class>
 		<load-on-startup>4</load-on-startup>
 	</servlet>
+	
+	<servlet>
+        <display-name>Cache Servlet</display-name>
+        <servlet-name>cacheservlet</servlet-name>
+        <servlet-class>eu.nets.sis.common.cache.servlets.CacheSignServlet</servlet-class>
+        <load-on-startup>5</load-on-startup>
+    </servlet>
 
 	<servlet>
 		<servlet-name>dk_nemid_initidp</servlet-name>
 		<servlet-class>no.bbs.trust.ts.idp.nemid.startup.InitDKNEMID</servlet-class>
-		<load-on-startup>5</load-on-startup>
+		<load-on-startup>9</load-on-startup>
 	</servlet>
-
+	
+	
 	<servlet>
 		<display-name>dknemid_index</display-name>
 		<servlet-name>dknemid_index</servlet-name>
@@ -52,12 +60,7 @@
 		<load-on-startup>127</load-on-startup>
 	</servlet>
 
-	<servlet>
-		<display-name>dknemid_refresh</display-name>
-		<servlet-name>dknemid_refresh</servlet-name>
-		<servlet-class>no.bbs.trust.ts.idp.nemid.servlet.RefreshCache</servlet-class>
-		<load-on-startup>127</load-on-startup>
-	</servlet>
+	    
 
 	<servlet-mapping>
 		<servlet-name>dknemid_index</servlet-name>
@@ -69,10 +72,10 @@
 		<url-pattern>/verify.html</url-pattern>
 	</servlet-mapping>
 
-	<servlet-mapping>
-		<servlet-name>dknemid_refresh</servlet-name>
-		<url-pattern>/refresh.cache</url-pattern>
-	</servlet-mapping>
+	 <servlet-mapping>
+        <servlet-name>cacheservlet</servlet-name>
+        <url-pattern>/refresh.cache</url-pattern>
+    </servlet-mapping>
 
 	<resource-ref>
 		<description>JDBC Connection Pool</description>
