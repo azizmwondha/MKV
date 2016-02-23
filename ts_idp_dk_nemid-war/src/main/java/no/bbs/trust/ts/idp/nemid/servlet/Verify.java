@@ -12,6 +12,11 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.bouncycastle.util.encoders.Base64;
+import org.springframework.transaction.TransactionStatus;
+
+import eu.nets.sis.common.cache.loader.MerchantCache;
+import eu.nets.sis.common.cache.types.MerchantProviderConfig;
 import no.bbs.trust.amqcapi.MessageQueueProducer;
 import no.bbs.trust.amqcapi.constants.AMQConstants;
 import no.bbs.trust.amqcapi.message.FinalizeSigningProcessMessage;
@@ -23,7 +28,6 @@ import no.bbs.trust.common.basics.types.ReturnCode;
 import no.bbs.trust.common.basics.utils.EventLogger;
 import no.bbs.trust.common.basics.utils.RequestReader;
 import no.bbs.trust.common.basics.utils.StringUtils;
-import no.bbs.trust.common.config.Config;
 import no.bbs.trust.common.webapp.utils.StackLogger;
 import no.bbs.trust.cprregclientapi.CPRRegistryFacade;
 import no.bbs.trust.cprregclientapi.MatchCPR2PIDRequest;
@@ -36,17 +40,13 @@ import no.bbs.trust.ts.idp.nemid.verify.SignatureVerifier;
 import no.bbs.trust.ts.idp.nemid.verify.VerifyClientSignatureData;
 import no.bbs.trust.ts.idp.nemid.verify.VerifyClientSignatureResponseDataExt;
 import no.bbs.trust.ts.rid.client.RIDFacade;
-import no.bbs.trust.ts.rid.client.RIDFacadeFactory;
-import no.bbs.trust.ts.rid.client.RIDMerchantContext;
 import no.bbs.trust.ts.rid.client.soap.MatchCPRRIDResponse;
-import no.bbs.trust.ts2.idp.common.context.merchant.MerchantContext;
-import no.bbs.trust.ts2.idp.common.context.merchant.MerchantContextCache;
 import no.bbs.tt.bc.cryptlib.ds.XMLDSIGContent;
 import no.bbs.tt.bc.cryptlib.ds.XMLDSIGValidator;
 import no.bbs.tt.bc.cryptlib.ds.XMLDSValidationException;
 import no.bbs.tt.bc.cryptlib.x509.X509Parser;
 import no.bbs.tt.bc.cryptlib.x509.X509ParserException;
-import no.bbs.tt.trustsign.trustsignDAL.constant.PKIConfigKeys;
+import no.bbs.tt.trustsign.trustsignDAL.constant.PKIIDMap;
 import no.bbs.tt.trustsign.trustsignDAL.constant.SignerIDTypes;
 import no.bbs.tt.trustsign.trustsignDAL.constant.StatusTypes;
 import no.bbs.tt.trustsign.trustsignDAL.dao.helpers.MerchantPropertiesHelperDAO;
@@ -59,9 +59,6 @@ import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignObjectData;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignerId;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.Step;
-
-import org.bouncycastle.util.encoders.Base64;
-import org.springframework.transaction.TransactionStatus;
 
 /**
  *
@@ -401,15 +398,16 @@ public class Verify extends BaseServlet {
 		if (!StringUtils.isNullorEmpty(orderCPR)) {
 			if (signerPID != null && !signerPID.equals("")) {
 				logger.debug("Matching [OrderCPR=" + orderCPR + "] against [SignerPID=" + signerPID + "]");
-				MerchantContext mc = MerchantContextCache.getMerchantContext(mid);
+				MerchantProviderConfig mc = MerchantCache.getConfig(Integer.parseInt(mid), PKIIDMap.DKNEMIDJS_ID);
+				
 
 				if (null == mc) {
 					throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_CACHE_ERROR, "Unable to retrieve merchant context from cache for Merchant["
 							+ mid + "]");
 				}
 
-				Map<String, String> idpc = mc.getIdpConfig();
-				String serviceId = idpc.get(PKICONFIG_PIDSERVICEID);
+				
+				String serviceId = mc.getString(PKICONFIG_PIDSERVICEID);
 
 				if (!matchCPR2PID(mid, serviceId, signerPID, orderCPR)) {
 					StatusCodeException sce = new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_CPRMISMATCH, "CPR-PID mismatch");
@@ -420,8 +418,8 @@ public class Verify extends BaseServlet {
 				responseData.setSignerCPR(orderCPR);
 			} else if (signerRID != null && !signerRID.equals("")) {
 				logger.debug("Matching [OrderCPR=" + orderCPR + "] against [SignerRID=" + signerRID + "]");
-				MerchantContext mc = MerchantContextCache.getMerchantContext(mid);
-
+				MerchantProviderConfig mc = MerchantCache.getConfig(Integer.parseInt(mid), PKIIDMap.DKNEMIDJS_ID);
+				
 				if (null == mc) {
 					throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_CACHE_ERROR, "Unable to retrieve merchant context from cache for Merchant["
 							+ mid + "]");
@@ -449,55 +447,20 @@ public class Verify extends BaseServlet {
 		if (StringUtils.isNullorEmpty(cpr) || StringUtils.isNullorEmpty(rid)) {
 			return false;
 		}
-		RIDMerchantContext ctx = new RIDMerchantContext();
-
-		String truststorepath = Config.INSTANCE.getProperty(ConfigKeys.RID_TRUSTSTORE_PATH);
-		String truststorepass = Config.INSTANCE.getProperty(ConfigKeys.RID_TRUSTSTORE_PASSWORD);
-		String truststoretype = Config.INSTANCE.getProperty(ConfigKeys.RID_TRUSTSTORE_TYPE);
-
-		String lookupURL = Config.INSTANCE.getProperty(ConfigKeys.RIDREG_LOOKUP_URL);
-		String proxyHost = Config.INSTANCE.getProperty(ConfigKeys.CPR_LOOKUP_PROXYHOST);
-		String proxyPort = Config.INSTANCE.getProperty(ConfigKeys.CPR_LOOKUP_PROXYPORT);
-
-		logger.debug("truststorepath: " + truststorepath);
-		logger.trace("truststorepass: " + truststorepass);
-		logger.debug("truststoretype: " + truststoretype);
-		logger.debug("lookupURL: " + lookupURL);
-		logger.debug("proxyHost: " + proxyHost);
-		logger.debug("proxyPort: " + proxyPort);
-
-		MerchantContext mc = MerchantContextCache.getMerchantContext(mid);
+		
+	
+		MerchantProviderConfig mc = MerchantCache.getConfig(Integer.parseInt(mid), PKIIDMap.DKNEMIDJS_ID);
+		
 
 		if (null == mc) {
 			throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_CACHE_ERROR, "Unable to retrieve merchant context from cache for Merchant[" + mid + "]");
 		}
 
-		Map<String, String> idpc = mc.getIdpConfig();
-		String keystorepath = idpc.get(PKIConfigKeys.RIDKEYSTOREPATH);
-		String keystorepass = idpc.get(PKIConfigKeys.RIDKEYSTOREPWD);
-		String keystoretype = idpc.get(PKIConfigKeys.RIDKEYSTORETYPE);
-		String serviceid = idpc.get(PKICONFIG_RIDSERVICEID);
-
-		if (keystoretype == null || keystoretype.equals("") || keystorepass == null || keystorepass.equals("")) {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_SETUP_FAIL, "Unable to find rid keystore for Merchant[" + mid + "]");
-		}
-
-		logger.debug("CPRRequest keystore: " + keystorepath);
-		logger.debug("CPRRequest sto type: " + keystoretype);
-
-		ctx.setTruststore(truststorepath);
-		ctx.setTruststorePwd(truststorepass);
-		ctx.setTruststoreType(truststoretype);
-		ctx.setProxyHost(proxyHost);
-		ctx.setProxyPort(proxyPort);
-		ctx.setRidServiceURL(lookupURL);
-		ctx.setKeystore(keystorepath);
-		ctx.setKeystorePwd(keystorepass);
-		ctx.setKeystoreType(keystoretype);
-
+		String serviceid = mc.getString(PKICONFIG_RIDSERVICEID);
+		
 		MatchCPRRIDResponse resp;
 		try {
-			RIDFacade facade = RIDFacadeFactory.getRIDFacade(ctx);
+			RIDFacade facade = MerchantCache.getRIDFacade(Integer.parseInt(mid), PKIIDMap.DKNEMIDJS_ID);
 			resp = facade.matchCPRRID(rid, cpr, certificate, serviceid);
 		} catch (Exception e) {
 			logger.warn("Unable to do a rid match for [MerchantID=" + mid + "] Errormessage: " + e.getMessage());
@@ -533,43 +496,11 @@ public class Verify extends BaseServlet {
 			return false;
 		}
 
-		String truststorepath = Config.INSTANCE.getProperty(ConfigKeys.CPR_TRUSTSTORE_PATH);
-		String truststorepass = Config.INSTANCE.getProperty(ConfigKeys.CPR_TRUSTSTORE_PASSWORD);
-		String truststoretype = Config.INSTANCE.getProperty(ConfigKeys.CPR_TRUSTSTORE_TYPE);
-		String lookupURL = Config.INSTANCE.getProperty(ConfigKeys.CPRREG_LOOKUP_URL);
-		String proxyHost = Config.INSTANCE.getProperty(ConfigKeys.CPR_LOOKUP_PROXYHOST);
-		String proxyPort = Config.INSTANCE.getProperty(ConfigKeys.CPR_LOOKUP_PROXYPORT);
-
-		logger.debug("truststorepath: " + truststorepath);
-		logger.trace("truststorepass: " + truststorepass);
-		logger.debug("truststoretype: " + truststoretype);
-		logger.debug("lookupURL: " + lookupURL);
-		logger.debug("proxyHost: " + proxyHost);
-		logger.debug("proxyPort: " + proxyPort);
-
-		MerchantContext mc = MerchantContextCache.getMerchantContext(mid);
-
-		if (null == mc) {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_IDP_CACHE_ERROR, "Unable to retrieve merchant context from cache for Merchant[" + mid + "]");
-		}
-
-		java.util.Map<String, String> idpc = mc.getIdpConfig();
-
-		String keystorepath = idpc.get(PKIConfigKeys.KEYSTORE);
-		String keystorepass = idpc.get(PKIConfigKeys.KEYSTORE_PASSWORD);
-		String keystoretype = (keystorepath.toLowerCase().endsWith(".p12")) ? "PKCS12" : "JKS";
-
-		logger.debug("CPRRequest keystore: " + keystorepath);
 
 		int serviceId = (int) StringUtils.toLong(nemIDserviceID, 0);
-		int VOID_MERCHANT_ID = 127;
-		CPRRegistryFacade facade;
-		try {
-			facade = new CPRRegistryFacade(VOID_MERCHANT_ID, serviceId, keystorepath, keystorepass, keystoretype, truststorepath, truststorepass,
-					truststoretype, lookupURL, 5000, proxyHost, proxyPort, null, null);
-		} catch (InstantiationException e) {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_RID_LOOKUP_FAILED, "Unable to create CPRRegistryFacade for Merchant[" + mid + "]", e);
-		}
+		
+		CPRRegistryFacade facade=MerchantCache.getCPRRegistryFacade(Integer.parseInt(mid),PKIIDMap.DKNEMIDJS_ID);
+		
 
 		int requestId = (int) (Math.random() * Integer.MAX_VALUE);
 

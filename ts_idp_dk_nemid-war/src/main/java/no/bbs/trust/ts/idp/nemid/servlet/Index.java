@@ -4,12 +4,18 @@
  */
 package no.bbs.trust.ts.idp.nemid.servlet;
 
+import java.security.KeyStore;
 import java.sql.SQLException;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.openoces.ooapi.utils.Base64Handler;
+import org.springframework.transaction.TransactionStatus;
+
+import eu.nets.sis.common.cache.loader.MerchantCache;
+import eu.nets.sis.common.cache.types.MerchantProviderConfig;
 import no.bbs.trust.common.basics.exceptions.StatusCodeException;
 import no.bbs.trust.common.basics.types.Dispatch;
 import no.bbs.trust.common.basics.types.ReturnCode;
@@ -24,10 +30,9 @@ import no.bbs.trust.ts.idp.nemid.tag.ChallengeGenerator;
 import no.bbs.trust.ts.idp.nemid.tag.OcesJsonParameterGenerator;
 import no.bbs.trust.ts.idp.nemid.tag.Signer;
 import no.bbs.trust.ts.idp.nemid.utils.DAOUtil;
-import no.bbs.trust.ts2.idp.common.context.merchant.MerchantContext;
-import no.bbs.trust.ts2.idp.common.context.merchant.MerchantContextCache;
 import no.bbs.trust.ts2.idp.common.statustable.StatusTableRetriever;
 import no.bbs.tt.trustsign.trustsignDAL.constant.PKIConfigKeys;
+import no.bbs.tt.trustsign.trustsignDAL.constant.PKIIDMap;
 import no.bbs.tt.trustsign.trustsignDAL.constant.SessionKey;
 import no.bbs.tt.trustsign.trustsignDAL.dao.table.SessionDataDAO;
 import no.bbs.tt.trustsign.trustsignDAL.tx.TransactionHelper;
@@ -37,9 +42,6 @@ import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignerId;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.WebContext;
 
-import org.openoces.ooapi.utils.Base64Handler;
-import org.springframework.transaction.TransactionStatus;
-
 /**
  */
 public class Index extends BaseServlet {
@@ -47,8 +49,7 @@ public class Index extends BaseServlet {
 	private static final long serialVersionUID = 1L;
 
 	private static final String COMPONENT_NAME = "NemIDJS";
-	private static final String[] SESSION_DATA_KEYS = new String[] { ConfigKeys.SESSIONKEY_SPID, ConfigKeys.SESSIONKEY_MID, ConfigKeys.SESSIONKEY_LOCALE,
-			ConfigKeys.SESSIONKEY_TZO, ConfigKeys.SESSIONKEY_NEMID_CLIENTMODE };
+	private static final String[] SESSION_DATA_KEYS = new String[] { ConfigKeys.SESSIONKEY_SPID, ConfigKeys.SESSIONKEY_MID, ConfigKeys.SESSIONKEY_LOCALE, ConfigKeys.SESSIONKEY_TZO, ConfigKeys.SESSIONKEY_NEMID_CLIENTMODE };
 
 	private final TransactionHelper transactionHelper;
 
@@ -73,8 +74,8 @@ public class Index extends BaseServlet {
 			SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
 
 			if (!sref.equalsIgnoreCase(signingProcess.getSignProcessRef())) {
-				logger.info("SignProcess reference updated since session started (OneTimeUrl) [PreviousSREF=" + sref + "][NewSREF="
-						+ signingProcess.getSignProcessRef() + "]");
+				logger.info("SignProcess reference updated since session started (OneTimeUrl) [PreviousSREF=" + sref + "][NewSREF=" + signingProcess
+						.getSignProcessRef() + "]");
 			}
 
 			DAOUtil.updateSessionDataByKey(sref, ConfigKeys.SESSIONKEY_STEP, "5");
@@ -95,17 +96,21 @@ public class Index extends BaseServlet {
 			String challenge = Base64Handler.encode(ChallengeGenerator.generateChallenge());
 
 			SignerId signerID = DAOUtil.getSignerID(signingProcess.getSignerId());
-			String signerIDValue = null==signerID ? "" : signerID.getIdValue();
+			String signerIDValue = null == signerID ? "" : signerID.getIdValue();
+			
+			MerchantProviderConfig merchantConfig = MerchantCache.getConfig(Integer.parseInt(mid), PKIIDMap.DKNEMIDJS_ID);
+			
+			String includeCPRinSDO = merchantConfig.getString(PKIConfigKeys.INCLUDE_CPR_IN_SDO);
 
-			MerchantContext merchantContext = MerchantContextCache.getMerchantContext(mid);
-			String includeCPRinSDO = merchantContext.getIdpConfig().getOrDefault(PKIConfigKeys.INCLUDE_CPR_IN_SDO, "false");
-			if(!Boolean.valueOf(includeCPRinSDO)) {
+			if (!Boolean.valueOf(includeCPRinSDO)) {
 				signerIDValue = "";
 			}
 			logger.debug("[includeCPRinSDO=" + includeCPRinSDO + "] [CPR=" + signerIDValue + "]");
 
-			String nemidTag = clientGenerator.generateClientTag(clientMode, languageCode, challenge, sref, signerIDValue);
-			String clientTag = String.format(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_DIV), " " + clientMode, nemidTag);
+			String nemidTag = clientGenerator
+					.generateClientTag(clientMode, languageCode, challenge, sref, signerIDValue);
+			String clientTag = String.format(Config.INSTANCE
+					.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_DIV), " " + clientMode, nemidTag);
 			logger.debug("NemID JS client tag: " + clientTag);
 			request.setAttribute("clienttag", clientTag);
 			DAOUtil.updateSessionDataByKey(sref, ConfigKeys.SESSIONKEY_CHALLENGE, challenge);
@@ -119,11 +124,13 @@ public class Index extends BaseServlet {
 			request.setAttribute("tzo", tzos);
 
 			try {
-				request.setAttribute("statustable", new StatusTableRetriever().getStatusTable(mid, signingProcess)); //invoking method from common IDP
-			} catch (StatusCodeException exp) {
-				logger.warn("StatusCodeException :: Error in retrieving status table for SREF=" + sref + ", message=" + exp.toString());
+				request.setAttribute("statustable", new StatusTableRetriever().getStatusTable(mid, signingProcess));  //invoking method from common IDP
+		    } catch (StatusCodeException exp) {
+				logger.warn("StatusCodeException :: Error in retrieving status table for SREF=" + sref + ", message=" + exp
+						.toString());
 			} catch (SQLException exp) {
-				logger.warn("SQLException :: Error in retrieving status table for SREF=" + sref + ", message=" + exp.toString());
+				logger.warn("SQLException :: Error in retrieving status table for SREF=" + sref + ", message=" + exp
+						.toString());
 			}
 
 			EventLogger.appendEvent(NemIDPerformanceEvent.DK_NEMID_GENERATE_CLIENT_TAG, start);
@@ -141,23 +148,25 @@ public class Index extends BaseServlet {
 		}
 
 		// Default to standard mode if no valid value is given
-		if (!Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD).equals(clientMode)
-				&& !Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED).equals(clientMode)) {
+		if (!Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD)
+				.equals(clientMode) && !Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_LIMITED)
+						.equals(clientMode)) {
 			clientMode = Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTMODE_STANDARD);
 		}
 		return clientMode;
 	}
 
-	static OcesJsonParameterGenerator createClientGenerator(String mid) {
-		MerchantContext merchantContext = MerchantContextCache.getMerchantContext(mid);
-		Map<String, String> idpConfig = merchantContext.getIdpConfig();
+	static OcesJsonParameterGenerator createClientGenerator(String mid)throws StatusCodeException {
 
-		String keystorePath = idpConfig.get(PKIConfigKeys.KEYSTORE);
-		String keystorePwd = idpConfig.get(PKIConfigKeys.KEYSTORE_PASSWORD);
-		String keyAlias = idpConfig.get(PKIConfigKeys.MERCHANT_ALIAS);
-		String keyAliasPwd = idpConfig.get(PKIConfigKeys.MERCHANT_ALIAS_PASSWORD);
+		KeyStore keystore=MerchantCache.getPKCS12Keystore(Integer.parseInt(mid), PKIIDMap.DKNEMIDJS_ID);
+	
+		MerchantProviderConfig credentials = MerchantCache.getConfig(Integer.parseInt(mid), PKIIDMap.DKNEMIDJS_ID);
+		
+		String keystorePath = credentials.getString(PKIConfigKeys.KEYSTORE);
+		String keyAlias = credentials.getString(PKIConfigKeys.MERCHANT_ALIAS);
+		String keyAliasPwd = credentials.getString(PKIConfigKeys.MERCHANT_ALIAS_PASSWORD);
 
-		Signer signer = new Signer(keystorePath, keystorePwd, keyAlias, keyAliasPwd);
+		Signer signer = new Signer(keystorePath,keyAlias, keyAliasPwd,keystore);
 		return new OcesJsonParameterGenerator(signer);
 	}
 
