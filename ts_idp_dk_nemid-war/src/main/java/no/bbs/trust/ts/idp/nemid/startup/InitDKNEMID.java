@@ -4,10 +4,20 @@
  */
 package no.bbs.trust.ts.idp.nemid.startup;
 
+import java.util.List;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
+import org.apache.log4j.Logger;
+import org.openoces.ooapi.environment.Environments;
+import org.openoces.ooapi.environment.Environments.Environment;
+import org.openoces.serviceprovider.ServiceProviderSetup;
+
+import eu.nets.sis.common.cache.loader.CacheLoader;
+import eu.nets.sis.common.cache.response.json.MerchantCacheOperation;
+import eu.nets.sis.common.cache.util.CacheConstants;
 import no.bbs.trust.amqcapi.types.AMQAPIException;
 import no.bbs.trust.amqcapi.utils.AMQConnector;
 import no.bbs.trust.common.basics.constants.Constants;
@@ -19,15 +29,8 @@ import no.bbs.trust.common.webapp.startup.StartupCheck;
 import no.bbs.trust.common.webapp.utils.StackLogger;
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
 import no.bbs.trust.ts.idp.nemid.event.NemIDActionEvent;
-import no.bbs.trust.ts.idp.nemid.utils.NemIDUtils;
-import no.bbs.trust.ts2.idp.common.context.idprovider.IDPConfigCache;
-import no.bbs.trust.ts2.idp.common.context.merchant.MerchantContextCache;
 import no.bbs.tt.bc.cryptlib.util.BCCryptoLoader;
 import no.bbs.tt.trustsign.trustsignDAL.constant.PKIIDMap;
-import org.apache.log4j.Logger;
-import org.openoces.ooapi.environment.Environments;
-import org.openoces.ooapi.environment.Environments.Environment;
-import org.openoces.serviceprovider.ServiceProviderSetup;
 
 public class InitDKNEMID extends HttpServlet {
 
@@ -47,9 +50,7 @@ public class InitDKNEMID extends HttpServlet {
 			InitState.assertInitCompletedWithoutErrors();
 			BCCryptoLoader.registerBCProvider();
 			initNemIDEnv();
-			initMerchantCache();
-			initIDPCache();
-			NemIDUtils.initDKNEMID();
+			initCache();
 			initActiveMQConnection();
 			EventLogger.appendEvent(NemIDActionEvent.ACTION_IDP_DK_NEMID_LIFECYCLE);
 			InitState.assertInitCompletedWithoutErrors();
@@ -67,17 +68,13 @@ public class InitDKNEMID extends HttpServlet {
 		}
 	}
 
-	private void initMerchantCache() throws StatusCodeException {
-		MerchantContextCache.loadMerchantContexts(PKIIDMap.DKNEMIDJS_ID);
+	private void initCache() throws StatusCodeException {
+		List<MerchantCacheOperation> cache =CacheLoader.loadCache(CacheConstants.SOURCE_ESIGN,PKIIDMap.DKNEMIDJS_ID); 
 		EventLogger.appendEvent(NemIDActionEvent.ACTION_LOAD_MERCHANT_CONTEXTS);
-		logger.info("Merchant config for IDP[" + PKIIDMap.DKNEMID_NAME + "] loaded");
+		logger.info("Cache for IDP[" + PKIIDMap.DKNEMID_NAME + "] loaded");
 	}
 
-	private void initIDPCache() throws StatusCodeException {
-		IDPConfigCache.loadIDPConfig(PKIIDMap.DKNEMIDJS_ID);
-		EventLogger.appendEvent(NemIDActionEvent.ACTION_LOAD_IDP_CONFIG);
-		logger.info("IDP config for IDP[" + PKIIDMap.DKNEMID_NAME + "] loaded");
-	}
+	
 
 	@Override
 	public void destroy() {

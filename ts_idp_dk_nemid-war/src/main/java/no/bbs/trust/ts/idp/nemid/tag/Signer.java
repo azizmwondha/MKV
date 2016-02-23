@@ -1,36 +1,33 @@
 package no.bbs.trust.ts.idp.nemid.tag;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.cert.Certificate;
 
-import no.bbs.trust.common.basics.constants.Constants;
-import no.bbs.trust.common.basics.utils.EventLogger;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Base64;
+
+import no.bbs.trust.common.basics.constants.Constants;
+import no.bbs.trust.common.basics.utils.EventLogger;
 
 
 public class Signer {
 	protected static Logger logger = Logger.getLogger(Constants.MAIN_LOGGER);
 
 	private final String keystorePath;
-	private final String keystorePwd;
+	
 	private final String keyAlias;
 	private final String keyPwd;
 	private final String certificate;
 	private final KeyStore keyStore;
 
-	public Signer(String keystorePath, String keystorePwd, String keyAlias, String keyPwd) {
+	public Signer(String keystorePath, String keyAlias, String keyPwd,KeyStore keystore) {
 		this.keystorePath = keystorePath;
-		this.keystorePwd = keystorePwd;
 		this.keyAlias = keyAlias;
 		this.keyPwd = keyPwd;
-		this.keyStore = loadKeyStore();
+		this.keyStore = keystore;
 		this.certificate = loadCertificate(keyAlias);
 	}
 
@@ -65,22 +62,4 @@ public class Signer {
 		}
 	}
 
-	private KeyStore loadKeyStore() {
-		InputStream ksStream = null;
-		try {
-			String storeType = (keystorePath.toLowerCase().endsWith(".p12")) ? "PKCS12" : "JKS";
-
-			KeyStore keyStore = KeyStore.getInstance(storeType);
-			File keystoreFile = new File(keystorePath);
-			if (keystoreFile == null || !keystoreFile.exists()) {
-				throw new RuntimeException("could not find keystore: " + keystoreFile.getCanonicalPath());
-			}
-
-			ksStream = new FileInputStream(keystoreFile);
-			keyStore.load(ksStream, keystorePwd.toCharArray());
-			return keyStore;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
-}

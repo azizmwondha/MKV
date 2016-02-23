@@ -1,5 +1,9 @@
 package no.bbs.trust.ts.idp.nemid.servlet;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.net.URL;
 import java.security.Security;
 import java.util.HashMap;
@@ -7,6 +11,17 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 
+import org.apache.log4j.Logger;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
+
+import eu.nets.sis.common.cache.loader.CacheLoader;
+import eu.nets.sis.common.cache.loader.MerchantCache;
+import eu.nets.sis.common.cache.types.MerchantProviderConfig;
+import eu.nets.sis.common.cache.util.CacheConstants;
+import no.bbs.server.crypto.KeyStore;
 import no.bbs.trust.common.basics.constants.Constants;
 import no.bbs.trust.common.basics.exceptions.StatusCodeException;
 import no.bbs.trust.common.basics.utils.StringUtils;
@@ -18,21 +33,11 @@ import no.bbs.trust.ts.idp.nemid.db.OracleConnectionFactory;
 import no.bbs.trust.ts.idp.nemid.tag.ChallengeGenerator;
 import no.bbs.trust.ts.idp.nemid.tag.OcesJsonParameterGenerator;
 import no.bbs.trust.ts.idp.nemid.utils.DAOUtil;
-import no.bbs.trust.ts2.idp.common.context.merchant.MerchantContext;
-import no.bbs.trust.ts2.idp.common.context.merchant.MerchantContextCache;
 import no.bbs.tt.trustsign.trustsignDAL.config.ConnectionFactories;
 import no.bbs.tt.trustsign.trustsignDAL.constant.PKIConfigKeys;
+import no.bbs.tt.trustsign.trustsignDAL.constant.PKIIDMap;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignerId;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
-import org.apache.log4j.Logger;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class IndexTest {
 
@@ -43,9 +48,12 @@ public class IndexTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		
 		InitConfig config = new InitConfig();
-		ConfigStarter.initConfig(config.getConfigPropertySources("../ts_idp_dk_nemid-config/env/common"), config.getConfigPropertySettings());
+		ConfigStarter.initConfig(config.getConfigPropertySources("../ts_idp_dk_nemid-config/env/common"), config
+				.getConfigPropertySettings());
 		ConnectionFactories.getInstance().registerDBConnectionFactory(new OracleConnectionFactory());
+		CacheLoader.loadCache(CacheConstants.SOURCE_ESIGN, PKIIDMap.DKNEMIDJS_ID);
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
@@ -91,33 +99,39 @@ public class IndexTest {
 
 	@SuppressWarnings("static-method")
 	@Test
-	public void testGenerateJsonParameters() throws StatusCodeException, ServletException {
-		MerchantContext context = new MerchantContext();
-		HashMap<String, String> idpConfig = new HashMap<String, String>();
-		context.setIdpConfig(idpConfig);
-		MerchantContextCache.addMerchantContext("1001", context);
-
+	public void testGenerateJsonParameters() throws ServletException {
+     
+		MerchantProviderConfig credentials = new MerchantProviderConfig();
+		
 		String certFilename = findCert("VOCES_gyldig.p12");
-		idpConfig.put(PKIConfigKeys.KEYSTORE, certFilename);
-		idpConfig.put(PKIConfigKeys.KEYSTORE_PASSWORD, "Test1234");
-		idpConfig.put(PKIConfigKeys.MERCHANT_ALIAS, "nets danid a/s - tu voces gyldig");
-		idpConfig.put(PKIConfigKeys.MERCHANT_ALIAS_PASSWORD, "Test1234");
-
+		credentials.putConfig(PKIConfigKeys.KEYSTORE, certFilename);
+		credentials.putConfig(PKIConfigKeys.KEYSTORE_PASSWORD, "Test1234");
+		credentials.putConfig(PKIConfigKeys.MERCHANT_ALIAS, "nets danid a/s - tu voces gyldig");
+		credentials.putConfig(PKIConfigKeys.MERCHANT_ALIAS_PASSWORD, "Test1234");
+		MerchantCache.addConfig(1001, PKIIDMap.DKNEMIDJS_ID, credentials);
+		
 		final String sref = SREF;
 		Index index = new Index();
 		index.init(null);
+		OcesJsonParameterGenerator clientGenerator=null;
+		SigningProcess signingProcess=null;
+		try{
 		String mid = DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_MID);
-		OcesJsonParameterGenerator clientGenerator = Index.createClientGenerator(mid);
-
+		clientGenerator = Index.createClientGenerator(mid);
+		
 		int spid = (int) StringUtils.toLong(DAOUtil.getSessionDataByKey(sref, ConfigKeys.SESSIONKEY_SPID), 0);
-		SigningProcess signingProcess = DAOUtil.getSigningProcess(spid);
+		signingProcess = DAOUtil.getSigningProcess(spid);
+
 		Index.setSigningDocument(clientGenerator, signingProcess);
 		String challenge = ChallengeGenerator.generateChallenge();
 		SignerId signerID = DAOUtil.getSignerID(signingProcess.getSignerId());
-		String signerIDValue = null==signerID ? "" : signerID.getIdValue();
+		String signerIDValue = null == signerID ? "" : signerID.getIdValue();
 		String clientTag = clientGenerator.generateClientTag("standard", "en", challenge, sref, signerIDValue);
-
 		assertClientTag(clientTag);
+		}catch(StatusCodeException se){
+			se.printStackTrace();
+		}
+		
 	}
 
 	private String findCert(String certFilename) {
