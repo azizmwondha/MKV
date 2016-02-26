@@ -520,8 +520,8 @@
 			<!-- common_cache status code -->
 			<Error>
 				<code>03010C</code>
-				<name>CACHE_ERROR</name>
-				<label>cacheerror</label>
+				<label>CACHE_ERROR</label>
+				<action>D100</action>
 				<message>Cache error</message>
 				<severity>error</severity>
 			</Error>
