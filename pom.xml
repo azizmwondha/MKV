@@ -28,8 +28,10 @@
 		<tomcat-server>3vtsapp</tomcat-server>
 	</properties>
 
-	<scm>
-		<developerConnection>scm:svn:https://tt-source.bbsas.no/svn/trust/ts_idp_dk_nemid/tags/ts_idp_dk_nemid-1.1.10</developerConnection>
+    <scm>
+		<connection>scm:svn:https://tt-source.bbsas.no/svn/trust/ts_idp_dk_nemid/trunk</connection>
+		<developerConnection>scm:svn:https://tt-source.bbsas.no/svn/trust/ts_idp_dk_nemid/trunk</developerConnection>
+		<url>https://tt-source.bbsas.no/svn/trust/ts_idp_dk_nemid/trunk</url>
 	</scm>
-
+	
 </project>
