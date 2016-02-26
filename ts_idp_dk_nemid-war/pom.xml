@@ -4,13 +4,13 @@
 	<groupId>no.bbs.trust</groupId>
 	<artifactId>ts_idp_dk_nemid-war</artifactId>
 	<name>ts_idp_dk_nemid-war</name>
-	<version>1.1.10-SNAPSHOT</version>
+	<version>1.1.10</version>
 	<packaging>war</packaging>
 
 	<parent>
 		<artifactId>ts_idp_dk_nemid</artifactId>
 		<groupId>no.bbs.trust</groupId>
-		<version>1.1.10-SNAPSHOT</version>
+		<version>1.1.10</version>
 	</parent>
 
     <build>
