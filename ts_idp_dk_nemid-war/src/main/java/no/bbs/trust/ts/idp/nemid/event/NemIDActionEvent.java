@@ -68,7 +68,10 @@ public enum NemIDActionEvent implements ActionEvent {
 	ACTION_LOAD_OCES_CONFIG("33E9C"),
 	ACTION_LOAD_IDP_CONFIG("33E9D"),
 	ACTION_LOAD_MERCHANT_CONTEXTS("33E9E"),
-	ACTION_IDP_DK_NEMID_LIFECYCLE("33E9F");
+	ACTION_IDP_DK_NEMID_LIFECYCLE("33E9F"),
+	
+	CACHE_ERROR("3010C"); //from common_cache module, included for validation purpose (otherwise validation during server startup fails)
+
 	//@formatter:on
 
 	private String eventcode;
