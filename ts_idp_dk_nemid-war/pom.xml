@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>eu.nets.sis</groupId>
 			<artifactId>common_cache</artifactId>
-			<version>1.0.5</version>
+			<version>1.0.6</version>
         </dependency>
         <!-- end-Common Cache -->
 
