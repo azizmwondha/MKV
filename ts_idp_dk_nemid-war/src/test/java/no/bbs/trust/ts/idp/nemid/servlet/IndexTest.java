@@ -21,7 +21,6 @@ import eu.nets.sis.common.cache.loader.CacheLoader;
 import eu.nets.sis.common.cache.loader.MerchantCache;
 import eu.nets.sis.common.cache.types.MerchantProviderConfig;
 import eu.nets.sis.common.cache.util.CacheConstants;
-import no.bbs.server.crypto.KeyStore;
 import no.bbs.trust.common.basics.constants.Constants;
 import no.bbs.trust.common.basics.exceptions.StatusCodeException;
 import no.bbs.trust.common.basics.utils.StringUtils;
@@ -53,7 +52,7 @@ public class IndexTest {
 		ConfigStarter.initConfig(config.getConfigPropertySources("../ts_idp_dk_nemid-config/env/common"), config
 				.getConfigPropertySettings());
 		ConnectionFactories.getInstance().registerDBConnectionFactory(new OracleConnectionFactory());
-		CacheLoader.loadCache(CacheConstants.SOURCE_ESIGN, PKIIDMap.DKNEMIDJS_ID);
+		CacheLoader.loadCache(CacheConstants.SOURCE_ESIGN, PKIIDMap.DKNEMIDJS_ID, null);
 		Security.addProvider(new BouncyCastleProvider());
 	}
 

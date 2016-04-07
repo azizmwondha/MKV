@@ -65,7 +65,7 @@ public class InitDKNEMID extends HttpServlet {
 
 	private void initCache() {
 		try {
-			CacheLoader.loadCache(CacheConstants.SOURCE_ESIGN,PKIIDMap.DKNEMIDJS_ID); 
+			CacheLoader.loadCache(CacheConstants.SOURCE_ESIGN,PKIIDMap.DKNEMIDJS_ID, null);
 		} catch(StatusCodeException sce) {
 			InitState.initFailed(this, "Cache initialization failed.  Check startup logs");
 		}
