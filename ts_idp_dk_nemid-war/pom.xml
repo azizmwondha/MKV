@@ -35,14 +35,27 @@
 			<artifactId>trustsigndal</artifactId>
 			<version>2.7.10</version>
 		</dependency>
+
 		<!-- Common Cache -->
 		<dependency>
 			<groupId>eu.nets.sis</groupId>
 			<artifactId>common_cache</artifactId>
-			<version>1.0.6</version>
+			<version>1.0.7</version>
         </dependency>
-        <!-- end-Common Cache -->
 
+		<!-- ############################################################################# -->
+		<!-- NemID dependencies -->
+		<dependency>
+			<groupId>no.bbs.trust</groupId>
+			<artifactId>cprregclientapi</artifactId>
+			<version>1.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>no.bbs.trust</groupId>
+			<artifactId>ts_rid_client</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		
         <!-- ############################################################################# -->
         <!-- Crypto dependencies -->
 
