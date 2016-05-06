@@ -13,4 +13,5 @@ public class Constants {
 
 	public static final String ACTIVEMQ_URL = "activemq.url";
 	public static final String TID = "tid";
+	public static final String NEMID_CLIENTMODE_LIMITED = "limited"; //NemID client mode 'limited' for mobile devices
 }

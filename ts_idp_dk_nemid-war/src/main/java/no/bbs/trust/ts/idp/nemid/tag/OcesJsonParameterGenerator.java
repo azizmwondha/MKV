@@ -35,6 +35,8 @@ import no.bbs.trust.common.basics.charset.Charsets;
 import no.bbs.trust.common.basics.utils.StringUtils;
 import no.bbs.trust.common.config.Config;
 import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
+import no.bbs.trust.ts.idp.nemid.contants.Constants;
+
 import org.openoces.ooapi.utils.Base64Handler;
 import org.openoces.ooapi.web.JSONException;
 import org.openoces.ooapi.web.JSONObject;
@@ -140,7 +142,7 @@ public class OcesJsonParameterGenerator {
 	}
 
 	public String generateClientTag(String clientMode, String language, String challenge, String sref, String cpr) {
-		return generateParametersTag(clientMode, language, challenge, cpr) + System.getProperty(LINE_SEPARATOR) + generateIframeTag()
+		return generateParametersTag(clientMode, language, challenge, cpr) + System.getProperty(LINE_SEPARATOR) + generateIframeTag(clientMode)
 				+ System.getProperty(LINE_SEPARATOR) + generateScriptTag() + System.getProperty(LINE_SEPARATOR) + generatePostBackFormTag(sref);
 	}
 
@@ -161,9 +163,14 @@ public class OcesJsonParameterGenerator {
 		return String.format(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_PARAMETERS), getParametersAsJSON());
 	}
 
-	private static String generateIframeTag() {
+	private static String generateIframeTag(String clientMode) {
 		String iframeTag = Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_IFRAME);
-		iframeTag = String.format(iframeTag, Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_LAUNCHER) + System.currentTimeMillis());
+		//NemID client mode 'limited' for mobile devices and 'standard' for desktop clients
+		if (Constants.NEMID_CLIENTMODE_LIMITED.equals(clientMode)) {
+			iframeTag = String.format(iframeTag, Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_LAUNCHER_LIMITED) + System.currentTimeMillis());
+		} else {
+			iframeTag = String.format(iframeTag, Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENT_LAUNCHER) + System.currentTimeMillis());
+		}
 		return iframeTag;
 	}
 

@@ -83,6 +83,7 @@ public class ConfigKeys {
 	public static final String CONFIG_NEMID_CLIENTMODE_LIMITED = "nemid.clientmode.limited";
 	public static final String CONFIG_NEMID_CLIENTFLOW_SIGNING = "nemid.clientflow.signing";
 	public static final String CONFIG_NEMID_CLIENT_LAUNCHER = "nemid.client.launcher";
+	public static final String CONFIG_NEMID_CLIENT_LAUNCHER_LIMITED = "nemid.client.launcher.limited";
 	public static final String CONFIG_NEMID_CLIENT_ORIGIN = "nemid.client.origin";
 	public static final String CONFIG_NEMID_CLIENT_SP_ORIGIN = "nemid.client.sp.origin";
 	public static final String CONFIG_NEMID_CLIENT_URL = "nemid.client.url";
