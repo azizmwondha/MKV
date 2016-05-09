@@ -5,7 +5,7 @@
 	<artifactId>ts_idp_dk_nemid</artifactId>
 	<packaging>pom</packaging>
 	<name>ts_idp_dk_nemid</name>
-	<version>1.2.5-SNAPSHOT</version>
+	<version>1.2.5</version>
 	<inceptionYear>2014</inceptionYear>
 
     <parent>
@@ -32,7 +32,7 @@
 		<connection>scm:git:git@gitorious.bbsas.no:e-signing/ts_idp_dk_nemid.git</connection>
 		<developerConnection>scm:git:git@gitorious.bbsas.no:e-signing/ts_idp_dk_nemid.git</developerConnection>
 		<url>https://gitorious.bbsas.no/e-signing/ts_idp_dk_nemid</url>
-	  <tag>HEAD</tag>
+	  <tag>ts_idp_dk_nemid-1.2.5</tag>
   </scm>
 	
 </project>
