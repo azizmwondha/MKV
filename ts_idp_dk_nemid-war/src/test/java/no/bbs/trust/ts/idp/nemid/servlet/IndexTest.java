@@ -1,26 +1,8 @@
 package no.bbs.trust.ts.idp.nemid.servlet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.net.URL;
-import java.security.Security;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.ServletException;
-
-import org.apache.log4j.Logger;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
-
-import eu.nets.sis.common.cache.loader.CacheLoader;
 import eu.nets.sis.common.cache.loader.MerchantCache;
+import eu.nets.sis.common.cache.loader.SignCacheLoader;
 import eu.nets.sis.common.cache.types.MerchantProviderConfig;
-import eu.nets.sis.common.cache.util.CacheConstants;
 import no.bbs.trust.common.basics.constants.Constants;
 import no.bbs.trust.common.basics.exceptions.StatusCodeException;
 import no.bbs.trust.common.basics.utils.StringUtils;
@@ -37,6 +19,19 @@ import no.bbs.tt.trustsign.trustsignDAL.constant.PKIConfigKeys;
 import no.bbs.tt.trustsign.trustsignDAL.constant.PKIIDMap;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SignerId;
 import no.bbs.tt.trustsign.trustsignDAL.vos.table.SigningProcess;
+import org.apache.log4j.Logger;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
+
+import javax.servlet.ServletException;
+import java.net.URL;
+import java.security.Security;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 public class IndexTest {
 
@@ -52,7 +47,7 @@ public class IndexTest {
 		ConfigStarter.initConfig(config.getConfigPropertySources("../ts_idp_dk_nemid-config/env/common"), config
 				.getConfigPropertySettings());
 		ConnectionFactories.getInstance().registerDBConnectionFactory(new OracleConnectionFactory());
-		CacheLoader.loadCache(CacheConstants.SOURCE_ESIGN, PKIIDMap.DKNEMIDJS_ID, null);
+		SignCacheLoader.loadCache(PKIIDMap.DKNEMIDJS_ID);
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
@@ -107,7 +102,7 @@ public class IndexTest {
 		credentials.putConfig(PKIConfigKeys.KEYSTORE_PASSWORD, "Test1234");
 		credentials.putConfig(PKIConfigKeys.MERCHANT_ALIAS, "nets danid a/s - tu voces gyldig");
 		credentials.putConfig(PKIConfigKeys.MERCHANT_ALIAS_PASSWORD, "Test1234");
-		MerchantCache.addConfig(1001, PKIIDMap.DKNEMIDJS_ID, credentials);
+		MerchantCache.putConfig(1001, PKIIDMap.DKNEMIDJS_ID, credentials);
 		
 		final String sref = SREF;
 		Index index = new Index();

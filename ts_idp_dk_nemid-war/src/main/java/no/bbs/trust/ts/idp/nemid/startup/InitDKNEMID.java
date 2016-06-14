@@ -4,21 +4,10 @@
  */
 package no.bbs.trust.ts.idp.nemid.startup;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-
-import org.apache.log4j.Logger;
-import org.openoces.ooapi.environment.Environments;
-import org.openoces.ooapi.environment.Environments.Environment;
-import org.openoces.serviceprovider.ServiceProviderSetup;
-
-import eu.nets.sis.common.cache.loader.CacheLoader;
-import eu.nets.sis.common.cache.util.CacheConstants;
+import eu.nets.sis.common.cache.loader.SignCacheLoader;
 import no.bbs.trust.amqcapi.types.AMQAPIException;
 import no.bbs.trust.amqcapi.utils.AMQConnector;
 import no.bbs.trust.common.basics.constants.Constants;
-import no.bbs.trust.common.basics.exceptions.StatusCodeException;
 import no.bbs.trust.common.basics.utils.EventLogger;
 import no.bbs.trust.common.config.Config;
 import no.bbs.trust.common.webapp.startup.InitState;
@@ -27,6 +16,14 @@ import no.bbs.trust.ts.idp.nemid.contants.ConfigKeys;
 import no.bbs.trust.ts.idp.nemid.event.NemIDActionEvent;
 import no.bbs.tt.bc.cryptlib.util.BCCryptoLoader;
 import no.bbs.tt.trustsign.trustsignDAL.constant.PKIIDMap;
+import org.apache.log4j.Logger;
+import org.openoces.ooapi.environment.Environments;
+import org.openoces.ooapi.environment.Environments.Environment;
+import org.openoces.serviceprovider.ServiceProviderSetup;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 
 public class InitDKNEMID extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -65,8 +62,8 @@ public class InitDKNEMID extends HttpServlet {
 
 	private void initCache() {
 		try {
-			CacheLoader.loadCache(CacheConstants.SOURCE_ESIGN,PKIIDMap.DKNEMIDJS_ID, null);
-		} catch(StatusCodeException sce) {
+			SignCacheLoader.loadCache(PKIIDMap.DKNEMIDJS_ID);
+		} catch(Exception sce) {
 			InitState.initFailed(this, "Cache initialization failed.  Check startup logs");
 		}
 	}

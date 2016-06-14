@@ -35,7 +35,7 @@
 	<servlet>
         <display-name>Cache Servlet</display-name>
         <servlet-name>cacheservlet</servlet-name>
-        <servlet-class>eu.nets.sis.common.cache.servlets.CacheSignServlet</servlet-class>
+        <servlet-class>eu.nets.sis.common.cache.servlets.SignCacheServlet</servlet-class>
         <load-on-startup>5</load-on-startup>
     </servlet>
 
