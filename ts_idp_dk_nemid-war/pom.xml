@@ -42,7 +42,11 @@
 			<artifactId>common_cache</artifactId>
 			<version>1.0.10</version>
         </dependency>
-
+        <dependency>
+			<groupId>eu.nets.sis</groupId>
+			<artifactId>common_healthcheck</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 		<!-- ############################################################################# -->
 		<!-- NemID dependencies -->
 		<dependency>

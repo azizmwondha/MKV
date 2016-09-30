@@ -11,7 +11,7 @@ public class Constants {
 	public static final String DIGEST_SHA2 = "SHA-256";
 	public static final String DIGEST_SHA2_SHORTNAME = "SHA2";
 
-	public static final String ACTIVEMQ_URL = "activemq.url";
+	public static final String ACTIVEMQ_URL = "amq.url.broker";
 	public static final String TID = "tid";
 	public static final String NEMID_CLIENTMODE_LIMITED = "limited"; //NemID client mode 'limited' for mobile devices
 }
