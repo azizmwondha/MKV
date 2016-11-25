@@ -220,7 +220,7 @@ public class Index extends BaseServlet {
 	
 	private static String getSignerAndServerMetadata(HttpServletRequest httpRequest) {
 		String userAgent = httpRequest.getHeader("User-Agent");
-		String ipAddress = httpRequest.getRemoteAddr();
+		String ipAddress = httpRequest.getHeader("X-Forwarded-For");
 		String os = getOsName();
 		String osVersion = getOsVersion();
 		String javaVersion = getJavaVersion();
