@@ -50,7 +50,11 @@ public class Index extends BaseServlet {
 
 	private static final String COMPONENT_NAME = "NemIDJS";
 	private static final String[] SESSION_DATA_KEYS = new String[] { ConfigKeys.SESSIONKEY_SPID, ConfigKeys.SESSIONKEY_MID, ConfigKeys.SESSIONKEY_LOCALE, ConfigKeys.SESSIONKEY_TZO, ConfigKeys.SESSIONKEY_NEMID_CLIENTMODE };
-
+    private static String OS;
+    private static String osVersion;
+    private static String javaVersion;
+    private static String appVersion;
+    
 	private final TransactionHelper transactionHelper;
 
 	public Index() {
@@ -106,9 +110,18 @@ public class Index extends BaseServlet {
 				signerIDValue = "";
 			}
 			logger.debug("[includeCPRinSDO=" + includeCPRinSDO + "] [CPR=" + signerIDValue + "]");
+			
+			String metaData = null;
+			String includeMetaDatainSDO = merchantConfig.getString(PKIConfigKeys.INCLUDE_METADATA_IN_SDO);
+
+			if (Boolean.valueOf(includeMetaDatainSDO)) {
+				metaData = getSignerAndServerMetadata(request);
+			}
+			logger.debug("[includeMetaDatainSDO=" + includeMetaDatainSDO + "] [MetaData=" + metaData + "]");
+
 
 			String nemidTag = clientGenerator
-					.generateClientTag(clientMode, languageCode, challenge, sref, signerIDValue);
+					.generateClientTag(clientMode, languageCode, challenge, sref, signerIDValue, metaData);
 			String clientTag = String.format(Config.INSTANCE
 					.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_DIV), " " + clientMode, nemidTag);
 			logger.debug("NemID JS client tag: " + clientTag);
@@ -204,4 +217,51 @@ public class Index extends BaseServlet {
 			logger.debug("InsertOrder webcontext [" + attrName + "=" + wcURL + "]");
 		}
 	}
+	
+	private static String getSignerAndServerMetadata(HttpServletRequest httpRequest) {
+		String userAgent = httpRequest.getHeader("User-Agent");
+		String ipAddress = httpRequest.getRemoteAddr();
+		String os = getOsName();
+		String osVersion = getOsVersion();
+		String javaVersion = getJavaVersion();
+		String appVersion = getAppVersion();
+		StringBuffer metadata = new StringBuffer();
+		metadata.append(",useragent=").append(userAgent);
+		metadata.append(",useripaddress=").append(ipAddress);
+		metadata.append(",apposname=").append(os);
+		metadata.append(",apposversion=").append(osVersion);
+		metadata.append(",appjavaversion=").append(javaVersion);
+		metadata.append(",appversion=").append(appVersion);
+		return metadata.toString();
+
+	}
+
+	private static String getOsName() {
+		if (OS == null) {
+			OS = System.getProperty("os.name");
+		}
+		return OS;
+	}
+
+	private static String getOsVersion() {
+		if (osVersion == null) {
+			osVersion = System.getProperty("os.version");
+		}
+		return osVersion;
+	}
+
+	private static String getJavaVersion() {
+		if (javaVersion == null) {
+			javaVersion = System.getProperty("java.version");
+		}
+		return javaVersion;
+	}
+
+	private static String getAppVersion() {
+		if (appVersion == null) {
+			appVersion = Config.INSTANCE.getProperty(ConfigKeys.IDP_VERSION);
+		}
+		return appVersion;
+	}
+	
 }

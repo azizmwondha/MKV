@@ -141,12 +141,12 @@ public class OcesJsonParameterGenerator {
 		return sb.toString().getBytes(Charsets.UTF_8);
 	}
 
-	public String generateClientTag(String clientMode, String language, String challenge, String sref, String cpr) {
-		return generateParametersTag(clientMode, language, challenge, cpr) + System.getProperty(LINE_SEPARATOR) + generateIframeTag(clientMode)
+	public String generateClientTag(String clientMode, String language, String challenge, String sref, String cpr, String metadata) {
+		return generateParametersTag(clientMode, language, challenge, cpr, metadata) + System.getProperty(LINE_SEPARATOR) + generateIframeTag(clientMode)
 				+ System.getProperty(LINE_SEPARATOR) + generateScriptTag() + System.getProperty(LINE_SEPARATOR) + generatePostBackFormTag(sref);
 	}
 
-	private String generateParametersTag(String clientMode, String language, String challenge, String cpr) {
+	private String generateParametersTag(String clientMode, String language, String challenge, String cpr, String metadata) {
 		// Set parameter values
 		addParameter("CLIENTFLOW", Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTFLOW_SIGNING));
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
@@ -158,6 +158,9 @@ public class OcesJsonParameterGenerator {
 		String signProperties = "challenge=" + challenge;
 		if(!StringUtils.isNullorEmpty(cpr)) {
 			signProperties += ",cpr=" + cpr;
+		}
+		if(!StringUtils.isNullorEmpty(metadata)) {
+			signProperties += metadata;
 		}
 		addParameter("SIGN_PROPERTIES", signProperties);
 		return String.format(Config.INSTANCE.getProperty(ConfigKeys.CONFIG_NEMID_CLIENTTAG_PARAMETERS), getParametersAsJSON());

@@ -120,7 +120,7 @@ public class IndexTest {
 		String challenge = ChallengeGenerator.generateChallenge();
 		SignerId signerID = DAOUtil.getSignerID(signingProcess.getSignerId());
 		String signerIDValue = null == signerID ? "" : signerID.getIdValue();
-		String clientTag = clientGenerator.generateClientTag("standard", "en", challenge, sref, signerIDValue);
+		String clientTag = clientGenerator.generateClientTag("standard", "en", challenge, sref, signerIDValue, null);
 		assertClientTag(clientTag);
 		}catch(StatusCodeException se){
 			se.printStackTrace();

@@ -64,6 +64,8 @@ public class ConfigKeys {
 	public static final String NEMID_CODEGROUP_DOCINVALID = "nemid.codegroup.docinvalid";
 
 	public static final String RIDREG_LOOKUP_URL = "ridreg.lookup.url";
+	
+	public static final String IDP_VERSION = "version";
 
 	// Activation tag keys.
 	public static final String CONFIG_NEMID_TAG_SOURCE = "nemid.clienttag.source";
