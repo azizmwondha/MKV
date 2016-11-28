@@ -291,8 +291,12 @@ public class Verify extends BaseServlet {
 		logger.info("Signature verification completed OK. Store signature and revocation status");
 
 		Date signerTime = new Date();
-		DAOUtil.storeSignature(signingProcess.getSignprocessId(), signerTime, verifySign.getSignerCPR(), signerCN, signerCertPolicyOID, signedResponse,
-				verifySign.getB64ocsp());
+		String signerIdentType = null;
+		if (null != verifySign.getSignerCPR()) {
+			signerIdentType = SignerIDTypes.SSN;
+		}
+		DAOUtil.storeSignature(signingProcess.getSignprocessId(), signerTime, verifySign.getSignerCPR(), signerCN,
+				signerCertPolicyOID, signedResponse, verifySign.getB64ocsp(), signerIdentType);
 	}
 
 	private static void waitForOrderCompletion(SigningProcess signingProcess) {

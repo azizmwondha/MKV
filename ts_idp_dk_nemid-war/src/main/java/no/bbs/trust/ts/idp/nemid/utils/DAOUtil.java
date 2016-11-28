@@ -76,13 +76,13 @@ public class DAOUtil {
 		}
 	}
 
-	public static void storeSignature(int spid, Date signTime, String signerID, String signerCN, String signerOIDS, String dsig, String ocsp) throws StatusCodeException {
+	public static void storeSignature(int spid, Date signTime, String signerID, String signerCN, String signerOIDS, String dsig, String ocsp, String signerIdentType) throws StatusCodeException {
 		try {
 			SignatureDAO signdao = new SignatureDAO();
 			Signature signInfo = signdao.getInfoBySignprocid(null, spid);
 
 			if (null == signInfo) {
-				signdao.insertXMLDsig(null, 0, spid, signerCN, signerOIDS, dsig, ocsp, PKIIDMap.DKNEMIDJS_ID, signTime, signerID);
+				signdao.insertXMLDsig(null, 0, spid, signerCN, signerOIDS, dsig, ocsp, PKIIDMap.DKNEMIDJS_ID, signTime, signerID, signerIdentType);
 			} else {
 				throw new StatusCodeException(NemIDActionEvent.SIGNING_ALREADY_DONE, "Signature already exists for this SignProcess [SignProcessID=" + spid + "][signerCN="
 						+ signerCN + "]");
