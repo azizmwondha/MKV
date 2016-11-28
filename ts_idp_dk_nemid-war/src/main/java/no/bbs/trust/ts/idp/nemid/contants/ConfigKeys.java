@@ -66,6 +66,7 @@ public class ConfigKeys {
 	public static final String RIDREG_LOOKUP_URL = "ridreg.lookup.url";
 	
 	public static final String IDP_VERSION = "version";
+	public static final String IDP_NAME = "app";
 
 	// Activation tag keys.
 	public static final String CONFIG_NEMID_TAG_SOURCE = "nemid.clienttag.source";

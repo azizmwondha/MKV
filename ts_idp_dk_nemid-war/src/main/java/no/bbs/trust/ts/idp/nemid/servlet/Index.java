@@ -228,8 +228,7 @@ public class Index extends BaseServlet {
 		StringBuffer metadata = new StringBuffer();
 		metadata.append(",useragent=").append(userAgent);
 		metadata.append(",useripaddress=").append(ipAddress);
-		metadata.append(",apposname=").append(os);
-		metadata.append(",apposversion=").append(osVersion);
+		metadata.append(",apposversion=").append(os).append(" ").append(osVersion);
 		metadata.append(",appjavaversion=").append(javaVersion);
 		metadata.append(",appversion=").append(appVersion);
 		return metadata.toString();
@@ -259,7 +258,7 @@ public class Index extends BaseServlet {
 
 	private static String getAppVersion() {
 		if (appVersion == null) {
-			appVersion = Config.INSTANCE.getProperty(ConfigKeys.IDP_VERSION);
+			appVersion = Config.INSTANCE.getProperty(ConfigKeys.IDP_NAME) + " "	+ Config.INSTANCE.getProperty(ConfigKeys.IDP_VERSION);
 		}
 		return appVersion;
 	}
