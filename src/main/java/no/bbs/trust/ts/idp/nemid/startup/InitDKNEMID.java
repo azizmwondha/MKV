@@ -4,7 +4,12 @@
  */
 package no.bbs.trust.ts.idp.nemid.startup;
 
+import com.codahale.metrics.health.HealthCheckRegistry;
+import com.codahale.metrics.health.jvm.ThreadDeadlockHealthCheck;
+import com.codahale.metrics.servlets.HealthCheckServlet;
 import eu.nets.sis.common.cache.loader.SignCacheLoader;
+import eu.nets.sis.common.healthcheck.ActiveMQHealthCheck;
+import eu.nets.sis.common.healthcheck.OracleHealthCheck;
 import no.bbs.trust.amqcapi.types.AMQAPIException;
 import no.bbs.trust.amqcapi.utils.AMQConnector;
 import no.bbs.trust.common.basics.constants.Constants;
@@ -49,6 +54,12 @@ public class InitDKNEMID extends HttpServlet {
 		EventLogger.appendEvent(NemIDActionEvent.ACTION_IDP_DK_NEMID_LIFECYCLE);
 
 		InitState.assertInitCompletedWithoutErrors();
+
+		HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
+		healthCheckRegistry.register("activemq", new ActiveMQHealthCheck(Config.INSTANCE.getProperty("healthcheck.amq.url")));
+		healthCheckRegistry.register("trustsign-db", new OracleHealthCheck(Config.INSTANCE.getProperty("healthcheck.trust-db.jndiName")));
+		healthCheckRegistry.register("thread-deadlock", new ThreadDeadlockHealthCheck());
+		config.getServletContext().setAttribute(HealthCheckServlet.HEALTH_CHECK_REGISTRY, healthCheckRegistry);
 	}
 
 	private void initActiveMQConnection() throws ServletException {

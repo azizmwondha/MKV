@@ -45,14 +45,10 @@
 		<load-on-startup>9</load-on-startup>
 	</servlet>
 	<servlet>
-        <servlet-name>common_healthcheck</servlet-name>
-        <servlet-class>eu.nets.sis.common_healthcheck.servlet.AppHealthcheckServlet</servlet-class>
-        <init-param>
-        	<param-name>context_constant</param-name>
-        	<param-value>dknemidjs</param-value>
-        </init-param>
-        <load-on-startup>7</load-on-startup>
-    </servlet>
+		<servlet-name>common_healthcheck</servlet-name>
+		<servlet-class>com.codahale.metrics.servlets.HealthCheckServlet</servlet-class>
+		<load-on-startup>7</load-on-startup>
+	</servlet>
 	
 	
 	<servlet>

@@ -67,13 +67,7 @@
 		<dependency>
 			<groupId>eu.nets.sis</groupId>
 			<artifactId>common_healthcheck</artifactId>
-			<version>1.0.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>oracle</groupId>
-					<artifactId>ojdbc6</artifactId>
-				</exclusion>
-			</exclusions>
+			<version>1.0.1-SNAPSHOT</version>
 		</dependency>
 		<!-- ############################################################################# -->
 		<!-- NemID dependencies -->
