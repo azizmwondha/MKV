@@ -250,7 +250,7 @@
 			</Error>
 			<Error>
 				<code>033E46</code>
-				<label>errorsigningdocument</label>
+				<label>errorauthenticating</label>
 				<action>D100</action>
 				<message>STATUS_AUTH_FAILED</message>
 				<severity>info</severity>

@@ -178,15 +178,15 @@ public class SignatureVerifier {
 	private void invalidCertificate (CertificateStatus certificateStatus) throws StatusCodeException {
 		
 		if (certificateStatus == CertificateStatus.EXPIRED) {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_EXPIRED, "Certificate has expired: " + certificateStatus);
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_EXPIRED, "Certificate has expired");
 		} else if (certificateStatus == CertificateStatus.INVALID) {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_INVALID, "Certificate is invalid: " + certificateStatus);
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_INVALID, "Certificate is invalid");
 		} else if (certificateStatus == CertificateStatus.NOT_YET_VALID) {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_INVALID, "Certificate is not yet valid: " + certificateStatus);
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_INVALID, "Certificate is not yet valid");
 		} else if (certificateStatus == CertificateStatus.REVOKED) {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_REVOKED, "Certificate is revoked: " + certificateStatus);
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_REVOKED, "Certificate is revoked");
 		} else {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_INVALID, "Certificate has an unkown error: " + certificateStatus);
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_INVALID, "Certificate has an unkown error");
 		}
 	}
 
