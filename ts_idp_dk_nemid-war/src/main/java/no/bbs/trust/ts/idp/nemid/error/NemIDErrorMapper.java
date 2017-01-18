@@ -11,13 +11,13 @@ import no.bbs.trust.ts.idp.nemid.event.NemIDActionEvent;
 public class NemIDErrorMapper {
 
 	/*
-	nemid.codegroup.usercancel=CAN001,CAN002
+	nemid.codegroup.usercancel=CAN001,CAN002,CAN003,CAN004
 	nemid.codegroup.opercancel=
-	nemid.codegroup.badprotocol=APP001,APP003,APP004,APP007,APP008,SRV001,SRV002,SRV003,SRV004,SRV005,SRV006,SRV007,SRV009
+	nemid.codegroup.badprotocol=APP001,APP003,APP004,APP007,APP008,APP009,APP010,SRV001,SRV002,SRV003,SRV004,SRV005,SRV006,SRV007,SRV009,SRV010
 	nemid.codegroup.uidrevoked=LOCK001,LOCK002,LOCK003
 	nemid.codegroup.uidinvalid=OCES001,OCES002,OCES003,OCES004,OCES005,OCES006
 	nemid.codegroup.uidexpired=
-	nemid.codegroup.authfailed=AUTH001,AUTH002,AUTH003,AUTH004,AUTH005,AUTH006,AUTH007,AUTH008,AUTH009,AUTH010,AUTH011,AUTH012
+	nemid.codegroup.authfailed=AUTH001,AUTH003,AUTH004,AUTH005,AUTH006,AUTH007,AUTH008,AUTH009,AUTH010,AUTH011,AUTH012,AUTH013,AUTH017
 	nemid.codegroup.docinvalid=APP002
 	*/
 

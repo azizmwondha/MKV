@@ -66,9 +66,8 @@ public class SignatureVerifier {
 			logger.info("CertificateType: " + (isFoces ? "F" : (isMoces ? "M" : (isPoces ? "P" : "Unknown-"))) + "OCES");
 			logger.debug("Signature Matches: " + status.signatureMatches());
 
-			if (!CertificateStatus.VALID.equals(certificateStatus)) {
-				logger.info("Certificate not valid");
-					throw new StatusCodeException(NemIDActionEvent.STATUS_NOT_VALID_CERTIFICATE, "Invalid certificatestatus: " + certificateStatus);
+			if (certificateStatus != CertificateStatus.VALID) {
+				invalidCertificate(certificateStatus);
 			}
 
 			if (isPoces) {
@@ -169,6 +168,26 @@ public class SignatureVerifier {
 
 	public boolean isValidatedOK() {
 		return validatedOK;
+	}
+	
+	/**
+	 * Return NemID error codes based on Certificate Status
+	 * @param certificateStatus
+	 * @throws StatusCodeException
+	 */
+	private void invalidCertificate (CertificateStatus certificateStatus) throws StatusCodeException {
+		
+		if (certificateStatus == CertificateStatus.EXPIRED) {
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_EXPIRED, "Certificate has expired: " + certificateStatus);
+		} else if (certificateStatus == CertificateStatus.INVALID) {
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_INVALID, "Certificate is invalid: " + certificateStatus);
+		} else if (certificateStatus == CertificateStatus.NOT_YET_VALID) {
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_INVALID, "Certificate is not yet valid: " + certificateStatus);
+		} else if (certificateStatus == CertificateStatus.REVOKED) {
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_REVOKED, "Certificate is revoked: " + certificateStatus);
+		} else {
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_INVALID, "Certificate has an unkown error: " + certificateStatus);
+		}
 	}
 
 }
