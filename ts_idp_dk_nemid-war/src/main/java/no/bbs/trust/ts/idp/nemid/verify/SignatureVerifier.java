@@ -25,6 +25,7 @@ import org.openoces.ooapi.certificate.MocesCertificate;
 import org.openoces.ooapi.certificate.PocesCertificate;
 import org.openoces.ooapi.exceptions.AppletException;
 import org.openoces.securitypackage.SignatureValidationStatus;
+import org.openoces.ooapi.signatures.Oces2ErrorCode;
 
 public class SignatureVerifier {
 
@@ -121,7 +122,14 @@ public class SignatureVerifier {
 			ActionEvent actionEvent = NemIDErrorMapper.getActionEvent(errorCode);
 			logger.info("NemID error code: " + errorCode + ", message: " + ae.getMessage() + ", action event: " + actionEvent);
 			throw new StatusCodeException(actionEvent, NemIDErrorMapper.getErrorCodeDescription(errorCode), errorCode);
+		} catch (StatusCodeException se) {
+			ActionEvent actionEvent = se.getActionEvent();
+			logger.info("NemID internal error code: " + actionEvent.getCode() + ", message: " + se.getMessage() + ", action event: " + actionEvent);
+			throw new StatusCodeException(actionEvent, se.getMessage(), actionEvent.getCode());
 		} catch (Throwable t) {
+			if (t instanceof Oces2ErrorCode && t.getMessage().equals("CAN003")) {
+				throw new StatusCodeException(NemIDActionEvent.STATUS_OTP_TIMEOUT, "OTP timed out due to inactivity");
+			}
 			EventLogger.dumpStack(t);
 			logger.info("Certificate status validation: " + t.getMessage());
 			throw new StatusCodeException(NemIDActionEvent.STATUS_VERIFY_CERT_TYPE_FAILED, "Signature or certificate status validation failed: "

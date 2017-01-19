@@ -62,6 +62,7 @@ public class ConfigKeys {
 	public static final String NEMID_CODEGROUP_UIDEXPIRED = "nemid.codegroup.uidexpired";
 	public static final String NEMID_CODEGROUP_AUTHFAILED = "nemid.codegroup.authfailed";
 	public static final String NEMID_CODEGROUP_DOCINVALID = "nemid.codegroup.docinvalid";
+	public static final String NEMID_CODEGROUP_OTPTIMEOUT = "nemid.codegroup.otptimeout";
 
 	public static final String RIDREG_LOOKUP_URL = "ridreg.lookup.url";
 	

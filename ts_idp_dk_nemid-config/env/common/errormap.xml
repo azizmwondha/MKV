@@ -263,6 +263,13 @@
 				<severity>info</severity>
 			</Error>
 			<Error>
+				<code>033E48</code>
+				<label>signprocesstimeout</label>
+				<action>D100</action>
+				<message>STATUS_OTP_TIMEOUT</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
 				<code>033E98</code>
 				<label>info</label>
 				<action>D100</action>

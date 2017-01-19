@@ -11,7 +11,7 @@ import no.bbs.trust.ts.idp.nemid.event.NemIDActionEvent;
 public class NemIDErrorMapper {
 
 	/*
-	nemid.codegroup.usercancel=CAN001,CAN002,CAN003,CAN004
+	nemid.codegroup.usercancel=CAN001,CAN002,CAN004
 	nemid.codegroup.opercancel=
 	nemid.codegroup.badprotocol=APP001,APP003,APP004,APP007,APP008,APP009,APP010,SRV001,SRV002,SRV003,SRV004,SRV005,SRV006,SRV007,SRV009,SRV010
 	nemid.codegroup.uidrevoked=LOCK001,LOCK002,LOCK003
@@ -19,6 +19,7 @@ public class NemIDErrorMapper {
 	nemid.codegroup.uidexpired=
 	nemid.codegroup.authfailed=AUTH001,AUTH003,AUTH004,AUTH005,AUTH006,AUTH007,AUTH008,AUTH009,AUTH010,AUTH011,AUTH012,AUTH013,AUTH017
 	nemid.codegroup.docinvalid=APP002
+	nemid.codegroup.otptimeout=CAN003
 	*/
 
 	private static final String USER_CANCEL = Config.INSTANCE.getProperty(ConfigKeys.NEMID_CODEGROUP_USERCANCEL);
@@ -29,6 +30,7 @@ public class NemIDErrorMapper {
 	private static final String UID_EXPIRED = Config.INSTANCE.getProperty(ConfigKeys.NEMID_CODEGROUP_UIDEXPIRED);
 	private static final String AUTH_FAILED = Config.INSTANCE.getProperty(ConfigKeys.NEMID_CODEGROUP_AUTHFAILED);
 	private static final String DOC_INVALID = Config.INSTANCE.getProperty(ConfigKeys.NEMID_CODEGROUP_DOCINVALID);
+	private static final String OTP_TIMEOUT = Config.INSTANCE.getProperty(ConfigKeys.NEMID_CODEGROUP_OTPTIMEOUT);
 
 	static final String USER_CANCEL_DESCRIPTION = "The user cancelled the operation";
 	static final String OPER_CANCEL_DESCRIPTION = "The operator cancelled the operation";
@@ -38,6 +40,7 @@ public class NemIDErrorMapper {
 	static final String UID_EXPIRED_DESCRIPTION = "The user ID has expired";
 	static final String AUTH_FAILED_DESCRIPTION = "Authentication failed";
 	static final String DOC_INVALID_DESCRIPTION = "The document is invalid";
+	static final String OTP_TIMEOUT_DESCRIPTION = "The user has timed out due to inactivity";
 
 	private static final Map<String, NemIDActionEvent> errorCodeToActionEventMap = new HashMap<String, NemIDActionEvent>();
 	private static final Map<String, String> errorCodeDescriptionMap = new HashMap<String, String>();
@@ -75,6 +78,10 @@ public class NemIDErrorMapper {
 		for (String nemidErrorCode : DOC_INVALID.split(",")) {
 			errorCodeToActionEventMap.put(nemidErrorCode, NemIDActionEvent.STATUS_DOC_INVALID);
 			errorCodeDescriptionMap.put(nemidErrorCode, DOC_INVALID_DESCRIPTION);
+		}
+		for (String nemidErrorCode : OTP_TIMEOUT.split(",")) {
+			errorCodeToActionEventMap.put(nemidErrorCode, NemIDActionEvent.STATUS_OTP_TIMEOUT);
+			errorCodeDescriptionMap.put(nemidErrorCode, OTP_TIMEOUT_DESCRIPTION);
 		}
 	}
 
