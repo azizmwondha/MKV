@@ -29,7 +29,7 @@ public class NemIDErrorMapperTest {
 		assertNotNull(actionEvent);
 		assertEquals(NemIDActionEvent.STATUS_USER_CANCEL, actionEvent);
 		assertNotNull(errorDescription);
-		assertEquals(NemIDErrorMapper.USER_CANCEL_DESCRIPTION, errorDescription);
+		assertEquals(NemIDErrorMapper.USER_CANCEL_DESCRIPTION + " [ErrorCode=" + ERROR_CODE + "]", errorDescription);
 	}
 
 	@SuppressWarnings("static-method")
@@ -42,7 +42,7 @@ public class NemIDErrorMapperTest {
 		assertNotNull(actionEvent);
 		assertEquals(NemIDActionEvent.STATUS_BAD_PROTOCOL, actionEvent);
 		assertNotNull(errorDescription);
-		assertEquals(NemIDErrorMapper.BAD_PROTOCOL_DESCRIPTION, errorDescription);
+		assertEquals(NemIDErrorMapper.BAD_PROTOCOL_DESCRIPTION + " [ErrorCode=" + ERROR_CODE + "]", errorDescription);
 	}
 
 	@SuppressWarnings("static-method")
@@ -55,20 +55,20 @@ public class NemIDErrorMapperTest {
 		assertNotNull(actionEvent);
 		assertEquals(NemIDActionEvent.STATUS_UID_REVOKED, actionEvent);
 		assertNotNull(errorDescription);
-		assertEquals(NemIDErrorMapper.UID_REVOKED_DESCRIPTION, errorDescription);
+		assertEquals(NemIDErrorMapper.UID_REVOKED_DESCRIPTION + " [ErrorCode=" + ERROR_CODE + "]", errorDescription);
 	}
 
 	@SuppressWarnings("static-method")
 	@Test
 	public void testNemIDErrorMapper4() {
-		final String ERROR_CODE = ErrorCodeChecker.ErrorCodes.OCES003.name();
+		final String ERROR_CODE = ErrorCodeChecker.ErrorCodes.OCES006.name();
 		ActionEvent actionEvent = NemIDErrorMapper.getActionEvent(ERROR_CODE);
 		String errorDescription = NemIDErrorMapper.getErrorCodeDescription(ERROR_CODE);
 
 		assertNotNull(actionEvent);
 		assertEquals(NemIDActionEvent.STATUS_UID_INVALID, actionEvent);
 		assertNotNull(errorDescription);
-		assertEquals(NemIDErrorMapper.UID_INVALID_DESCRIPTION, errorDescription);
+		assertEquals(NemIDErrorMapper.UID_INVALID_DESCRIPTION + " [ErrorCode=" + ERROR_CODE + "]", errorDescription);
 	}
 
 	@SuppressWarnings("static-method")
@@ -81,7 +81,7 @@ public class NemIDErrorMapperTest {
 		assertNotNull(actionEvent);
 		assertEquals(NemIDActionEvent.STATUS_AUTH_FAILED, actionEvent);
 		assertNotNull(errorDescription);
-		assertEquals(NemIDErrorMapper.AUTH_FAILED_DESCRIPTION, errorDescription);
+		assertEquals(NemIDErrorMapper.AUTH_FAILED_DESCRIPTION+ " [ErrorCode=" + ERROR_CODE + "]", errorDescription);
 	}
 
 	@SuppressWarnings("static-method")
@@ -94,7 +94,7 @@ public class NemIDErrorMapperTest {
 		assertNotNull(actionEvent);
 		assertEquals(NemIDActionEvent.STATUS_DOC_INVALID, actionEvent);
 		assertNotNull(errorDescription);
-		assertEquals(NemIDErrorMapper.DOC_INVALID_DESCRIPTION, errorDescription);
+		assertEquals(NemIDErrorMapper.DOC_INVALID_DESCRIPTION+ " [ErrorCode=" + ERROR_CODE + "]", errorDescription);
 	}
 
 }

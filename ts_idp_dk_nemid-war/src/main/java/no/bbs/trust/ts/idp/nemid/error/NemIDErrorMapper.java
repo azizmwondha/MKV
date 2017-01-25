@@ -104,7 +104,7 @@ public class NemIDErrorMapper {
 	 */
 	public static String getErrorCodeDescription(String nemidErrorCode) {
 		String errorCodeDescription = errorCodeDescriptionMap.get(nemidErrorCode);
-		return errorCodeDescription != null ? errorCodeDescription : "";
+		return errorCodeDescription != null ? errorCodeDescription + " [ErrorCode=" + nemidErrorCode + "]" : "";
 	}
 
 }

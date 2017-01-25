@@ -68,7 +68,7 @@ public class SignatureVerifier {
 			logger.debug("Signature Matches: " + status.signatureMatches());
 
 			if (certificateStatus != CertificateStatus.VALID) {
-				invalidCertificate(certificateStatus);
+				findInvalidStatus(certificateStatus);
 			}
 
 			if (isPoces) {
@@ -120,15 +120,17 @@ public class SignatureVerifier {
 		} catch (AppletException ae) {
 			String errorCode = ae.getErrorCode();
 			ActionEvent actionEvent = NemIDErrorMapper.getActionEvent(errorCode);
-			logger.info("NemID error code: " + errorCode + ", message: " + ae.getMessage() + ", action event: " + actionEvent);
-			throw new StatusCodeException(actionEvent, NemIDErrorMapper.getErrorCodeDescription(errorCode), errorCode);
+			String errorMsg = NemIDErrorMapper.getErrorCodeDescription(errorCode);
+			logger.info("NemID error message: " + errorMsg + ", action event: " + actionEvent);
+			throw new StatusCodeException(actionEvent, errorMsg, errorCode);
 		} catch (StatusCodeException se) {
 			ActionEvent actionEvent = se.getActionEvent();
-			logger.info("NemID internal error code: " + actionEvent.getCode() + ", message: " + se.getMessage() + ", action event: " + actionEvent);
+			logger.info("NemID error message: " + se.getMessage() + ", action event: " + actionEvent);
 			throw new StatusCodeException(actionEvent, se.getMessage(), actionEvent.getCode());
 		} catch (Throwable t) {
 			if (t instanceof Oces2ErrorCode && t.getMessage().equals("CAN003")) {
-				throw new StatusCodeException(NemIDActionEvent.STATUS_OTP_TIMEOUT, "OTP timed out due to inactivity");
+				logger.info("NemID error message: OTP timed out due to inactivity [ErrorCode=" + t.getMessage() + "]" );
+				throw new StatusCodeException(NemIDActionEvent.STATUS_OTP_TIMEOUT, "OTP timed out due to inactivity [ErrorCode=CAN003]");
 			}
 			EventLogger.dumpStack(t);
 			logger.info("Certificate status validation: " + t.getMessage());
@@ -183,18 +185,18 @@ public class SignatureVerifier {
 	 * @param certificateStatus
 	 * @throws StatusCodeException
 	 */
-	private void invalidCertificate (CertificateStatus certificateStatus) throws StatusCodeException {
+	private void findInvalidStatus (CertificateStatus certificateStatus) throws StatusCodeException {
 		
 		if (certificateStatus == CertificateStatus.EXPIRED) {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_EXPIRED, "Certificate has expired");
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_EXPIRED, "Certificate has expired [ErrorCode=OCES006]");
 		} else if (certificateStatus == CertificateStatus.INVALID) {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_INVALID, "Certificate is invalid");
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_INVALID, "Certificate is invalid [ErrorCode=OCES006]");
 		} else if (certificateStatus == CertificateStatus.NOT_YET_VALID) {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_INVALID, "Certificate is not yet valid");
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_INVALID, "Certificate is not yet valid [ErrorCode=OCES005]");
 		} else if (certificateStatus == CertificateStatus.REVOKED) {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_REVOKED, "Certificate is revoked");
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_REVOKED, "Certificate is revoked [ErrorCode=LOCK003]");
 		} else {
-			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_INVALID, "Certificate has an unkown error");
+			throw new StatusCodeException(NemIDActionEvent.STATUS_UID_INVALID, "Certificate has an unkown error [ErrorCode=UNKOWN]");
 		}
 	}
 
