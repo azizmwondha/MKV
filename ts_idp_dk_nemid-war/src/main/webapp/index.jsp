@@ -2,8 +2,12 @@
 <%@ page import="no.bbs.trust.common.config.Config" %>
 <%@ page import="no.bbs.trust.common.i18n.LangSupport" %>
 <%@ page import="no.bbs.trust.ts.idp.nemid.contants.ConfigKeys" %>
+<%@ page import="java.util.Date" %>
 <%
-    String locale = (String) request.getAttribute("locale");
+response.setHeader("Cache-Control","no-cache"); 
+response.setHeader("Pragma","no-cache"); 
+response.setDateHeader("Last-Modified", (new Date()).getTime() );
+String locale = (String) request.getAttribute("locale");
 %>
 <html id="nemid_index_html">
 <head>
