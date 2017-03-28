@@ -17,8 +17,8 @@ public class OracleConnectionFactory implements IDBConnectionFactory {
 	private static OracleDataSource ds = null;
 	private static final String name = "OracleConnectionFactory";
 	private static final String DRIVER_TYPE = "thin";
-	private static final String SERVER_NAME = "172.21.71.120";
-	private static final int PORT_NUMBER = 1524;
+	private static final String SERVER_NAME = "172.21.71.124";
+	private static final int PORT_NUMBER = 1521;
 	private static final String DATABASE_NAME = "trust";
 	private static final String USER = "trustsign";
 	private static final String PASSWORD = "BankID1!";
@@ -30,7 +30,7 @@ public class OracleConnectionFactory implements IDBConnectionFactory {
 		ds.setDriverType(DRIVER_TYPE);
 		ds.setServerName(SERVER_NAME);
 		ds.setPortNumber(PORT_NUMBER);
-		ds.setDatabaseName(DATABASE_NAME);
+		ds.setServiceName(DATABASE_NAME);
 		ds.setUser(USER);
 		ds.setPassword(PASSWORD);
 	}
