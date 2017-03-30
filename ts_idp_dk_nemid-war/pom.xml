@@ -40,7 +40,7 @@
 		<dependency>
 			<groupId>eu.nets.sis</groupId>
 			<artifactId>common_cache</artifactId>
-			<version>1.0.13</version>
+			<version>1.0.14-SNAPSHOT</version>
         </dependency>
         <dependency>
 			<groupId>eu.nets.sis</groupId>
