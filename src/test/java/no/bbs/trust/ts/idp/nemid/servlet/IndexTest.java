@@ -2,6 +2,7 @@ package no.bbs.trust.ts.idp.nemid.servlet;
 
 import eu.nets.sis.common.cache.loader.MerchantCache;
 import eu.nets.sis.common.cache.loader.SignCacheLoader;
+import eu.nets.sis.common.cache.loader.asset.PKCS12Loader;
 import eu.nets.sis.common.cache.types.MerchantProviderConfig;
 import no.bbs.trust.common.basics.constants.Constants;
 import no.bbs.trust.common.basics.exceptions.StatusCodeException;
@@ -27,6 +28,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.ServletException;
 import java.net.URL;
+import java.security.KeyStore;
 import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
@@ -93,7 +95,7 @@ public class IndexTest {
 
 	@SuppressWarnings("static-method")
 	@Test
-	public void testGenerateJsonParameters() throws ServletException {
+	public void testGenerateJsonParameters() throws Exception {
      
 		MerchantProviderConfig credentials = new MerchantProviderConfig();
 		
@@ -103,7 +105,10 @@ public class IndexTest {
 		credentials.putConfig(PKIConfigKeys.MERCHANT_ALIAS, "nets danid a/s - tu voces gyldig");
 		credentials.putConfig(PKIConfigKeys.MERCHANT_ALIAS_PASSWORD, "Test1234");
 		MerchantCache.putConfig(1001, PKIIDMap.DKNEMIDJS_ID, credentials);
-		
+		KeyStore keystore = PKCS12Loader.load(1001, 16, credentials);
+		MerchantCache.addPKCS12Keystore(1001, 16, keystore);
+
+
 		final String sref = SREF;
 		Index index = new Index();
 		index.init(null);
