@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:element name="ErrorMapper">
+    <xs:annotation>
+      <xs:documentation>TI2 ErrorMapper definition</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="version" type="xs:string"/>
+        <xs:element ref="ErrorMap"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ErrorMap">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Errors" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Error">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="code" type="xs:hexBinary"/>
+        <xs:element name="label" type="xs:string"/>
+        <xs:element name="action" type="xs:string"/>
+        <xs:element name="message" type="xs:string"/>
+        <xs:element name="severity" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Errors">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Error" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TIRRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<RequestFilterConfig>
+		<name>NemID request filter</name>
+		<Defaults>
+			<description>Default request rules</description>
+			<PathConstraints>
+				<PathConstraint>
+					<description>mid (merchant identifier) is a mandatory field</description>
+					<methods>get,post</methods>
+					<InputParams>
+						<InputParam>
+							<name>mid</name>
+							<required>true</required>
+							<acceptPattern>[a-zA-Z0-9]{4,32}</acceptPattern>
+							<denyPattern></denyPattern>
+						</InputParam>
+					</InputParams>
+					<CookieParams>
+						<InputParam>
+							<name>gid</name>
+							<required>false</required>
+							<acceptPattern>[a-fA-F0-9]{4,48}|^$</acceptPattern>
+							<denyPattern></denyPattern>
+						</InputParam>
+						<InputParam>
+							<name>tzo</name>
+							<required>false</required>
+							<acceptPattern>.*|^$</acceptPattern>
+							<denyPattern></denyPattern>
+						</InputParam>
+						<InputParam>
+							<name>cos</name>
+							<required>false</required>
+							<acceptPattern>.*|^$</acceptPattern>
+							<denyPattern></denyPattern>
+						</InputParam>
+						<InputParam>
+							<name>locale</name>
+							<required>false</required>
+							<acceptPattern>.*|^$</acceptPattern>
+							<denyPattern></denyPattern>
+						</InputParam>
+						<InputParam>
+							<name>ua</name>
+							<required>false</required>
+							<acceptPattern>.*|^$</acceptPattern>
+							<denyPattern></denyPattern>
+						</InputParam>
+						<InputParam>
+							<name>jv</name>
+							<required>false</required>
+							<acceptPattern>.*|^$</acceptPattern>
+							<denyPattern></denyPattern>
+						</InputParam>
+						<InputParam>
+							<name>js</name>
+							<required>false</required>
+							<acceptPattern>.*|^$</acceptPattern>
+							<denyPattern></denyPattern>
+						</InputParam>
+						<InputParam>
+							<name>JSESSIONID</name>
+							<required>false</required>
+							<acceptPattern>.*|^$</acceptPattern>
+							<denyPattern></denyPattern>
+						</InputParam>
+						<InputParam>
+							<name>{tid_[a-zA-Z0-9]{4,32}}</name>
+							<required>true</required>
+							<acceptPattern>[a-fA-F0-9]{16,48}|^$</acceptPattern>
+							<denyPattern></denyPattern>
+						</InputParam>
+					</CookieParams>
+				</PathConstraint>
+			</PathConstraints>
+		</Defaults>
+		<EndPoints>
+			<EndPoint>
+				<path>/index.html</path>
+				<description>NemID index</description>
+				<PathConstraints>
+					<PathConstraint>
+						<description>Get client tag</description>
+						<methods>get,post</methods>
+					</PathConstraint>
+				</PathConstraints>
+			</EndPoint>
+			<EndPoint>
+				<path>/verify.html</path>
+				<description>NemID verify</description>
+				<PathConstraints>
+					<PathConstraint>
+						<description>Verify signature</description>
+						<methods>get,post</methods>
+					</PathConstraint>
+				</PathConstraints>
+			</EndPoint>
+		</EndPoints>
+	</RequestFilterConfig>
+</TIRRoot>

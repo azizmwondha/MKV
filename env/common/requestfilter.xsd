@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:element name="TIRRoot">
+    <xs:annotation>
+      <xs:documentation>TrustIdent Request root</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="RequestFilterConfig"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="InputParam">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="xs:string"/>
+        <xs:element name="required" type="xs:boolean"/>
+        <xs:element name="acceptPattern" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whitelist regexp</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="denyPattern" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Blacklist regexp</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="InputParams">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="InputParam" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="CookieParams">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="InputParam" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PathConstraints">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="PathConstraint" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="EndPoint">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="path" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>Path upon which constraints will be applied. </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="description" type="xs:string"/>
+        <xs:element ref="PathConstraints" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="EndPoints">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="EndPoint" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Defaults">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="description" type="xs:string"/>
+        <xs:element ref="PathConstraints" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="RequestFilterConfig">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="xs:string"/>
+        <xs:element ref="Defaults">
+          <xs:annotation>
+            <xs:documentation>Rules enforced for all requests</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element ref="EndPoints" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PathConstraint">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="description" type="xs:string"/>
+        <xs:element name="methods" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>Constraints apply only to those methods listed (comma-separated) here</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element ref="InputParams" minOccurs="0"/>
+        <xs:element ref="CookieParams" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

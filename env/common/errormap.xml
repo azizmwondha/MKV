@@ -1,0 +1,537 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ErrorMapper xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<version>1.0</version>
+	<ErrorMap>
+<!--
+/*
+ * Code range 0x33E00 - 0x33EFF Reserved for DK_NEMID_JS
+ * ======================================================
+ * 0x33E00 - 0x33E9F Action events
+ * 0x33EA0 - 0x33ECF Measurement events
+ * 0x33ED0 - 0x33EFF Performance events
+ *
+ * NB: Event group ranges can overlap (i.e. there is no problem if an action event
+ * has the same code as a measurement event or a performance event).
+ */
+-->
+		<Errors>
+			<!-- Action events for this module: -->
+
+			<Error>
+				<code>033E01</code>
+				<label>REQUEST_RECEIVED</label>
+				<action>D100</action>
+				<message>REQUEST_RECEIVED</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E02</code>
+				<label>RESPONSE_SENT</label>
+				<action>D100</action>
+				<message>RESPONSE_SENT</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E03</code>
+				<label>ACTION_IDP_DKNEMID_LIFECYCLE_STARTED</label>
+				<action>D100</action>
+				<message>ACTION_IDP_DKNEMID_LIFECYCLE_STARTED</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E04</code>
+				<label>ACTION_IDP_DKNEMID_LIFECYCLE_STOPPED</label>
+				<action>D100</action>
+				<message>ACTION_IDP_DKNEMID_LIFECYCLE_STOPPED</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E10</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_UNKNOWN_ERROR</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E11</code>
+				<label>merchant404</label>
+				<action>D100</action>
+				<message>STATUS_IDP_CACHE_ERROR</message>
+				<severity>error</severity>
+			</Error>
+			<Error>
+				<code>033E12</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_DAL_SQL_ERROR</message>
+				<severity>warn</severity>
+			</Error>
+			<Error>
+				<code>033E13</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_NO_TRANSACTIONDATA_FOR_TID_GID</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E14</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_INVALID_STEP</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E15</code>
+				<label>signrefnotfound</label>
+				<action>D100</action>
+				<message>STATUS_INVALID_STEP</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E16</code>
+				<label>statusamqerror</label>
+				<action>D100</action>
+				<message>STATUS_AMQ_ERROR</message>
+				<severity>error</severity>
+			</Error>
+			<Error>
+				<code>033E17</code>
+				<label>statusencodingerror</label>
+				<action>D100</action>
+				<message>STATUS_ENCODING_ERROR</message>
+				<severity>error</severity>
+			</Error>
+			<Error>
+				<code>033E20</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_NEMID_SERVICE_LOAD_FAILED</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E21</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_CREATE_SESSION_FAILED</message>
+				<severity>warn</severity>
+			</Error>
+			<Error>
+				<code>033E22</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_VERIFY_SIGN_FAILED</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E23</code>
+				<label>insufficientsignpermission</label>
+				<action>D100</action>
+				<message>STATUS_VERIFY_CPRMISMATCH</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E24</code>
+				<label>insufficientsignpermission</label>
+				<action>D100</action>
+				<message>STATUS_VERIFY_PIDMISMATCH</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E25</code>
+				<label>insufficientsignpermission</label>
+				<action>D100</action>
+				<message>STATUS_VERIFY_RIDMISMATCH</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E26</code>
+				<label>insufficientsignpermission</label>
+				<action>D100</action>
+				<message>STATUS_VERIFY_CERT_TYPE_FAILED</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E27</code>
+				<label>invalidid</label>
+				<action>D100</action>
+				<message>STATUS_NOT_VALID_CERTIFICATE</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E29</code>
+				<label>signrefnotfound</label>
+				<action>D100</action>
+				<message>STATUS_VERIFY_INVALIDSTATUS</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E30</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_UNEXPECTED_INTERNAL_ERROR</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E31</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_IDP_OPERATION_FAILED</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E32</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_IDP_CERT_PARSE_FAILED</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E33</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_RID_LOOKUP_FAILED</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E34</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_IDP_SETUP_FAIL</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E35</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_PID_LOOKUP_FAILED</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E40</code>
+				<label>cancel</label>
+				<action>D100</action>
+				<message>STATUS_USER_CANCEL</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E41</code>
+				<label>cancel</label>
+				<action>D100</action>
+				<message>STATUS_OPER_CANCEL</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E42</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_BAD_PROTOCOL</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E43</code>
+				<label>uid.revoked</label>
+				<action>D100</action>
+				<message>STATUS_UID_REVOKED</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E44</code>
+				<label>uid.invalid</label>
+				<action>D100</action>
+				<message>STATUS_UID_INVALID</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E45</code>
+				<label>uid.expired</label>
+				<action>D100</action>
+				<message>STATUS_UID_EXPIRED</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E46</code>
+				<label>errorauthenticating</label>
+				<action>D100</action>
+				<message>STATUS_AUTH_FAILED</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E47</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_DOC_INVALID</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E48</code>
+				<label>signprocesstimeout</label>
+				<action>D100</action>
+				<message>STATUS_OTP_TIMEOUT</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E98</code>
+				<label>info</label>
+				<action>D100</action>
+				<message>ACTION_DK_NEMID_RIDMATCH</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E99</code>
+				<label>info</label>
+				<action>D100</action>
+				<message>ACTION_DK_NEMID_CPRMATCH</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E9A</code>
+				<label>info</label>
+				<action>D100</action>
+				<message>ACTION_DK_NEMID_SIGN_OK</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E9B</code>
+				<label>info</label>
+				<action>D100</action>
+				<message>ACTION_DK_NEMID_GENERATE_TAG</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E9C</code>
+				<label>info</label>
+				<action>D100</action>
+				<message>ACTION_LOAD_OCES_CONFIG</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E9D</code>
+				<label>info</label>
+				<action>D100</action>
+				<message>ACTION_LOAD_IDP_CONFIG</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E9E</code>
+				<label>info</label>
+				<action>D100</action>
+				<message>ACTION_LOAD_MERCHANT_CONTEXTS</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>033E9F</code>
+				<label>info</label>
+				<action>D100</action>
+				<message>ACTION_IDP_DK_NEMID_LIFECYCLE</message>
+				<severity>info</severity>
+			</Error>
+
+			<!-- Preserve Error Code 00000. This is a fallback code: -->
+			<Error>
+				<code>000000</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>Default fallback code</message>
+				<severity>warn</severity>
+			</Error>
+
+			<!-- Preserve Error Code 99999. This is a test code: -->
+			<Error>
+				<code>099999</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>This is a test error</message>
+				<severity>trace</severity>
+			</Error>
+
+			<!-- Common: 030000 - 03000F -->
+
+			<!-- UNHANDLED_REQUEST -->
+			<Error>
+				<code>030100</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>UNHANDLED_REQUEST</message>
+				<severity>info</severity>
+			</Error>
+
+			<!-- REQ_PROTOCOL_VIOLATED -->
+			<Error>
+				<code>030101</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>REQ_PROTOCOL_VIOLATED</message>
+				<severity>info</severity>
+			</Error>
+
+			<!-- UA_NO_JAVA -->
+			<Error>
+				<code>030102</code>
+				<label>ua.nojava</label>
+				<action>D100</action>
+				<message>UA_NO_JAVA</message>
+				<severity>info</severity>
+			</Error>
+
+			<!-- UA_NO_JAVASCRIPT -->
+			<Error>
+				<code>030103</code>
+				<label>ua.nojavascript</label>
+				<action>D100</action>
+				<message>UA_NO_JAVASCRIPT</message>
+				<severity>info</severity>
+			</Error>
+
+			<!-- UA_NO_COOKIES -->
+			<Error>
+				<code>030104</code>
+				<label>ua.nocookies</label>
+				<action>D100</action>
+				<message>UA_NO_COOKIES</message>
+				<severity>info</severity>
+			</Error>
+
+			<!-- UNASSIGNED_1 -->
+			<Error>
+				<code>030105</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>UNASSIGNED_1</message>
+				<severity>info</severity>
+			</Error>
+
+			<!-- UA_UNSUPPORTED_VERSION -->
+			<Error>
+				<code>030106</code>
+				<label>ua.unsupported.version</label>
+				<action>D100</action>
+				<message>UA_UNSUPPORTED_VERSION</message>
+				<severity>info</severity>
+			</Error>
+
+			<!-- UA_UNSUPPORTED_CHARSET -->
+			<Error>
+				<code>030107</code>
+				<label>ua.unsupported.charset</label>
+				<action>D100</action>
+				<message>UA_UNSUPPORTED_CHARSET</message>
+				<severity>info</severity>
+			</Error>
+
+			<!-- FILTER_CHAIN_FAILED -->
+			<Error>
+				<code>030108</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>FILTER_CHAIN_FAILED</message>
+				<severity>info</severity>
+			</Error>
+
+			<!-- UNASSIGNED_2 -->
+			<Error>
+				<code>030109</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>REQ_PROTOCOL_EVASION</message>
+				<severity>info</severity>
+			</Error>
+
+			<!-- UNASSIGNED_3 -->
+			<Error>
+				<code>03010a</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>UNASSIGNED_3</message>
+				<severity>info</severity>
+			</Error>
+
+			<!-- UNASSIGNED_4 -->
+			<Error>
+				<code>03010b</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>UNASSIGNED_4</message>
+				<severity>info</severity>
+			</Error>
+
+			<!-- UNASSIGNED_5 -->
+			<Error>
+				<code>03010c</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>UNASSIGNED_5</message>
+				<severity>info</severity>
+			</Error>
+
+			<!-- UNASSIGNED_6 -->
+			<Error>
+				<code>03010d</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>INIT_CONTEXT_FAILED</message>
+				<severity>info</severity>
+			</Error>
+
+			<!-- UNASSIGNED_7 -->
+			<Error>
+				<code>03010e</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>DUMP_CONTEXT</message>
+				<severity>info</severity>
+			</Error>
+
+			<!-- Action events from the database modules: -->
+			<Error>
+				<code>030500</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>SQL_ERROR</message>
+				<severity>warn</severity>
+			</Error>
+			<Error>
+				<code>030501</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>MID_NOT_FOUND_IN_DB</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>030502</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>MID_NOT_ENABLED_IN_DB</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>030503</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_NO_TRANSACTIONDATA_FOR_TID_GID</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>030504</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_INVALID_STEP</message>
+				<severity>info</severity>
+			</Error>
+			<Error>
+				<code>030505</code>
+				<label>errorsigningdocument</label>
+				<action>D100</action>
+				<message>STATUS_GID_IP_MISMATCH</message>
+				<severity>info</severity>
+			</Error>
+			<!-- common_cache status code -->
+			<Error>
+				<code>03010C</code>
+				<label>CACHE_ERROR</label>
+				<action>D100</action>
+				<message>Cache error</message>
+				<severity>error</severity>
+			</Error>
+		</Errors>
+	</ErrorMap>
+</ErrorMapper>
