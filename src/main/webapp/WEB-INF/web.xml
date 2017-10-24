@@ -42,7 +42,7 @@
 	<servlet>
 		<servlet-name>dk_nemid_initidp</servlet-name>
 		<servlet-class>no.bbs.trust.ts.idp.nemid.startup.InitDKNEMID</servlet-class>
-		<load-on-startup>9</load-on-startup>
+		<load-on-startup>6</load-on-startup>
 	</servlet>
 	<servlet>
 		<servlet-name>common_healthcheck</servlet-name>
