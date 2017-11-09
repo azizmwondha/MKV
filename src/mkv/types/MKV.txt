@@ -1,0 +1,176 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package mkv.types;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.function.Consumer;
+
+/**
+ *
+ * @author amwon
+ */
+public abstract class MKV
+{
+
+    private final HashMap<String, State> h = new HashMap<>();
+    private final List<State> o = new ArrayList<>();
+    private final List<State> history = new ArrayList<>();
+
+    public void clear()
+    {
+        h.clear();
+        o.clear();
+        history.clear();
+    }
+
+    protected int order = 1;
+
+    public MKV()
+    {
+
+    }
+
+    public void order(int order)
+    {
+        if (order > 0)
+        {
+            this.order = order;
+        }
+    }
+
+    public abstract void scan(InputStream input);
+
+    protected final void scan(Sequence data)
+    {
+        byte[] datas = new byte[]{(byte)67};
+        List<Integer> blist=new ArrayList<>();
+        String value = data.stringValue();
+        boolean isString = (data instanceof StringSequence);// data.type().equals(Sequence.Type.STRING);
+        boolean isEndOfLine = false;
+
+        if (isString)
+        {
+            value = value.trim();
+            boolean hasPeriod = value.endsWith(".");
+            boolean isPunctuation = false;
+            if (hasPeriod)
+            {
+                if (value.lastIndexOf(".") > 0)
+                {
+                    value = value.substring(0, value.lastIndexOf("."));
+                }
+                else
+                {
+                    isPunctuation = true;
+                }
+                isEndOfLine = true;
+            }
+            if (value.isEmpty() || isPunctuation)
+            {
+                return;
+            }
+        }
+
+        String key = value;
+        
+        blist.add((int)datas[0]);
+        if (blist.size()>=order){}
+
+        if ((order > 1))//&& (history.size() > 0))
+        {
+            String nkey = "";
+            if (history.size() > 0)
+            {
+                for (int x = 0; (x < (order-1) && x < history.size()); x++)
+                {
+                    nkey += history.get(x).state();
+                }
+                key = nkey + value;
+            }
+            System.out.println("key=[" + key + "]   valuewas=[" + value + "] hist:" + history.size());
+        }
+        if (history.size() < order)
+        {
+            System.out.println("key=[" + key + "]   valuewas=[" + value + "] <-- history not full " + history.size());
+        }
+
+        State state = h.get(key);
+        if (null == state)
+        {
+            if (isString)
+            {
+                state = new State(new StringSequence(value));
+            }
+            else
+            {
+                state = new State(data);
+            }
+        }
+
+        if (history.size() >= order)
+        {
+            // We have a previous state
+            State previous = history.get(order - 1);
+            state.previous(previous);
+            previous.next(state);
+//            if (isEndOfLine)
+//            {
+//                System.out.println("IS EOL but add this ->"+value);
+//                State eol = new State(new StringSequence(value));
+////                state.next(eol);
+//                h.put(eol.state(), eol);
+//            }
+        }
+        else
+        {
+            if (!o.contains(state))
+            {
+                o.add(state);
+            }
+        }
+        h.put(state.state(), state);
+        history.add(0, state);
+        if (history.size() > order)
+        {
+            history.remove(order);
+        }
+        if (isEndOfLine)
+        {
+            history.clear();
+        }
+    }
+
+    public HashMap<String, State> states()
+    {
+        return h;
+    }
+
+    public List<State> origins()
+    {
+        return o;
+    }
+
+    public void d()
+    {
+        System.out.println("o:");
+        o.forEach((state) ->
+        {
+            System.out.println(state.toString());
+        });
+        System.out.println("d:");
+        h.values().
+                forEach((state) ->
+                {
+                    System.out.println(state.toString());
+                });
+        System.out.flush();
+        System.out.println("State count=" + h.size());
+    }
+}
+
