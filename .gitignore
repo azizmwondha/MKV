@@ -1,2 +1,10 @@
 /build/
 /nbproject/private/
+/bytes/
+/midi/
+/text/
+/data/
+/*.bin
+/*.mkd
+/*.mkv
+/dist/
