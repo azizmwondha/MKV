@@ -22,6 +22,7 @@ public abstract class MKV
     private final List<State> o = new ArrayList<>();
     private final List<State> history = new ArrayList<>();
     private final List<Sequence> sequences = new ArrayList<>();
+    protected int order = 1;
 
     public void clear()
     {
@@ -30,8 +31,10 @@ public abstract class MKV
         history.clear();
     }
 
-    protected int order = 1;
-
+    /**
+     * 
+     * @param order 
+     */
     public void order(int order)
     {
         if (order > 0)
@@ -39,14 +42,30 @@ public abstract class MKV
             this.order = order;
         }
     }
+
     public int order()
     {
         return order;
     }
 
+    /**
+     * Build MArkov chain for the data supplied 
+     * by the InputStream.
+     * Implementing classes must parse the input 
+     * and tokenise it into single state tokens
+     * that make up the finite and discrete states
+     * of the chain.
+     * 
+     * @param input
+     * @throws IOException 
+     */
     public abstract void scan(InputStream input)
             throws IOException;
 
+    /**
+     * Build the Markov chain, one token at a time
+     * @param data 
+     */
     protected final void scan(Sequence data)
     {
         String stringValue = data.asString();
@@ -86,33 +105,31 @@ public abstract class MKV
             key += sequences.get(x).asString();
         }
 
+        System.out.println("order=" + order + " seq.size=" + sequences.size() + " KEY: \"" + key + "\" DATA: \"" + stringValue + "\"");
         State state = h.get(key);
-        if (sequences.size() >= order)
+        if (null == state)
         {
-            if (null == state)
-            {
-                state = new State(sequences);
-            }
+            state = new State(sequences);
         }
 
-        if (history.size() >= order)
+        if (!history.isEmpty())
         {
             // We have a previous state
-            State previous = history.get(order - 1);
+            State previous = history.get(0);
             state.previous(previous);
             previous.next(state);
         }
         else
         {
-            if (!o.contains(state) && (null != state))
+            if (!o.contains(state))
             {
                 o.add(state);
             }
         }
+        h.put(key, state);
+        history.add(0, state);
         if (sequences.size() >= order)
         {
-            h.put(state.state(), state);
-            history.add(0, state);
             sequences.remove(0);
         }
         if (history.size() > order)

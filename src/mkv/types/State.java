@@ -25,22 +25,26 @@ public class State
 
     private double outWeight = 0.0f;
 
-    public State(List<Sequence> sequences)
+    /**
+     * 
+     * @param prequence
+     */
+    public State(List<Sequence> prequence)
     {
-        this.sequence = merge(sequences);
-        this.state = sequence.toString();
+        this.sequence = merge(prequence);
+        this.state = prequence.get(prequence.size() - 1).toString();
         previous = new HashMap<>();
         next = new HashMap<>();
     }
 
-    private static synchronized Sequence merge(List<Sequence> sequences)
+    private static synchronized Sequence merge(List<Sequence> prequences)
     {
         boolean isString = false;
-        if (!sequences.isEmpty()){
-            isString = (sequences.get(0) instanceof StringSequence);
+        if (!prequences.isEmpty()){
+            isString = (prequences.get(0) instanceof StringSequence);
         }
         List<Integer> s = new ArrayList<>();
-        sequences.forEach((seq) ->
+        prequences.forEach((seq) ->
         {
             for (byte b : seq.data())
             {

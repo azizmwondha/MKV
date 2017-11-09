@@ -20,8 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import mkv.filters.chains.MKV_byte;
 import mkv.filters.chains.MKV_word;
 import mkv.filters.pre.MidiTrackReader;
@@ -60,7 +58,7 @@ public class Main
 
         if (file.canRead())
         {
-        OutputStream out = null;//System.out;
+            OutputStream out = null;//System.out;
             System.out.println(file.getAbsolutePath());
             // Read script from file
             KRana k = new KRana();
@@ -80,21 +78,24 @@ public class Main
             }
             catch (FileNotFoundException ex)
             {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                ex.printStackTrace();
             }
             finally
             {
                 try
                 {
-                    out.flush();
-                    if (args.length > 1)
+                    if (null != out)
                     {
-                        out.close();
+                        out.flush();
+                        if (args.length > 1)
+                        {
+                            out.close();
+                        }
                     }
                 }
                 catch (IOException ex)
                 {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    ex.printStackTrace();
                 }
             }
         }
