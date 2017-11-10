@@ -18,9 +18,9 @@ import java.util.List;
 public abstract class MKV
 {
 
-    private final HashMap<String, State> h = new HashMap<>();
-    private final List<State> o = new ArrayList<>();
-    private final List<State> history = new ArrayList<>();
+    private HashMap<String, State> h = new HashMap<>();
+    private List<State> o = new ArrayList<>();
+    private List<State> history = new ArrayList<>();
     private final List<Sequence> sequences = new ArrayList<>();
     protected int order = 1;
 
@@ -29,6 +29,14 @@ public abstract class MKV
         h.clear();
         o.clear();
         history.clear();
+        
+        h=null;
+        o=null;
+        history=null;
+        
+        h = new HashMap<>();
+        o = new ArrayList<>();
+        history = new ArrayList<>();
     }
 
     /**
@@ -105,7 +113,6 @@ public abstract class MKV
             key += sequences.get(x).asString();
         }
 
-        System.out.println("order=" + order + " seq.size=" + sequences.size() + " KEY: \"" + key + "\" DATA: \"" + stringValue + "\"");
         State state = h.get(key);
         if (null == state)
         {
