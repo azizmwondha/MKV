@@ -24,7 +24,7 @@ import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiEvent;
 import javax.sound.midi.MidiMessage;
-import static javax.sound.midi.MidiSystem.getSequence;
+import javax.sound.midi.MidiSystem;
 import javax.sound.midi.Sequence;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.SysexMessage;
@@ -69,14 +69,10 @@ public class MidiTrackReader
     {
         try
         {
-            sequence = getSequence(input);
+            sequence = MidiSystem.getSequence(input);
             input.close();
         }
-        catch (InvalidMidiDataException e)
-        {
-            e.printStackTrace();
-        }
-        catch (IOException e)
+        catch (InvalidMidiDataException | IOException e)
         {
             e.printStackTrace();
         }
