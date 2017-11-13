@@ -18,30 +18,36 @@ import java.util.List;
 public abstract class MKV
 {
 
-    private HashMap<String, State> h = new HashMap<>();
-    private List<State> o = new ArrayList<>();
-    private List<State> history = new ArrayList<>();
-    private final List<Sequence> sequences = new ArrayList<>();
-    protected int order = 1;
+    private HashMap<String, State> h;
+    private List<State> o;
+    private final List<Sequence> sequences;
+    protected int order;
+    private boolean isOrigin;
+
+    public MKV()
+    {
+        this.h = new HashMap<>();
+        this.o = new ArrayList<>();
+        this.sequences = new ArrayList<>();
+        this.order = 1;
+        this.isOrigin = true;
+    }
 
     public void clear()
     {
         h.clear();
         o.clear();
-        history.clear();
-        
-        h=null;
-        o=null;
-        history=null;
-        
+
+        h = null;
+        o = null;
+
         h = new HashMap<>();
         o = new ArrayList<>();
-        history = new ArrayList<>();
     }
 
     /**
-     * 
-     * @param order 
+     *
+     * @param order
      */
     public void order(int order)
     {
@@ -57,22 +63,20 @@ public abstract class MKV
     }
 
     /**
-     * Build MArkov chain for the data supplied 
-     * by the InputStream.
-     * Implementing classes must parse the input 
-     * and tokenise it into single state tokens
-     * that make up the finite and discrete states
-     * of the chain.
-     * 
+     * Build MArkov chain for the data supplied by the InputStream. Implementing
+     * classes must parse the input and tokenise it into single state tokens
+     * that make up the finite and discrete states of the chain.
+     *
      * @param input
-     * @throws IOException 
+     * @throws IOException
      */
     public abstract void scan(InputStream input)
             throws IOException;
 
     /**
      * Build the Markov chain, one token at a time
-     * @param data 
+     *
+     * @param data
      */
     protected final void scan(Sequence data)
     {
@@ -104,49 +108,109 @@ public abstract class MKV
             }
         }
 
-        String key = "";
+        String prevStateKey = "";
+        String thisStateKey = "";
 
         sequences.add(data);
 
-        for (int x = (sequences.size() < order) ? 0 : (sequences.size() - order); x < sequences.size(); x++)
+        int thisKeyStart = (sequences.size() <= order) ? 0 : (sequences.size() - order);
+        int prevKeyStart = (sequences.size() <= (order + 1)) ? 0 : (sequences.size() - (order + 1));
+        int thisKeyEnd = (sequences.size() - 1);
+        int prevKeyEnd = (thisKeyEnd - 1);
+
+        List<Sequence> prequence = new ArrayList<>();
+
+        for (int x = prevKeyStart; x <= thisKeyEnd; x++)
         {
-            key += sequences.get(x).asString();
+            if (x >= thisKeyStart)
+            {
+                thisStateKey += sequences.get(x).asString();
+                prequence.add(sequences.get(x));
+
+            }
+            if (x >= prevKeyStart && x <= prevKeyEnd)
+            {
+                prevStateKey += sequences.get(x).asString();
+                prequence.add(sequences.get(x));
+            }
         }
 
-        State state = h.get(key);
+        State state = h.get(thisStateKey);
         if (null == state)
         {
-            state = new State(sequences);
+            state = new State(data, merge(sequences, prevKeyStart, thisKeyStart));
         }
 
-        if (!history.isEmpty())
+        if (h.containsKey(prevStateKey))
         {
-            // We have a previous state
-            State previous = history.get(0);
-            state.previous(previous);
-            previous.next(state);
+            State prevState = h.get(prevStateKey);
+            state.previous(prevState);
+            prevState.next(state);
         }
         else
+        {
+            if (prevKeyStart > 0)
+            {
+                State prevState = new State(sequences.get(thisKeyStart - 1), merge(sequences, prevKeyStart - 1, thisKeyStart - 1));
+                h.put(prevStateKey, prevState);
+            }
+        }
+
+        h.put(thisStateKey, state);
+        if (isOrigin)
         {
             if (!o.contains(state))
             {
                 o.add(state);
             }
+            isOrigin = false;
         }
-        h.put(key, state);
-        history.add(0, state);
-        if (sequences.size() >= order)
+
+        if (sequences.size() > (order + 1))
         {
             sequences.remove(0);
         }
-        if (history.size() > order)
-        {
-            history.remove(order);
-        }
         if (isEndOfLine)
         {
-            history.clear();
             sequences.clear();
+            isOrigin = true;
+        }
+    }
+
+    private synchronized Sequence merge(List<Sequence> prequences,
+                                        int startIndex,
+                                        int endIndex)
+    {
+        boolean isString = false;
+        if (!prequences.isEmpty())
+        {
+            isString = (prequences.get(0) instanceof StringSequence);
+        }
+        List<Integer> s = new ArrayList<>();
+        for (int i = startIndex; i < endIndex; i++)
+        {
+            Sequence seq = prequences.get(i);
+            for (byte b : seq.data())
+            {
+                s.add((int) b);
+            }
+            if (seq instanceof StringSequence)
+            {
+                s.add(0x20);
+            }
+        }
+        if (!s.isEmpty())
+        {
+            byte[] ba = new byte[s.size() - (isString ? 1 : 0)];
+            for (int i = 0; i < ba.length; i++)
+            {
+                ba[i] = s.get(i).byteValue();
+            }
+            return new ByteSequence(ba);
+        }
+        else
+        {
+            return null;
         }
     }
 

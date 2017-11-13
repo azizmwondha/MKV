@@ -45,7 +45,7 @@ public class MConsole
                     exit();
                     continue;
                 }
-                runner.run(s, null);
+                runner.run(s, System.out);//null);
             }
         }
 
@@ -62,10 +62,10 @@ public class MConsole
         private synchronized void info()
         {
             p("----");
-            p("parser  " + runner.mkv.getClass().getSimpleName());
-            p("order   " + runner.mkv.order());
-            p("states  " + runner.mkv.states().size());
-            p("origins " + runner.mkv.origins().size());
+            p("parser  " + runner.mkv().getClass().getSimpleName());
+            p("order   " + runner.mkv().order());
+            p("states  " + runner.mkv().states().size());
+            p("origins " + runner.mkv().origins().size());
             p("total   " + Runtime.getRuntime().totalMemory());
             p("free    " + Runtime.getRuntime().freeMemory());
             p("used    " + (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()));

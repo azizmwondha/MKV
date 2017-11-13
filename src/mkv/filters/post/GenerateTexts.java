@@ -24,10 +24,10 @@ public class GenerateTexts
 {
 
     private final Random r = new Random(System.currentTimeMillis());
-    private OutputStream out;
 
     @Override
-    public void apply(MKV m, OutputStream o)
+    public void apply(MKV m,
+                      OutputStream o)
     {
         m.origins().forEach((s) ->
         {
@@ -43,7 +43,9 @@ public class GenerateTexts
         });
     }
 
-    private void compose(State s, OutputStream o) throws IOException
+    private void compose(State s,
+                         OutputStream o)
+            throws IOException
     {
         StringBuilder sb = new StringBuilder();
         int maxTokens = 31;
@@ -51,12 +53,12 @@ public class GenerateTexts
         while (maxTokens > 0)
         {
             System.out.print(s.state() + " ");
-            
-            if (null != o)o.write(s.sequence().data());
-            for (byte b : s.sequence().data()){
-                sb.append(b).append(" ");
-            }
-            
+
+//            if (null != o)
+//            {
+//                o.write(s.state().data());
+//            }
+
             if (s.outCount() == 0)
             {
                 break;
@@ -68,7 +70,6 @@ public class GenerateTexts
             maxTokens--;
         }
         System.out.println(" ]\n");
-//        System.out.println(""+ sb.toString());
     }
 
     private int random(int oneOf)

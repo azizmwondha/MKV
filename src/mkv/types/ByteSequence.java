@@ -9,18 +9,23 @@ package mkv.types;
  *
  * @author aziz
  */
-public class ByteSequence extends Sequence
+public class ByteSequence
+        extends Sequence
 {
+
     private final byte[] sequence;
 
     public ByteSequence(byte[] data)
     {
         sequence = data;
     }
-    
+
     @Override
-    public byte[] data(){return sequence;}
-    
+    public byte[] data()
+    {
+        return sequence;
+    }
+
     @Override
     public String asString()
     {

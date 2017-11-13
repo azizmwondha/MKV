@@ -45,7 +45,7 @@ public class Main
 
         if (file.canRead())
         {
-            OutputStream out = null;//System.out;
+            OutputStream out = System.out;
             System.out.println(file.getAbsolutePath());
             // Read script from file
             MRunner k = new MRunner();
@@ -59,7 +59,7 @@ public class Main
                 while (scanner.hasNext())
                 {
                     String l = scanner.next();
-                    System.out.println("line: " + l);
+                    System.out.println("> " + l);
                     k.run(l, out);
                 }
             }

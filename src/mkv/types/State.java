@@ -5,9 +5,7 @@
  */
 package mkv.types;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Markov state
@@ -17,7 +15,7 @@ import java.util.List;
 public class State
 {
 
-    private final String state;
+    private final Sequence state;
     private final Sequence sequence;
 
     private final HashMap<State, Integer> previous;
@@ -25,45 +23,15 @@ public class State
 
     private double outWeight = 0.0f;
 
-    /**
-     * 
-     * @param prequence
-     */
-    public State(List<Sequence> prequence)
+    public State(Sequence state, Sequence prequence)
     {
-        this.sequence = merge(prequence);
-        this.state = prequence.get(prequence.size() - 1).toString();
+        this.sequence = prequence;
+        this.state = state;
         previous = new HashMap<>();
         next = new HashMap<>();
     }
-
-    private static synchronized Sequence merge(List<Sequence> prequences)
-    {
-        boolean isString = false;
-        if (!prequences.isEmpty()){
-            isString = (prequences.get(0) instanceof StringSequence);
-        }
-        List<Integer> s = new ArrayList<>();
-        prequences.forEach((seq) ->
-        {
-            for (byte b : seq.data())
-            {
-                s.add((int) b);
-            }
-            if (seq instanceof StringSequence)
-            {
-                s.add(0x20);
-            }
-        });
-        byte[] ba = new byte[s.size() - (isString ? 1 : 0)];
-        for (int i = 0; i < ba.length; i++)
-        {
-            ba[i] = s.get(i).byteValue();
-        }
-        return new ByteSequence(ba);
-    }
-
-    public String state()
+    
+    public Sequence state()
     {
         return state;
     }
@@ -131,7 +99,7 @@ public class State
     {
         if ((null != o) && (o instanceof State))
         {
-            return state.equalsIgnoreCase(((State) o).state());
+            return state.equals(((State) o).state());
         }
         return false;
     }
@@ -146,7 +114,8 @@ public class State
     public String toString()
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("[ \"").append(state).append("\" ]\n");
+//        sb.append("[ \"").append(state).append("\" ]\n");
+        sb.append("[ \"").append(state).append(" preq: ").append(sequence).append("\" ]\n");
         sb.append("\tin-count =").append(inCount()).append("\t");
         previous.keySet().forEach((s) ->
         {

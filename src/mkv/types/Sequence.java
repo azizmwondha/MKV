@@ -5,19 +5,32 @@
  */
 package mkv.types;
 
+import java.util.Arrays;
+
 /**
  *
  * @author aziz
  */
 public abstract class Sequence
-{    
+{
+
     public abstract String asString();
-    
+
     public abstract byte[] data();
 
     @Override
     public String toString()
     {
         return asString();
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if ((null != o) && (o instanceof Sequence))
+        {
+            return Arrays.equals(data(), ((Sequence) o).data());
+        }
+        return false;
     }
 }
