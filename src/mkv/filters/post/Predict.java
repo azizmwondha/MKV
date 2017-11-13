@@ -8,6 +8,7 @@ package mkv.filters.post;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import mkv.types.MKI;
 import mkv.types.MKR;
 import mkv.types.MKV;
 import mkv.types.State;
@@ -17,7 +18,7 @@ import mkv.types.PostChainFilter;
  *
  * @author aziz
  */
-public class TransitionMatrix
+public class Predict
         implements PostChainFilter {
 
     private MKR mkr = null;
@@ -26,6 +27,17 @@ public class TransitionMatrix
     // http://setosa.io/markov/playground.html
     @Override
     public void apply(MKV m, HashMap<String, String> options, OutputStream o) {
+        
+                int max;
+
+        try {
+            max = Integer.parseInt(options.get(MKI.FilterKeys.MAX_TOKENS.key()) + "");
+        } catch (NumberFormatException nfe) {
+            max = 31;
+        }
+
+        final int maxTokens = max;
+        
         HashMap<String, State> h = m.states();
 
         Iterator<State> allStates = h.values().iterator();

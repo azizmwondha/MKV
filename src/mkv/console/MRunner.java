@@ -18,10 +18,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import mkv.filters.chains.MKV_byte;
 import mkv.filters.chains.MKV_word;
 import mkv.filters.pre.MidiTrackReader;
 import mkv.filters.pre.URL2LocalFile;
+import mkv.types.MKI;
 import mkv.types.MKV;
 import mkv.types.PostChainFilter;
 
@@ -187,27 +189,61 @@ public class MRunner
     private void eval(String[] s,
                       OutputStream o)
     {
+        // [0] eval
+        // [1..] filters
+        // e.g.
+        // eval filter
+        // eval filter1 filter2 filter3
+        // eval filter1,name1=value1,name2=value2
+        // eval filter1,name1=value1,name2=value2 filter2 filter3,name1=value1,name2=value2
         for (int i = 1; i < s.length; i++)
         {
-            if (postFilters.containsKey(s[i]))
+            System.out.println("s"+i+"="+s[i]);
+            HashMap<String, String> filterTokens = tokenise(s[i]);
+            if (postFilters.containsKey(filterTokens.get(MKI.FilterKeys.FILTER_NAME.key())))
             {
+                String f = filterTokens.get(MKI.FilterKeys.FILTER_NAME.key());
                 try
                 {
-                    Class<?> filter = Class.forName(postFilters.get(s[i]));
+                    Class<?> filter = Class.forName(postFilters.get(f));
                     PostChainFilter pcf = (PostChainFilter) filter.newInstance();
-                    pcf.apply(mkv, o);
+                    pcf.apply(mkv, filterTokens, o);
                 }
                 catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex)
                 {
-                    System.out.println("Filter not found (" + postFilters.get(s[i]) + ")");
+                    System.out.println("Filter not found (" + postFilters.get(f) + ")");
                     System.out.println(ex.getMessage());
                 }
             }
             else
             {
-                System.out.println("Unknown filter (" + s[i] + ")");
+                System.out.println("Unknown filter (" + filterTokens.get(MKI.FilterKeys.FILTER_NAME.key()) + ")");
             }
         }
+    }
+    
+    private HashMap<String, String> tokenise(String filter){
+        HashMap<String, String> tokens = new HashMap<>();
+        tokens.put(MKI.FilterKeys.FILTER_NAME.key(), "");
+        
+        StringTokenizer keys = new StringTokenizer(filter, ",", false);
+        
+        if (keys.hasMoreElements()){
+            tokens.put(MKI.FilterKeys.FILTER_NAME.key(), keys.nextToken().toLowerCase());
+            
+            while (keys.hasMoreTokens()) {
+                StringTokenizer params = new StringTokenizer(keys.nextToken(), "=", false);
+                if (params.hasMoreTokens()) {
+                    if (params.countTokens() > 1) {
+                        tokens.put(params.nextToken().toLowerCase(), params.nextToken());
+                    } else {
+                        tokens.put(params.nextToken().toLowerCase(), "");
+                    }
+                }
+            }
+        }
+        System.out.println("tokens->"+tokens);
+        return tokens;
     }
 
     public MKV mkv()

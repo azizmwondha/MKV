@@ -6,11 +6,13 @@
 package mkv.types;
 
 import java.io.OutputStream;
+import java.util.HashMap;
 
 /**
  * Markov state filter
  * @author aziz
  */
 public interface PostChainFilter {
-    public void apply(MKV m, OutputStream o);
+    public void apply(MKV m, HashMap<String, String> options, OutputStream o);
+    public MKR result();
 }

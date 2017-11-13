@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import mkv.types.MKI;
+import mkv.types.MKR;
 import mkv.types.MKV;
 import mkv.types.State;
 import mkv.types.PostChainFilter;
@@ -20,64 +22,66 @@ import mkv.types.PostChainFilter;
  * @author aziz
  */
 public class GenerateTexts
-        implements PostChainFilter
-{
+        implements PostChainFilter {
 
     private final Random r = new Random(System.currentTimeMillis());
+//    HashMap<String, String> options = null;
 
     @Override
-    public void apply(MKV m,
-                      OutputStream o)
-    {
-        m.origins().forEach((s) ->
-        {
-            try
-            {
-                compose(s, o);
-            }
-            catch (IOException ex)
-            {
+    public void apply(MKV m, HashMap<String, String> options,
+            OutputStream o) {
+
+        int max;
+
+        try {
+            max = Integer.parseInt(options.get(MKI.FilterKeys.MAX_TOKENS.key()) + "");
+        } catch (NumberFormatException nfe) {
+            max = 31;
+        }
+
+        final int maxTokens = max;
+        m.origins().forEach((s)
+                -> {
+            try {
+                compose(s, maxTokens, o);
+            } catch (IOException ex) {
                 Logger.getLogger(GenerateTexts.class.getName()).log(Level.SEVERE, null, ex);
                 return;
             }
         });
     }
 
-    private void compose(State s,
-                         OutputStream o)
-            throws IOException
-    {
+    private void compose(State s, final int maxTokens,
+            OutputStream o)
+            throws IOException {
         StringBuilder sb = new StringBuilder();
-        int maxTokens = 31;
         System.out.print("[ ");
-        while (maxTokens > 0)
-        {
+        for (int i = 0; i <maxTokens;i++) {
             System.out.print(s.state() + " ");
 
 //            if (null != o)
 //            {
 //                o.write(s.state().data());
 //            }
-
-            if (s.outCount() == 0)
-            {
+            if (s.outCount() == 0) {
                 break;
             }
             HashMap<State, Integer> next = s.next();
             int which = random(next.size());
             State[] ns = next.keySet().toArray(new State[0]);
             s = ns[which];
-            maxTokens--;
         }
         System.out.println(" ]\n");
     }
 
-    private int random(int oneOf)
-    {
+    private int random(int oneOf) {
         return r.nextInt(oneOf);
     }
 
-    private void d(double[][] t)
-    {
+    public MKR result() {
+        return null;
+    }
+
+    private void d(double[][] t) {
     }
 }

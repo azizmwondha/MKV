@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import mkv.types.MKR;
 import mkv.types.MKV;
 import mkv.types.State;
 import mkv.types.PostChainFilter;
@@ -25,7 +26,7 @@ public class GenerateNotes
     private final Random r = new Random(System.currentTimeMillis());
 
     @Override
-    public void apply(MKV m, OutputStream o) {
+    public void apply(MKV m, HashMap<String, String> options, OutputStream o) {
         m.origins().forEach((s)
                 -> {
             compose(s, o);
@@ -62,6 +63,10 @@ public class GenerateNotes
 
     private int random(int oneOf) {
         return r.nextInt(oneOf);
+    }
+
+    public MKR result() {
+        return null;
     }
 
     private void d(double[][] t) {
