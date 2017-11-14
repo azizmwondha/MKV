@@ -28,13 +28,13 @@ public class GenerateTexts
 //    HashMap<String, String> options = null;
 
     @Override
-    public void apply(MKV m, HashMap<String, String> options,
+    public void apply(MKV m, MKR r, HashMap<String, String> options,
             OutputStream o) {
 
         int max;
 
         try {
-            max = Integer.parseInt(options.get(MKI.FilterKeys.MAX_TOKENS.key()) + "");
+            max = Integer.parseInt(options.get(MKI.FilterKeys.MAXTOKENS.key()) + "");
         } catch (NumberFormatException nfe) {
             max = 31;
         }

@@ -25,7 +25,7 @@ public class TransitionMatrix
     // Transition matrix visualisation:
     // http://setosa.io/markov/playground.html
     @Override
-    public void apply(MKV m, HashMap<String, String> options, OutputStream o) {
+    public void apply(MKV m, MKR r, HashMap<String, String> options, OutputStream o) {
         HashMap<String, State> h = m.states();
 
         Iterator<State> allStates = h.values().iterator();

@@ -24,6 +24,7 @@ import mkv.filters.chains.MKV_word;
 import mkv.filters.pre.MidiTrackReader;
 import mkv.filters.pre.URL2LocalFile;
 import mkv.types.MKI;
+import mkv.types.MKR;
 import mkv.types.MKV;
 import mkv.types.PostChainFilter;
 
@@ -46,6 +47,7 @@ public class MRunner
         postFilters.put("matrix", "mkv.filters.post.TransitionMatrix");
         postFilters.put("texts", "mkv.filters.post.GenerateTexts");
         postFilters.put("notes", "mkv.filters.post.GenerateNotes");
+        postFilters.put("predict", "mkv.filters.post.Predict");
     }
 
     public void run(String r,
@@ -189,25 +191,28 @@ public class MRunner
     private void eval(String[] s,
                       OutputStream o)
     {
+        MKR r = null;
+
         // [0] eval
         // [1..] filters
         // e.g.
         // eval filter
         // eval filter1 filter2 filter3
-        // eval filter1,name1=value1,name2=value2
-        // eval filter1,name1=value1,name2=value2 filter2 filter3,name1=value1,name2=value2
+        // eval filter1;name1=value1;name2=value2
+        // eval filter1;name1=value1;name2=value2 filter2 filter3;name1=value1;name2=value2
+        // eval filter1;list1=value1,value2,value3
         for (int i = 1; i < s.length; i++)
         {
-            System.out.println("s"+i+"="+s[i]);
             HashMap<String, String> filterTokens = tokenise(s[i]);
-            if (postFilters.containsKey(filterTokens.get(MKI.FilterKeys.FILTER_NAME.key())))
+            if (postFilters.containsKey(filterTokens.get(MKI.FilterKeys.FILTERNAME.key())))
             {
-                String f = filterTokens.get(MKI.FilterKeys.FILTER_NAME.key());
+                String f = filterTokens.get(MKI.FilterKeys.FILTERNAME.key());
                 try
                 {
                     Class<?> filter = Class.forName(postFilters.get(f));
                     PostChainFilter pcf = (PostChainFilter) filter.newInstance();
-                    pcf.apply(mkv, filterTokens, o);
+                    pcf.apply(mkv, r, filterTokens, o);
+                    r = pcf.result();
                 }
                 catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex)
                 {
@@ -217,32 +222,39 @@ public class MRunner
             }
             else
             {
-                System.out.println("Unknown filter (" + filterTokens.get(MKI.FilterKeys.FILTER_NAME.key()) + ")");
+                System.out.println("Unknown filter (" + filterTokens.get(MKI.FilterKeys.FILTERNAME.key()) + ")");
             }
         }
     }
-    
-    private HashMap<String, String> tokenise(String filter){
+
+    private HashMap<String, String> tokenise(String filter)
+    {
         HashMap<String, String> tokens = new HashMap<>();
-        tokens.put(MKI.FilterKeys.FILTER_NAME.key(), "");
-        
-        StringTokenizer keys = new StringTokenizer(filter, ",", false);
-        
-        if (keys.hasMoreElements()){
-            tokens.put(MKI.FilterKeys.FILTER_NAME.key(), keys.nextToken().toLowerCase());
-            
-            while (keys.hasMoreTokens()) {
-                StringTokenizer params = new StringTokenizer(keys.nextToken(), "=", false);
-                if (params.hasMoreTokens()) {
-                    if (params.countTokens() > 1) {
+        tokens.put(MKI.FilterKeys.FILTERNAME.key(), "");
+
+        StringTokenizer keys = new StringTokenizer(filter, MKI.FilterKeys.PARAMDELIMITER.key(), false);
+
+        if (keys.hasMoreElements())
+        {
+            tokens.put(MKI.FilterKeys.FILTERNAME.key(), keys.nextToken().toLowerCase());
+
+            while (keys.hasMoreTokens())
+            {
+                StringTokenizer params = new StringTokenizer(keys.nextToken(), MKI.FilterKeys.EQUALDELIMITER.key(), false);
+                if (params.hasMoreTokens())
+                {
+                    if (params.countTokens() > 1)
+                    {
                         tokens.put(params.nextToken().toLowerCase(), params.nextToken());
-                    } else {
+                    }
+                    else
+                    {
                         tokens.put(params.nextToken().toLowerCase(), "");
                     }
                 }
             }
         }
-        System.out.println("tokens->"+tokens);
+        System.out.println("tokens->" + tokens);
         return tokens;
     }
 

@@ -24,8 +24,13 @@ public interface MKI {
     public void d();
 
     public enum FilterKeys {
-        FILTER_NAME("filter-name"),
-        MAX_TOKENS("max-tokens"),
+        FILTERNAME("filter-name"),
+        MAXTOKENS("max-tokens"),
+        STARTSTATE("start-state"),
+        ENDSTATE("start-state"),
+        PARAMDELIMITER(";"),
+        EQUALDELIMITER("="),
+        LISTDELIMITER(","),
         TIME("time");
 
         final String key;

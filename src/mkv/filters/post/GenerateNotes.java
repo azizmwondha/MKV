@@ -26,7 +26,7 @@ public class GenerateNotes
     private final Random r = new Random(System.currentTimeMillis());
 
     @Override
-    public void apply(MKV m, HashMap<String, String> options, OutputStream o) {
+    public void apply(MKV m, MKR r, HashMap<String, String> options, OutputStream o) {
         m.origins().forEach((s)
                 -> {
             compose(s, o);

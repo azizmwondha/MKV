@@ -13,6 +13,6 @@ import java.util.HashMap;
  * @author aziz
  */
 public interface PostChainFilter {
-    public void apply(MKV m, HashMap<String, String> options, OutputStream o);
+    public void apply(MKV m, MKR r, HashMap<String, String> options, OutputStream o);
     public MKR result();
 }

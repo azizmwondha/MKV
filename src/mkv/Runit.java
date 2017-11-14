@@ -94,7 +94,7 @@ t.order(order);
 
         // Transition matrix visualisation:
         // http://setosa.io/markov/playground.html
-        tm.apply(t, null, System.out);
+        tm.apply(t, null, null, System.out);
 
 //        new Main().go(args);
     }
@@ -183,7 +183,7 @@ t.order(order);
 
         // Transition matrix visualisation:
         // http://setosa.io/markov/playground.html
-        tm.apply(t, null, System.out);
+        tm.apply(t, null, null, System.out);
     }
 
     private static InputStream file(String path)
