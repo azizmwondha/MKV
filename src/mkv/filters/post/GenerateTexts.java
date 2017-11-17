@@ -78,6 +78,7 @@ public class GenerateTexts
         return r.nextInt(oneOf);
     }
 
+    @Override
     public MKR result() {
         return null;
     }

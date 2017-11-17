@@ -71,6 +71,7 @@ public class MRunner
             history.add(r);
         }
 
+        long start = System.nanoTime();
         if (in[0].equalsIgnoreCase("scan"))
         {
             StringBuilder sb = new StringBuilder();
@@ -87,6 +88,9 @@ public class MRunner
             eval(in, o);
             history.add(r);
         }
+        long elapsens = (System.nanoTime() - start);
+        long elapsems = (elapsens / 1000000l);
+        System.out.println(elapsens + " ns (" + elapsems + " ms)");
 
         if (in[0].equalsIgnoreCase("map"))
         {
@@ -143,8 +147,6 @@ public class MRunner
 
     private void scan(String s)
     {
-        System.out.println("scan -> " + s);
-
         InputStream is = null;
         if (s.trim().toLowerCase().startsWith("http"))
         {
@@ -168,14 +170,8 @@ public class MRunner
         }
         try
         {
-            if (null != is)
-            {
-                mkv.scan(is);
-            }
-            else
-            {
-                System.out.println("End of file");
-            }
+            mkv.scan(is);
+            System.out.println("Scan complete");
         }
         catch (IOException ex)
         {
@@ -234,7 +230,7 @@ public class MRunner
 
         StringTokenizer keys = new StringTokenizer(filter, MKI.FilterKeys.PARAMDELIMITER.key(), false);
 
-        if (keys.hasMoreElements())
+        if (keys.hasMoreTokens())
         {
             tokens.put(MKI.FilterKeys.FILTERNAME.key(), keys.nextToken().toLowerCase());
 
@@ -254,7 +250,7 @@ public class MRunner
                 }
             }
         }
-        System.out.println("tokens->" + tokens);
+//        System.out.println("tokens->" + tokens + "\n");
         return tokens;
     }
 

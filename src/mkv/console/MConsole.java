@@ -80,8 +80,9 @@ public class MConsole
             p("order  (1+)");
             p("scan   (file path | URL | plain text)");
             p("map    ");
-            p("eval   (transition | composer)");
+            p("eval   (matrix | texts | predict)");
             p("       Post-chain filter name");
+            p("       Params: max-tokens, start-vector, time");
             p("info   Session info");
             p("clear  ");
             p("");

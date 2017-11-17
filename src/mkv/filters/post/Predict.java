@@ -7,11 +7,9 @@ package mkv.filters.post;
 
 import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.Iterator;
 import mkv.types.MKI;
 import mkv.types.MKR;
 import mkv.types.MKV;
-import mkv.types.State;
 import mkv.types.PostChainFilter;
 
 /**
@@ -33,41 +31,43 @@ public class Predict
                       OutputStream o)
     {
 
-        int max;
+        int time;
 
         try
         {
-            max = Integer.parseInt(options.get(MKI.FilterKeys.TIME.key()) + "");
+            time = Integer.parseInt(options.get(MKI.FilterKeys.TIME.key()) + "");
         }
         catch (NumberFormatException nfe)
         {
-            max = 31;
+            time = 1;
         }
 
-        final int maxTokens = max;
+        String startState = options.containsKey(MKI.FilterKeys.STARTVECTOR.key()) ? options.get(MKI.FilterKeys.STARTVECTOR.key()) : "";
 
-        System.out.println("time=" + max);
-
-//        double[][] s = new double[4][1];
-        double[][] s =
-        {
-            {
-                0d
-            },
-            {
-                2d
-            },
-            {
-                4d
-            },
-            {
-                6d
-            }
-        };
+        System.out.println("time=" + time);
+        System.out.println("start=" + startState);
         
-   
-        System.out.println("SxM");
-        d(product(s, r.matrix()));
+        String startStates[] = startState.split("[, ]");
+        
+        double[][] s = new double[1][startStates.length];
+        for (int x = 0; x < startStates.length; x++){
+            try
+        {
+            s[0][x] = Double.parseDouble(startStates[x]);
+        }
+        catch (NumberFormatException nfe)
+        {
+        }
+        }
+        d(s, "Starting vector");
+
+        double[][] product = r.matrix();
+        for (int power = 0; power < time; power++)
+        {
+            product = product(product, r.matrix());
+        }
+//        d(product);
+        d(product(s, product), "Predict matrix");
 
         mkr = new MKR()
         {
@@ -82,39 +82,21 @@ public class Predict
     private double[][] product(double[][] s,
                                double[][] m)
     {
-        System.out.println("PROD:");
-        double[][] p = new double[m.length][m.length];;
-        for (int mx = 0; mx < m.length; mx++)
+        double[][] p = new double[s.length][m[0].length];
+
+        for (int sy = 0; sy < s.length; sy++)
         {
-            for (int my = 0; my < m[0].length; my++)
+
+            for (int sx = 0; sx < s[0].length; sx++)
             {
-                p[mx][my] = 1.0d;
+                double pd = p[sy][sx];
+                for (int my = 0; my < m.length; my++)
+                {
+                    pd += s[sy][my] * m[my][sx];
+                }
+                p[sy][sx] = pd;
             }
         }
-        
-        
-        System.out.println("S:");
-        d(s);
-        
-        
-        System.out.println("P:");
-        d(p);
-
-        
-        System.out.println("M:");
-        d(m);
-        for (int sy = 0; sy < s[0].length; sy++)
-        {
-            for (int mx = 0; mx < m.length; mx++)
-            {
-                for (int sx = 0; sx < s.length; sx++)
-        {
-                System.out.print(mx+","+sy+" ");
-                p[mx][sy] += s[sx][sy] * m[mx][sy];
-            }}
-            System.out.println("");
-        }
-
         return p;
     }
 
@@ -124,22 +106,22 @@ public class Predict
         return mkr;
     }
 
-    private void d(double[][] t)
+    private void d(double[][] t, String s)
     {
-        System.out.println("Predict matrix");
+        System.out.println(s);
         System.out.println("-----------------");
         System.out.println("[");
-        
-            for (int y = 0; y < t[0].length; y++)
+
+        for (int y = 0; y < t.length; y++)
         {
             System.out.print("[");
-            for (int x = 0; x < t.length; x++)
+            for (int x = 0; x < t[0].length; x++)
             {
-                System.out.print(t[x][y] + (((x + 1) < t[0].length) ? "," : ""));
+                System.out.print(" " + t[y][x] + (((x + 1) < t[0].length) ? "," : " "));
             }
             System.out.println("]" + (((y + 1) < t.length) ? "," : ""));
         }
         System.out.println("]");
-        System.out.println("Size: " + t.length + " x " + t[0].length);
+        System.out.println("Size: " + t[0].length + " x " + t.length + "\n");
     }
 }

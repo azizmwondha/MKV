@@ -122,7 +122,7 @@ public class State
             sb.append(" [\"").append(s.state()).append("\" (").append(previous.get(s)).append(")]");
         });
 
-        sb.append("\n\tout-count=").append(outCount()).append("\tout-weight=").append(inCount());
+        sb.append("\n\tout-count=").append(outCount()).append("\t");
         next.keySet().forEach((s) ->
         {
             sb.append(" [\"").append(s.state()).append("\" (count=").append(next.get(s)).append(") (weight=").append(weight(s)).append(")]");

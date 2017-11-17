@@ -26,8 +26,7 @@ public interface MKI {
     public enum FilterKeys {
         FILTERNAME("filter-name"),
         MAXTOKENS("max-tokens"),
-        STARTSTATE("start-state"),
-        ENDSTATE("start-state"),
+        STARTVECTOR("start-vector"),
         PARAMDELIMITER(";"),
         EQUALDELIMITER("="),
         LISTDELIMITER(","),

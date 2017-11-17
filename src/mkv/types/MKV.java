@@ -81,12 +81,13 @@ public abstract class MKV
     protected final void scan(Sequence data)
     {
         String stringValue = data.asString();
-        boolean isString = (data instanceof StringSequence);
         boolean isEndOfLine = false;
 
-        if (isString)
+        if (data instanceof StringSequence)
         {
             stringValue = stringValue.trim();
+            
+            // Period "." is predefined EOL token
             boolean hasPeriod = stringValue.endsWith(".");
             boolean isPunctuation = false;
             if (hasPeriod)
@@ -98,6 +99,7 @@ public abstract class MKV
                 }
                 else
                 {
+                    // A lone standing period
                     isPunctuation = true;
                 }
                 isEndOfLine = true;
@@ -111,34 +113,37 @@ public abstract class MKV
         String prevStateKey = "";
         String thisStateKey = "";
 
+        // Add incoming state to current sequence
         sequences.add(data);
 
+        // Calculate new reference frame for the current chain
         int thisKeyStart = (sequences.size() <= order) ? 0 : (sequences.size() - order);
-        int prevKeyStart = (sequences.size() <= (order + 1)) ? 0 : (sequences.size() - (order + 1));
+        int prevKeyStart = thisKeyStart - 1;
         int thisKeyEnd = (sequences.size() - 1);
         int prevKeyEnd = (thisKeyEnd - 1);
 
-        List<Sequence> prequence = new ArrayList<>();
+        if ((prevKeyStart < 0) && (thisKeyStart > 0))
+        {
+            prevKeyStart = 0;
+        }
 
-        for (int x = prevKeyStart; x <= thisKeyEnd; x++)
+        for (int x = 0; x <= thisKeyEnd; x++)
         {
             if (x >= thisKeyStart)
             {
                 thisStateKey += sequences.get(x).asString();
-                prequence.add(sequences.get(x));
-
             }
-            if (x >= prevKeyStart && x <= prevKeyEnd)
+            if ((x >= prevKeyStart) && (x <= prevKeyEnd))
             {
                 prevStateKey += sequences.get(x).asString();
-                prequence.add(sequences.get(x));
             }
         }
 
         State state = h.get(thisStateKey);
         if (null == state)
         {
-            state = new State(data, merge(sequences, prevKeyStart, thisKeyStart));
+            state = new State(data, merge(sequences, prevKeyStart));
+            h.put(thisStateKey, state);
         }
 
         if (h.containsKey(prevStateKey))
@@ -149,14 +154,13 @@ public abstract class MKV
         }
         else
         {
-            if (prevKeyStart > 0)
+            if ((prevKeyStart >= order) && (thisKeyStart >= order))
             {
-                State prevState = new State(sequences.get(thisKeyStart - 1), merge(sequences, prevKeyStart - 1, thisKeyStart - 1));
+                State prevState = new State(sequences.get(thisKeyStart - 1), merge(sequences, prevKeyStart));
                 h.put(prevStateKey, prevState);
             }
         }
 
-        h.put(thisStateKey, state);
         if (isOrigin)
         {
             if (!o.contains(state))
@@ -178,8 +182,7 @@ public abstract class MKV
     }
 
     private synchronized Sequence merge(List<Sequence> prequences,
-                                        int startIndex,
-                                        int endIndex)
+                                        int startIndex)
     {
         boolean isString = false;
         if (!prequences.isEmpty())
@@ -187,16 +190,25 @@ public abstract class MKV
             isString = (prequences.get(0) instanceof StringSequence);
         }
         List<Integer> s = new ArrayList<>();
-        for (int i = startIndex; i < endIndex; i++)
+        if (startIndex >= 0)
         {
-            Sequence seq = prequences.get(i);
-            for (byte b : seq.data())
+            int endIndex = startIndex + order;
+            if (endIndex >= prequences.size())
             {
-                s.add((int) b);
+                endIndex = prequences.size();
             }
-            if (seq instanceof StringSequence)
+            
+            for (int i = startIndex; i < endIndex; i++)
             {
-                s.add(0x20);
+                Sequence seq = prequences.get(i);
+                for (byte b : seq.data())
+                {
+                    s.add((int) b);
+                }
+                if (seq instanceof StringSequence)
+                {
+                    s.add(0x20);
+                }
             }
         }
         if (!s.isEmpty())
