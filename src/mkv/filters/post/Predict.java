@@ -11,24 +11,25 @@ import mkv.types.MKI;
 import mkv.types.MKR;
 import mkv.types.MKV;
 import mkv.types.PostChainFilter;
+import mkv.types.exceptions.InvalidInput;
+import mkv.types.exceptions.MKE;
 
 /**
  *
  * @author aziz
  */
 public class Predict
-        implements PostChainFilter
+        extends PostChainFilter
 {
 
     private MKR mkr = null;
 
-    // Transition matrix visualisation:
-    // http://setosa.io/markov/playground.html
     @Override
     public void apply(MKV m,
                       MKR r,
                       HashMap<String, String> options,
                       OutputStream o)
+            throws MKE
     {
 
         int time;
@@ -39,54 +40,73 @@ public class Predict
         }
         catch (NumberFormatException nfe)
         {
-            time = 1;
+            time = 0;
+            throw new InvalidInput("Invalid time(" + options.get(MKI.FilterKeys.TIME.key()) + "), expected integer");
         }
 
-        String startState = options.containsKey(MKI.FilterKeys.STARTVECTOR.key()) ? options.get(MKI.FilterKeys.STARTVECTOR.key()) : "";
-
-        System.out.println("time=" + time);
-        System.out.println("start=" + startState);
-        
-        String startStates[] = startState.split("[, ]");
-        
-        double[][] s = new double[1][startStates.length];
-        for (int x = 0; x < startStates.length; x++){
-            try
-        {
-            s[0][x] = Double.parseDouble(startStates[x]);
-        }
-        catch (NumberFormatException nfe)
-        {
-        }
-        }
-        d(s, "Starting vector");
+        String startState = options.get(MKI.FilterKeys.STARTVECTOR.key());
 
         double[][] product = r.matrix();
-        for (int power = 0; power < time; power++)
+
+        boolean hasStartVector = ((null != startState) && (!startState.trim().isEmpty()));
+
+        if (hasStartVector)
+        {
+            String startStates[] = startState.split("[,]", 0);
+
+            double[][] startVector = new double[1][startStates.length];
+            for (int x = 0; x < startStates.length; x++)
+            {
+                try
+                {
+                    startVector[0][x] = Double.parseDouble(startStates[x]);
+                }
+                catch (NumberFormatException nfe)
+                {
+                    throw new InvalidInput("Invalid starting vector (" + startStates[x] + " in " + startState + ")");
+                }
+            }
+            product = startVector;
+            d(startVector, "Starting vector");
+        }
+
+        for (int power = 1; power <= time; power++)
         {
             product = product(product, r.matrix());
         }
-//        d(product);
-        d(product(s, product), "Predict matrix");
+        d(product, "Predict matrix (time=" + time + ")");
+
+        final double[][] prediction = product;
 
         mkr = new MKR()
         {
             @Override
             public double[][] matrix()
             {
-                return product(s, r.matrix()); //To change body of generated methods, choose Tools | Templates.
+                return prediction;
             }
         };
     }
 
+    /**
+     * Multiply matrices s and m.
+     *
+     * @param s
+     * @param m
+     * @return
+     */
     private double[][] product(double[][] s,
                                double[][] m)
+            throws MKE
     {
         double[][] p = new double[s.length][m[0].length];
 
+        if (s[0].length != m.length)
+        {
+            throw new InvalidInput("Start vector length (" + s[0].length + ") not compatible with transition matrix (" + m.length + ")");
+        }
         for (int sy = 0; sy < s.length; sy++)
         {
-
             for (int sx = 0; sx < s[0].length; sx++)
             {
                 double pd = p[sy][sx];
@@ -100,17 +120,19 @@ public class Predict
         return p;
     }
 
+    @Override
     public MKR result()
     {
 
         return mkr;
     }
 
-    private void d(double[][] t, String s)
+    private void d(double[][] t,
+                   String s)
     {
-        System.out.println(s);
-        System.out.println("-----------------");
-        System.out.println("[");
+        p(s);
+        p("-----------------");
+        p("[");
 
         for (int y = 0; y < t.length; y++)
         {
@@ -119,9 +141,9 @@ public class Predict
             {
                 System.out.print(" " + t[y][x] + (((x + 1) < t[0].length) ? "," : " "));
             }
-            System.out.println("]" + (((y + 1) < t.length) ? "," : ""));
+            p("]" + (((y + 1) < t.length) ? "," : ""));
         }
-        System.out.println("]");
-        System.out.println("Size: " + t[0].length + " x " + t.length + "\n");
+        p("]");
+        p("Size: " + t[0].length + " x " + t.length + "\n");
     }
 }

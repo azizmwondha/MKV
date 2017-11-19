@@ -16,20 +16,21 @@ import mkv.types.MKR;
 import mkv.types.MKV;
 import mkv.types.State;
 import mkv.types.PostChainFilter;
+import mkv.types.exceptions.MKE;
 
 /**
  *
  * @author aziz
  */
 public class GenerateTexts
-        implements PostChainFilter {
+        extends PostChainFilter {
 
     private final Random r = new Random(System.currentTimeMillis());
-//    HashMap<String, String> options = null;
 
     @Override
     public void apply(MKV m, MKR r, HashMap<String, String> options,
-            OutputStream o) {
+            OutputStream o) 
+            throws MKE{
 
         int max;
 
@@ -71,7 +72,7 @@ public class GenerateTexts
             State[] ns = next.keySet().toArray(new State[0]);
             s = ns[which];
         }
-        System.out.println(" ]\n");
+        p(" ]\n");
     }
 
     private int random(int oneOf) {

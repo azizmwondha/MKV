@@ -7,12 +7,18 @@ package mkv.types;
 
 import java.io.OutputStream;
 import java.util.HashMap;
+import mkv.types.exceptions.MKE;
 
 /**
  * Markov state filter
  * @author aziz
  */
-public interface PostChainFilter {
-    public void apply(MKV m, MKR r, HashMap<String, String> options, OutputStream o);
-    public MKR result();
+public abstract class PostChainFilter {
+    public abstract void apply(MKV m, MKR r, HashMap<String, String> options, OutputStream o) throws MKE;
+    public abstract MKR result();
+    
+    protected void p(String s)
+    {
+        System.out.println(s);
+    }
 }

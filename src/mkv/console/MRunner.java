@@ -21,12 +21,13 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import mkv.filters.chains.MKV_byte;
 import mkv.filters.chains.MKV_word;
-import mkv.filters.pre.MidiTrackReader;
 import mkv.filters.pre.URL2LocalFile;
 import mkv.types.MKI;
 import mkv.types.MKR;
 import mkv.types.MKV;
 import mkv.types.PostChainFilter;
+import mkv.types.exceptions.InvalidInput;
+import mkv.types.exceptions.MKE;
 
 /**
  *
@@ -81,16 +82,24 @@ public class MRunner
             }
             scan(sb.toString().trim());
             history.add(r);
+            timestamp(start);
         }
 
         if (in[0].equalsIgnoreCase("eval"))
         {
-            eval(in, o);
-            history.add(r);
+            try
+            {
+                eval(in, o);
+                history.add(r);
+            }
+            catch (MKE ex)
+            {
+                System.out.println(ex.getMessage());
+                history.add(r);
+                history.add("  +- " + ex.getMessage());
+            }
+            timestamp(start);
         }
-        long elapsens = (System.nanoTime() - start);
-        long elapsems = (elapsens / 1000000l);
-        System.out.println(elapsens + " ns (" + elapsems + " ms)");
 
         if (in[0].equalsIgnoreCase("map"))
         {
@@ -107,15 +116,22 @@ public class MRunner
         {
             history.forEach((h) ->
             {
-                System.out.println("> " + h);
+                System.out.println("   " + h);
             });
         }
-        System.out.println("# ");
+        System.out.println("\n#");
 
         if (history.size() > 17)
         {
             history.remove(0);
         }
+    }
+    
+    private void timestamp(long start)
+    {
+        long elapsens = (System.nanoTime() - start);
+        long elapsems = (elapsens / 1000000l);
+        System.out.println(elapsens + " ns (" + elapsems + " ms)");
     }
 
     private void parser(String s)
@@ -158,12 +174,6 @@ public class MRunner
             is = file(s);
         }
 
-        if ((null != is) && ((s.endsWith(".mid") || s.endsWith(".midi"))))
-        {
-            MidiTrackReader mtr = new MidiTrackReader();
-            is = mtr.scan(is);
-        }
-
         if (null == is)
         {
             is = new ByteArrayInputStream(s.getBytes());
@@ -186,6 +196,7 @@ public class MRunner
 
     private void eval(String[] s,
                       OutputStream o)
+            throws MKE
     {
         MKR r = null;
 
@@ -218,7 +229,7 @@ public class MRunner
             }
             else
             {
-                System.out.println("Unknown filter (" + filterTokens.get(MKI.FilterKeys.FILTERNAME.key()) + ")");
+                throw new InvalidInput("Unknown filter (" + filterTokens.get(MKI.FilterKeys.FILTERNAME.key()) + ")");
             }
         }
     }

@@ -17,9 +17,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import mkv.filters.chains.MKV_word;
 import mkv.filters.post.TransitionMatrix;
-import mkv.filters.pre.MidiTrackReader;
 import mkv.filters.pre.URL2LocalFile;
 import mkv.types.MKV;
+import mkv.types.exceptions.MKE;
 
 /**
  *
@@ -70,11 +70,6 @@ t.order(order);
             URL2LocalFile urL2LocalFile = new URL2LocalFile();
             is = urL2LocalFile.scan(url(args[1]));
         }
-        else if (args[1].endsWith(".mid") || args[1].endsWith(".midi"))
-        {
-            MidiTrackReader mtr = new MidiTrackReader();
-            is = mtr.scan(url(args[1]));
-        }
         else
         {
             is = file(args[1]);
@@ -92,11 +87,18 @@ t.order(order);
 
         TransitionMatrix tm = new TransitionMatrix();
 
-        // Transition matrix visualisation:
-        // http://setosa.io/markov/playground.html
-        tm.apply(t, null, null, System.out);
-
+        try
+        {
+            // Transition matrix visualisation:
+            // http://setosa.io/markov/playground.html
+            tm.apply(t, null, null, System.out);
+            
 //        new Main().go(args);
+        }
+        catch (MKE ex)
+        {
+            Logger.getLogger(Runit.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private void go(String[] args)
@@ -181,9 +183,16 @@ t.order(order);
 
         TransitionMatrix tm = new TransitionMatrix();
 
-        // Transition matrix visualisation:
-        // http://setosa.io/markov/playground.html
-        tm.apply(t, null, null, System.out);
+        try
+        {
+            // Transition matrix visualisation:
+            // http://setosa.io/markov/playground.html
+            tm.apply(t, null, null, System.out);
+        }
+        catch (MKE ex)
+        {
+            Logger.getLogger(Runit.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private static InputStream file(String path)

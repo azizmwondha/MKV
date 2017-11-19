@@ -15,37 +15,52 @@ import mkv.types.MKR;
 import mkv.types.MKV;
 import mkv.types.State;
 import mkv.types.PostChainFilter;
+import mkv.types.exceptions.MKE;
 
 /**
  *
  * @author aziz
  */
 public class GenerateNotes
-        implements PostChainFilter {
+        extends PostChainFilter
+{
 
     private final Random r = new Random(System.currentTimeMillis());
 
     @Override
-    public void apply(MKV m, MKR r, HashMap<String, String> options, OutputStream o) {
+    public void apply(MKV m,
+                      MKR r,
+                      HashMap<String, String> options,
+                      OutputStream o)
+            throws MKE
+    {
         m.origins().forEach((s)
-                -> {
+                ->
+        {
             compose(s, o);
         });
     }
 
-    private void compose(State s, OutputStream o) {
-        try {
+    private void compose(State s,
+                         OutputStream o)
+    {
+        try
+        {
             StringBuilder sb = new StringBuilder();
             int count = 0;
-            while (count < 1024) {
-                if (null != o) {
-                    for (byte b : s.sequence().data()) {
+            while (count < 1024)
+            {
+                if (null != o)
+                {
+                    for (byte b : s.sequence().data())
+                    {
                         o.write(b);
                         count++;
                     }
                 }
 
-                if (s.outCount() == 0) {
+                if (s.outCount() == 0)
+                {
                     break;
                 }
                 HashMap<State, Integer> next = s.next();
@@ -54,21 +69,26 @@ public class GenerateNotes
                 s = ns[which];
 
             }
-            System.out.println("Output, " + count + "bytes\n");
-        }  catch (IOException ex) {
+            p("Output, " + count + "bytes\n");
+        }
+        catch (IOException ex)
+        {
             Logger.getLogger(GenerateNotes.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
 
-    private int random(int oneOf) {
+    private int random(int oneOf)
+    {
         return r.nextInt(oneOf);
     }
 
-    public MKR result() {
+    public MKR result()
+    {
         return null;
     }
 
-    private void d(double[][] t) {
+    private void d(double[][] t)
+    {
     }
 }

@@ -12,13 +12,14 @@ import mkv.types.MKR;
 import mkv.types.MKV;
 import mkv.types.State;
 import mkv.types.PostChainFilter;
+import mkv.types.exceptions.MKE;
 
 /**
  *
  * @author aziz
  */
 public class TransitionMatrix
-        implements PostChainFilter
+        extends PostChainFilter
 {
 
     private MKR mkr = null;
@@ -30,6 +31,7 @@ public class TransitionMatrix
                       MKR r,
                       HashMap<String, String> options,
                       OutputStream o)
+            throws MKE
     {
         HashMap<String, State> h = m.states();
 
@@ -37,8 +39,8 @@ public class TransitionMatrix
 
         State[] states = new State[h.size()];
         int x = 0;
-        System.out.println("Initial state");
-        System.out.println("-------------");
+        p("Initial state");
+        p("-------------");
         System.out.print("[");
         while (allStates.hasNext())
         {
@@ -46,11 +48,11 @@ public class TransitionMatrix
             System.out.print(" " + states[x].state().asString() + ((x < states.length) ? "," : ""));
             x++;
         }
-        System.out.println(" ]\n");
+        p(" ]\n");
 
         double[][] t = new double[h.size()][h.size()];
         int ty = -1;
-        int tx = 0;
+        int tx;
 
         for (State from : states)
         {
@@ -70,11 +72,6 @@ public class TransitionMatrix
                     {
                         t[ty][tx] = from.weight(to);
                         sums += t[ty][tx];
-
-                        if (sums > 1.0d)
-                        {
-//                            System.out.println("ofenda= from:" + from.state() + " to:" + to.state());
-                        }
                     }
                     else
                     {
@@ -110,26 +107,26 @@ public class TransitionMatrix
 
     private void d(double[][] t)
     {
-        System.out.println("Transition matrix");
-        System.out.println("-----------------");
+        p("Transition matrix");
+        p("-----------------");
         if (t.length > 0)
         {
-            System.out.println("[");
+            p("[");
             for (int y = 0; y < t.length; y++)
             {
                 System.out.print("[");
                 for (int x = 0; x < t[0].length; x++)
                 {
-                    System.out.print(t[y][x] + (((x + 1) < t[0].length) ? "," : ""));
+                    System.out.print(" " + t[y][x] + (((x + 1) < t[0].length) ? "," : ""));
                 }
-                System.out.println("]" + (((y + 1) < t.length) ? "," : ""));
+                p(" ]" + (((y + 1) < t.length) ? "," : ""));
             }
-            System.out.println("]");
-            System.out.println("Size: " + t.length + " x " + t[0].length + "\n");
+            p("]");
+            p("Size: " + t.length + " x " + t[0].length + "\n");
         }
         else
         {
-            System.out.println("[]");
+            p("[]");
         }
     }
 }
