@@ -32,6 +32,7 @@ public class MKV_word
         try (Scanner scanner = new Scanner(input))
         {
             scanner.useDelimiter("[\\s\n]");
+//            scanner.useDelimiter("[\\s\n\\p{Punct}]");
 
             while (scanner.hasNext())
             {
@@ -43,5 +44,9 @@ public class MKV_word
             }
             scanner.close();
         }
+    }
+    
+    protected byte[] eolState(){
+        return ".".getBytes();
     }
 }

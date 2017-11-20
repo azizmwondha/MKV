@@ -44,4 +44,8 @@ public class MKV_byte
 
         }
     }
+    
+        protected byte[] eolState(){
+        return null;
+    }
 }
