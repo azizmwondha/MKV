@@ -299,7 +299,7 @@ public class Verify extends BaseServlet {
         } else if (null != verifySign.getSignerPID()) {
             signerIDType = SignerIDTypes.PID;
             signerID = verifySign.getSignerPID();
-        } else if (null != verifySign.getSignerPID()) {
+        } else if (null != verifySign.getSignerRID()) {
             signerIDType = SignerIDTypes.RID;
             signerID = verifySign.getSignerRID();
         }
